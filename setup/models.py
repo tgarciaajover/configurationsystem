@@ -44,7 +44,7 @@ class IOSignalsDeviceType(models.Model):
         ('I', 'Input'),
         ('O', 'Output'),
     )
-    device = models.ForeignKey(DeviceType, on_delete=models.CASCADE)
+    device = models.ForeignKey(DeviceType, related_name='io_signals', on_delete=models.CASCADE)
     signal = models.ForeignKey(Signal, on_delete=models.CASCADE)
     i_o = models.CharField(max_length=1, choices=IO_TYPE)
 
@@ -99,7 +99,7 @@ class MeasuredEntityBehavior(models.Model):
         return self.name  + ' ' + self.descr 
    
 class InputOutputPort(models.Model):
-    device = models.ForeignKey(MonitoringDevice, on_delete=models.CASCADE)
+    device = models.ForeignKey(MonitoringDevice,related_name='io_ports', on_delete=models.CASCADE)
     port_label = models.CharField(max_length=10, default='COM1',help_text="This field must be included in the mqtt topic")
     signal_type = models.ForeignKey(Signal, on_delete=models.CASCADE)
     measured_entity = models.ForeignKey(MeasuredEntity, blank= True, null= True, on_delete=models.SET_NULL)

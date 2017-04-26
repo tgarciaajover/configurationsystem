@@ -163,12 +163,11 @@ def planta_detail(request, pk, format=None):
         planta = Planta.objects.get(id_compania=data.get('id_compania'), 
                                      id_sede = data.get('id_sede'), 
                                       id_planta = data.get('id_planta'))
-	planths = PlantHostSystem.objects.get(id_compania=data.get('id_compania'), 
-                                     id_sede = data.get('id_sede'), 
-                                      id_planta = data.get('id_planta'))
-
+        planths = PlantHostSystem.objects.get(id_compania=data.get('id_compania'), 
+                                               id_sede = data.get('id_sede'), 
+                                                id_planta = data.get('id_planta'))
     except Planta.DoesNotExist:
-    except PlantHostSystem.DoesNotExist:
+    #except PlantHostSystem.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
@@ -331,7 +330,7 @@ def maquina_detail(request, pk, format=None):
                                               id_maquina = data.get('id_maquina'))
 
     except Maquina.DoesNotExist:
-    except MachineHostSystem.DoesNotExist:
+    #except MachineHostSystem.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':

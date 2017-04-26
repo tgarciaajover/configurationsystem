@@ -1,6 +1,57 @@
 from rest_framework import serializers
 from setup.models import MachineHostSystem
 from setup.models import PlantHostSystem
+from setup.models import DeviceType
+from setup.models import MonitoringDevice
+
+
+class SignalUnitSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    descr = serializers.CharField(max_length=60)
+    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+
+class SignalTypeSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    name =  serializers.CharField(max_length=60)
+    class_name = serializers.CharField(max_length=200) 
+    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+
+class SignalSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    descr = serializers.CharField(max_length=200) 
+    unit = SignalUnitSerializer(required=True)
+    type = SignalTypeSerializer(required=True)
+    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+
+class IOSignalDeviceTypeSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    i_o = serializers.CharField(max_length=1)
+    signal = SignalSerializer(required=True)
+
+class DeviceTypeSerializer(serializers.ModelSerializer):
+    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+    io_signals = IOSignalDeviceTypeSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = DeviceType
+        fields = ( 'id', 'descr', 'create_date', 'io_signals' )
+
+class InputOutputPortSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    port_label = serializers.CharField(max_length=10)
+    signal_type = SignalSerializer(required=True)
+    meaured_entity = serializers.IntegerField(read_only=True)
+    transformation_text = serializer.CharField()
+
+class MonitoringDevicesSerializer(serializers.ModelSerializer):
+    type = DeviceTypeSerializer()
+    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+    io_ports = InputOutputPortSerializer(many=True,read_only=True)
+
+    class Meta:
+        model = MeonitoringDevice
+        fields= ('type','descr','serial','mac_address','ip_address','create_date','io_ports')
+
 
 class MachineHostSystemSerializer(serializers.Serializer):
     code = serializers.CharField(max_length=20)
