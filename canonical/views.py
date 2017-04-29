@@ -31,6 +31,7 @@ from setup.serializers import PlantHostSystemSerializer
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def compania_list(request, format=None):
     """
     Lista todas las companias, or crea una nueva compania.
@@ -42,21 +43,27 @@ def compania_list(request, format=None):
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = CompaniaSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data = JSONParser().parse(request)
+        try:
+            planta = Planta.objects.get(id_compania = data['id_compania'])
+            return Response(status=status.HTTP_302_FOUND)
+        except Planta.DoesNotExist:
+            serializer = CompaniaSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def compania_detail(request, pk, format=None):
     """
     Obtiene, actualiza or borra una compania.
     """
-
     try:
-        compania = Compania.objects.get(pk=pk)
+        data = JSONParser().parse(request)
+        compania = Compania.objects.get(id_compania=data.get('id_compania'))
     except Compania.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -78,6 +85,7 @@ def compania_detail(request, pk, format=None):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def sede_list(request, format=None):
     """
     Lista todas las sedes, or crea una nueva sede.
@@ -89,21 +97,30 @@ def sede_list(request, format=None):
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = SedeSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data = JSONParser().parse(request)
+            sede = Sede.objects.get(id_compania=data.get('id_compania'), 
+                                 id_sede = data.get('id_sede'))
+            return Response(status=status.HTTP_302_FOUND)
+        except Sede.DoesNotExist:
+            serializer = SedeSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def sede_detail(request, pk, format=None):
     """
     Obtiene, actualiza or borra una sede.
     """
    
     try:
-        sede = Sede.objects.get(pk=pk)
+        data = JSONParser().parse(request)
+        sede = Sede.objects.get(id_compania=data.get('id_compania'), 
+                                 id_sede = data.get('id_sede'))
     except Sede.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -153,6 +170,7 @@ def planta_list(request, format=None):
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def planta_detail(request, pk, format=None):
     """
     Obtiene, actualiza or borra una planta.
@@ -166,8 +184,7 @@ def planta_detail(request, pk, format=None):
         planths = PlantHostSystem.objects.get(id_compania=data.get('id_compania'), 
                                                id_sede = data.get('id_sede'), 
                                                 id_planta = data.get('id_planta'))
-    except Planta.DoesNotExist:
-    #except PlantHostSystem.DoesNotExist:
+    except ( Planta.DoesNotExist, PlantHostSystem.DoesNotExist ) as e:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
@@ -190,6 +207,7 @@ def planta_detail(request, pk, format=None):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def razon_parada_list(request, format=None):
     """
     Lista todas las razones de parada, or crea una nueva razon de parada.
@@ -201,21 +219,40 @@ def razon_parada_list(request, format=None):
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = RazonParadaSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data = JSONParser().parse(request)
+        try:
+            razonparada = RazonParada.objects.get(id_compania=data.get('id_compania'), 
+                                                  id_sede = data.get('id_sede'), 
+                                                  id_planta = data.get('id_planta'),
+                                                  id_razon_parada = data.get('id_razon_parada'))
+            return Response(status=status.HTTP_302_FOUND)
+        except RazonParada.DoesNotExist:
+            serializer = RazonParadaSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                content = JSONRenderer().render(serializer.data)
+                url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+                url = url + defaults.CONTEXT_ROOT + '/'
+                url = url + 'ReasonCode' + '/' + str(obj.id)
+                r = requests.put(url, data = content)
+
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def razon_parada_detail(request, pk, format=None):
     """
     Obtiene, actualiza or borra una razon de parada.
     """
 
     try:
-        razonparada = RazonParada.objects.get(pk=pk)
+        data = JSONParser().parse(request)
+        razonparada = RazonParada.objects.get(id_compania=data.get('id_compania'), 
+                                                  id_sede = data.get('id_sede'), 
+                                                  id_planta = data.get('id_planta'),
+                                                  id_razon_parada = data.get('id_razon_parada'))
     except RazonParada.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -227,15 +264,27 @@ def razon_parada_detail(request, pk, format=None):
         serializer = RazonParadaSerializer(razonparada, data=request.data)
         if serializer.is_valid():
             serializer.save()
+            content = JSONRenderer().render(serializer.data)
+            url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+            url = url + defaults.CONTEXT_ROOT + '/'
+            url = url + 'ReasonCode' + '/' + str(obj.id)
+            r = requests.put(url, data = content)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
+        serializer = RazonParadaSerializer(razonparada, data=request.data)
         razonparada.delete()
+        content = JSONRenderer().render(serializer.data)
+        url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+        url = url + defaults.CONTEXT_ROOT + '/'
+        url = url + 'ReasonCode' + '/' + str(obj.id)
+        r = requests.delete(url, data = content)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def grupo_maquina_list(request, format=None):
     """
     Lista todas los grupos de maquina, or crea un nuevo grupo de maquina.
@@ -247,21 +296,34 @@ def grupo_maquina_list(request, format=None):
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = GrupoMaquinaSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data = JSONParser().parse(request)
+        try:
+            grupomaquina = GrupoMaquina.objects.get(id_compania=data.get('id_compania'), 
+                                                    id_sede = data.get('id_sede'), 
+                                                    id_planta = data.get('id_planta'),
+                                                    id_grupo_maquina = data.get('id_grupo_maquina'))
+            return Response(status=status.HTTP_302_FOUND)
+        except GrupoMaquina.DoesNotExist:
+            serializer = GrupoMaquinaSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def grupo_maquina_detail(request, pk, format=None):
     """
     Obtiene, actualiza or borra un grupo de maquina.
     """
 
     try:
-        grupomaquina = GrupoMaquina.objects.get(pk=pk)
+        data = JSONParser().parse(request)
+        grupomaquina = GrupoMaquina.objects.get(id_compania=data.get('id_compania'), 
+                                                    id_sede = data.get('id_sede'), 
+                                                    id_planta = data.get('id_planta'),
+                                                    id_grupo_maquina = data.get('id_grupo_maquina'))
     except GrupoMaquina.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -282,6 +344,7 @@ def grupo_maquina_detail(request, pk, format=None):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def maquina_list(request, format=None):
     """
     Lista todas las maquinas, or crea una nueva maquina.
@@ -300,7 +363,7 @@ def maquina_list(request, format=None):
                                             id_planta = data.get('id_planta'),
                                              id_grupo_maquina = data.get('id_grupo_maquina'),
                                               id_maquina = data.get('id_maquina'))
-            return JsonResponse(data, status=301) # HTTP_FOUND
+            return Response(status=status.HTTP_302_FOUND)
         except Maquina.DoesNotExist:
             serializer_p = MaquinaSerializer(data=data)
             serializer_mhs = MachineHostSystemSerializer(data=data)
@@ -312,12 +375,14 @@ def maquina_list(request, format=None):
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def maquina_detail(request, pk, format=None):
     """
     Obtiene, actualiza or borra una maquina.
     """
 
     try:
+        data = JSONParser().parse(request)
         maquina = Maquina.objects.get(id_compania = data.get('id_compania'),
                                            id_sede = data.get('id_sede'),
                                             id_planta = data.get('id_planta'),
@@ -329,8 +394,7 @@ def maquina_detail(request, pk, format=None):
                                              id_grupo_maquina = data.get('id_grupo_maquina'),
                                               id_maquina = data.get('id_maquina'))
 
-    except Maquina.DoesNotExist:
-    #except MachineHostSystem.DoesNotExist:
+    except ( Maquina.DoesNotExist, MachineHostSystem.DoesNotExist) as e:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
@@ -353,6 +417,7 @@ def maquina_detail(request, pk, format=None):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def plan_produccion_list(request, format=None):
     """
     Lista todos los planes de produccion, or crea un nuevo plan de produccion.
@@ -364,21 +429,40 @@ def plan_produccion_list(request, format=None):
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = PlanProduccionSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data = JSONParser().parse(request)
+        try:
+            planproduccion = PlanProduccion.objects.get(id_compania = data.get('id_compania'),
+                                           id_sede = data.get('id_sede'),
+                                            id_planta = data.get('id_planta'),
+                                             id_grupo_maquina = data.get('id_grupo_maquina'),
+                                              id_maquina = data.get('id_maquina'),
+                                               ano = data.get('ano'),
+                                                mes = data.get('mes'))
+            return Response(status=status.HTTP_302_FOUND)
+        except PlanProduccion.DoesNotExist:
+            serializer = PlanProduccionSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def plan_produccion_detail(request, pk, format=None):
     """
     Obtiene, actualiza or borra un plan de produccion.
     """
 
     try:
-        planproduccion = PlanProduccion.objects.get(pk=pk)
+        data = JSONParser().parse(request)
+        planproduccion = PlanProduccion.objects.get(id_compania = data.get('id_compania'),
+                                           id_sede = data.get('id_sede'),
+                                            id_planta = data.get('id_planta'),
+                                             id_grupo_maquina = data.get('id_grupo_maquina'),
+                                              id_maquina = data.get('id_maquina'),
+                                               ano = data.get('ano'),
+                                                mes = data.get('mes'))
     except PlanProduccion.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -399,6 +483,7 @@ def plan_produccion_detail(request, pk, format=None):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def orden_produccion_planeada_list(request, format=None):
     """
     Lista todos las ordenes de produccion planeada, or crea una nueva orden de produccion planeada.
@@ -410,21 +495,42 @@ def orden_produccion_planeada_list(request, format=None):
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = OrdenProduccionPlaneadaSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data = JSONParser().parse(request)
+        try:
+            ordenproduccionplaneada = OrdenProduccionPlaneada.objects.get(id_compania = data.get('id_compania'),
+                                           id_sede = data.get('id_sede'),
+                                            id_planta = data.get('id_planta'),
+                                             id_grupo_maquina = data.get('id_grupo_maquina'),
+                                              id_maquina = data.get('id_maquina'),
+                                               ano = data.get('ano'),
+                                                mes = data.get('mes'),
+                                                 id_produccion = data.get('id_produccion'))
+            return Response(status=status.HTTP_302_FOUND)
+        except OrdenProduccionPlaneada.DoesNotExist:
+            serializer = OrdenProduccionPlaneadaSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def orden_produccion_planeada_detail(request, pk, format=None):
     """
     Obtiene, actualiza or borra una order de produccion planeada.
     """
 
     try:
-        ordenproduccionplaneada = OrdenProduccionPlaneada.objects.get(pk=pk)
+        data = JSONParser().parse(request)
+        ordenproduccionplaneada = OrdenProduccionPlaneada.objects.get(id_compania = data.get('id_compania'),
+                                           id_sede = data.get('id_sede'),
+                                            id_planta = data.get('id_planta'),
+                                             id_grupo_maquina = data.get('id_grupo_maquina'),
+                                              id_maquina = data.get('id_maquina'),
+                                               ano = data.get('ano'),
+                                                mes = data.get('mes'),
+                                                 id_produccion = data.get('id_produccion'))
     except OrdenProduccionPlaneada.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -445,6 +551,7 @@ def orden_produccion_planeada_detail(request, pk, format=None):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def parada_planeada_list(request, format=None):
     """
     Lista todos las paradas planeadas, or crea una nueva parada planeada.
@@ -456,21 +563,40 @@ def parada_planeada_list(request, format=None):
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = ParadaPlaneadaSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data = JSONParser().parse(request)
+        try:
+            paradaplaneada = ParadaPlaneada.objects.get(id_compania = data.get('id_compania'),
+                                           id_sede = data.get('id_sede'),
+                                            id_planta = data.get('id_planta'),
+                                             id_grupo_maquina = data.get('id_grupo_maquina'),
+                                              id_maquina = data.get('id_maquina'),
+                                               ano = data.get('ano'),
+                                                mes = data.get('mes'))
+            return Response(status=status.HTTP_302_FOUND)
+        except ParadaPlaneada.DoesNotExist:
+            serializer = ParadaPlaneadaSerializer(data=request.data)
+            if serializer.is_valid():
+               serializer.save()
+               return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def parada_planeada_detail(request, pk, format=None):
     """
     Obtiene, actualiza or borra una parada planeada.
     """
 
     try:
-        paradaplaneada = ParadaPlaneada.objects.get(pk=pk)
+        data = JSONParser().parse(request)
+        paradaplaneada = ParadaPlaneada.objects.get(id_compania = data.get('id_compania'),
+                                           id_sede = data.get('id_sede'),
+                                            id_planta = data.get('id_planta'),
+                                             id_grupo_maquina = data.get('id_grupo_maquina'),
+                                              id_maquina = data.get('id_maquina'),
+                                               ano = data.get('ano'),
+                                                mes = data.get('mes'))
     except ParadaPlaneada.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 

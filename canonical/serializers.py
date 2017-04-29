@@ -18,7 +18,6 @@ class CompaniaSerializer(serializers.Serializer):
         """
         Create and return a new `Company` instance, given the validated data.
         """
-        print ('here i am create')
         return Compania.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
@@ -30,7 +29,6 @@ class CompaniaSerializer(serializers.Serializer):
         instance.descr = validated_data.get('descr',instance.descr)
         instance.last_updttm =  validated_data.get('descr',instance.last_updttm)
         instance.save()
-        print ('here i am update')
         return instance
 
 class SedeSerializer(serializers.ModelSerializer):
@@ -49,7 +47,6 @@ class PlantaSerializer(serializers.Serializer):
         """
         Create and return a new `Planta` instance, given the validated data.
         """
-        print ('here i am create')
         planta = Planta.objects.create(**validated_data)
         return planta
 
@@ -63,7 +60,6 @@ class PlantaSerializer(serializers.Serializer):
         instance.descr =  validated_data.get('descr')
         instance.last_updttm = validated_data.get('last_updttm')
         instance.save()
-        print ('here i am update')
         return instance
 
 class RazonParadaSerializer(serializers.ModelSerializer):

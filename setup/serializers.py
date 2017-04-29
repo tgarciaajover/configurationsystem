@@ -3,6 +3,9 @@ from setup.models import MachineHostSystem
 from setup.models import PlantHostSystem
 from setup.models import DeviceType
 from setup.models import MonitoringDevice
+from setup.models import MeasuredEntity
+from setup.models import InputOutputPort
+from setup.models import IdleReason
 
 
 class SignalUnitSerializer(serializers.Serializer):
@@ -36,22 +39,44 @@ class DeviceTypeSerializer(serializers.ModelSerializer):
         model = DeviceType
         fields = ( 'id', 'descr', 'create_date', 'io_signals' )
 
-class InputOutputPortSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
-    port_label = serializers.CharField(max_length=10)
+class InputOutputPortSerializer(serializers.ModelSerializer):
     signal_type = SignalSerializer(required=True)
-    meaured_entity = serializers.IntegerField(read_only=True)
-    transformation_text = serializer.CharField()
+    measured_entity = serializers.PrimaryKeyRelatedField(queryset=MeasuredEntity.objects.all())
 
-class MonitoringDevicesSerializer(serializers.ModelSerializer):
-    type = DeviceTypeSerializer()
+    class Meta:
+        model = InputOutputPort
+        fields = ('id','port_label','signal_type','measured_entity','transformation_text')
+
+class MonitoringDeviceSerializer(serializers.ModelSerializer):
+    device_type = DeviceTypeSerializer()
     create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
     io_ports = InputOutputPortSerializer(many=True,read_only=True)
 
     class Meta:
-        model = MeonitoringDevice
-        fields= ('type','descr','serial','mac_address','ip_address','create_date','io_ports')
+        model = MonitoringDevice
+        fields= ('device_type','descr','serial','mac_address','ip_address','create_date','io_ports')
 
+class MeasuredEntityBehaviorSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(max_length=40)
+    descr = serializers.CharField(max_length=160)
+    behavior_text = serializers.CharField()
+    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+
+class MeasuredEntitySerializer(serializers.ModelSerializer):
+    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+    behaviors = MeasuredEntityBehaviorSerializer(many=True,read_only=True)
+
+    class Meta:
+        model = MeasuredEntity
+        fields= ('id', 'code', 'descr', 'type', 'create_date', 'behaviors')
+
+class IdleReasonSerializer(serializers.ModelSerializer):
+    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+    
+    class Meta:
+        model = IdleReason
+        fields = ('id', 'descr', 'classification', 'group_cd','down', 'create_date')
 
 class MachineHostSystemSerializer(serializers.Serializer):
     code = serializers.CharField(max_length=20)
@@ -67,7 +92,6 @@ class MachineHostSystemSerializer(serializers.Serializer):
         """
         Create and return a new `MachineHostSystem` instance, given the validated data.
         """
-        print ('here i am create')
         machineHostSystem = MachineHostSystem()
         machineHostSystem.id_compania = validated_data.get('id_compania')
         machineHostSystem.id_sede = validated_data.get('id_sede')
@@ -97,7 +121,6 @@ class MachineHostSystemSerializer(serializers.Serializer):
         instance.descr =  validated_data.get('descr')
         instance.last_updttm = validated_data.get('last_updttm')
         instance.save()
-        print ('here i am update')
         return instance    
 
 class PlantHostSystemSerializer(serializers.Serializer):
@@ -111,7 +134,6 @@ class PlantHostSystemSerializer(serializers.Serializer):
         """
         Create and return a new `PlantHostSystem` instance, given the validated data.
         """
-        print ('here i am create')
         plantHostSystem = PlantHostSystem()
         plantHostSystem.id_compania = validated_data.get('id_compania')
         plantHostSystem.id_sede = validated_data.get('id_sede')
@@ -135,6 +157,5 @@ class PlantHostSystemSerializer(serializers.Serializer):
         instance.descr =  validated_data.get('descr')
         instance.last_updttm = validated_data.get('last_updttm')
         instance.save()
-        print ('here i am update')
         return instance
 
