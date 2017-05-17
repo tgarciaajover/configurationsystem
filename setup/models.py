@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 import setup.defaults as defaults
 from xml.etree.ElementTree import Element, tostring
 import xml.etree.ElementTree as ET
@@ -187,4 +188,75 @@ class IdleReason(models.Model):
     
     def __str__(self):
         return self.descr
+
+class DisplayType(models.Model):
+    COLOR_OPTIONS = ( 
+       ('K', 'Black'),
+       ('R', 'Red'),
+       ('G', 'Green'),
+       ('Y', 'Yellow'),
+    )
+
+    MODE_OPTIONS = (
+       ('JO', 'Jump out'),
+       ('ML', 'Move Left'),
+       ('MR','Move Right'),
+       ('SL','Scroll Left'),
+       ('SR','Scroll Right'),
+    )
+
+    SPEED_OPTIONS = (
+       ('0', 'Very Fast'),
+       ('1', 'Fast'),
+       ('2', 'Medium Fast'),
+       ('3', 'Medium'),
+       ('4', 'Medium Slow'),
+       ('5', 'Slow'),
+       ('6', 'Very Slow'),
+    )
+
+    LETTER_SIZE = (
+       ('0', 'Normal 5 (5X5)'),
+       ('1', 'Normal 7 (6X7)'),
+       ('2', 'Normal 14 (8X14)'),
+       ('3', 'Normal 15 (9X15)'),
+       ('4', 'Normal 16 (9X16)'),
+    )
+
+    VERT_ALIGN_OPTION = (
+       ('0', 'Center'),
+       ('1', 'Top'),
+       ('2', 'Bottom'),
+    ) 
+
+    HORZ_ALIGN_OPTION = (
+       ('0', 'Center'),
+       ('1', 'Left'),
+       ('2', 'Right'),
+    ) 
+
+    descr = models.CharField(max_length=160, null=False, blank=False)
+    pixels_width = models.IntegerField(null=False, blank=False, default=128)
+    pixels_height = models.IntegerField(null=False, blank=False, default=32)
+    text_color = models.CharField(max_length=1, choices=COLOR_OPTIONS, default='R')
+    back_color = models.CharField(max_length=1, choices=COLOR_OPTIONS, default='K')
+    in_mode = models.CharField(max_length=2, choices=MODE_OPTIONS, default='ML')
+    out_mode = models.CharField(max_length=2, choices=MODE_OPTIONS, default='ML')
+    speed = models.CharField(max_length=1, choices=COLOR_OPTIONS, default='2')
+    line_spacing = models.IntegerField(null=False, blank=False, default=1, validators=[MaxValueValidator(9), MinValueValidator(0)])
+    letter_size = models.CharField(max_length=1, choices=LETTER_SIZE, default='1')
+    vertical_alignment = models.CharField(max_length=1, choices=VERT_ALIGN_OPTION, default=0)
+    horizontal_alignment = models.CharField(max_length=1, choices=HORZ_ALIGN_OPTION, default=0)
+    create_date = models.DateTimeField('create datetime', auto_now=False, auto_now_add=True)
+    last_updttm = models.DateTimeField('last datetime', auto_now=True)
+
+    def __str__(self):
+        return self.descr
+
+class DisplayDevice(models.Model):
+    reference_cd = models.CharField(max_length=20, null=False, blank=False)
+    display = models.ForeignKey(DisplayType,on_delete=models.CASCADE)
+    descr = models.CharField(max_length=160, null=False, blank=False)
+    ip_address = models.GenericIPAddressField()
+    port = models.IntegerField(null=False, blank=False, default=3001, validators=[MaxValueValidator(65535), MinValueValidator(1)])
     

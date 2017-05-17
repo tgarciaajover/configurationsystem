@@ -81,7 +81,7 @@ class MaquinaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Maquina
         fields = ( 'id_compania', 'id_sede','id_planta', 
-                   'id_grupo_maquina', 'id_maquina','descr', 
+                   'id_grupo_maquina', 'id_maquina',
                    'descr', 'estado_actual',
                    'create_date', 'last_updttm' )
 

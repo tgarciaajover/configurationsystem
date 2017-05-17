@@ -6,6 +6,8 @@ from setup.models import MonitoringDevice
 from setup.models import MeasuredEntity
 from setup.models import InputOutputPort
 from setup.models import IdleReason
+from setup.models import DisplayType
+from setup.models import DisplayDevice
 
 
 class SignalUnitSerializer(serializers.Serializer):
@@ -77,6 +79,23 @@ class IdleReasonSerializer(serializers.ModelSerializer):
     class Meta:
         model = IdleReason
         fields = ('id', 'descr', 'classification', 'group_cd','down', 'create_date')
+
+
+class DisplayTypeSerializer(serializers.ModelSerializer):
+    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+
+    class Meta:
+        model = DisplayType
+        fields = ('id', 'descr', 'pixels_width', 'pixels_height', 'text_color', 'back_color', 
+                  'in_mode', 'out_mode', 'speed', 'line_spacing', 'letter_size', 
+                  'vertical_alignment', 'horizontal_alignment', 'create_date' )
+
+class DisplayDeviceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = DisplayType
+        fields = ('id', 'descr', 'reference_cd', 'ip_address', 'port', 'display') 
+
 
 class MachineHostSystemSerializer(serializers.Serializer):
     code = serializers.CharField(max_length=20)
