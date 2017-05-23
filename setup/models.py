@@ -94,7 +94,7 @@ class MeasuredEntity(models.Model):
        ('M', 'Machine'),
        ('P', 'Plant'),
     )
-    code = models.CharField(max_length=20, null=False, blank=False)
+    code = models.CharField(max_length=180, null=False, blank=False)
     descr = models.CharField(max_length=200)
     type = models.CharField(max_length=1, choices=MEASURED_ENTITY_TYPE, default='M')
     serial = models.CharField(max_length=60, null=True, blank=True)
@@ -118,6 +118,10 @@ class MachineHostSystem(MeasuredEntity):
     id_planta = models.CharField(max_length=60)
     id_grupo_maquina = models.CharField(max_length=60)
     id_maquina = models.CharField(max_length=60)
+
+    @property
+    def get_code(self):
+        return str( hash( id_planta + id_grupo_maquina + id_maquina))
 
 class MeasuredEntityBehavior(models.Model):
     measure_entity =  models.ForeignKey(MeasuredEntity, related_name='behaviors', on_delete=models.CASCADE)

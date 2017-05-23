@@ -40,7 +40,7 @@ class PlantaSerializer(serializers.Serializer):
     id_sede = serializers.CharField(max_length=60)
     id_planta = serializers.CharField(max_length=60)
     descr = serializers.CharField(max_length=200)
-    last_updttm = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S", required=False, read_only=True)
+    last_updttm = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S", required=False, read_only=True)
 
     def create(self, validated_data):
         """
@@ -62,6 +62,9 @@ class PlantaSerializer(serializers.Serializer):
         return instance
 
 class RazonParadaSerializer(serializers.ModelSerializer):
+    create_date = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
+    last_updttm = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
+
     class Meta:
         model = RazonParada
         fields = ( 'id_compania', 'id_sede','id_planta', 
@@ -70,6 +73,9 @@ class RazonParadaSerializer(serializers.ModelSerializer):
                    'create_date', 'last_updttm' )
 
 class GrupoMaquinaSerializer(serializers.ModelSerializer):
+    create_date = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
+    last_updttm = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
+
     class Meta: 
         model = GrupoMaquina
         fields = ( 'id_compania', 'id_sede','id_planta', 
@@ -77,6 +83,9 @@ class GrupoMaquinaSerializer(serializers.ModelSerializer):
                    'create_date', 'last_updttm' )
 
 class MaquinaSerializer(serializers.ModelSerializer):
+    create_date = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
+    last_updttm = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
+
     class Meta:
         model = Maquina
         fields = ( 'id_compania', 'id_sede','id_planta', 
@@ -85,6 +94,8 @@ class MaquinaSerializer(serializers.ModelSerializer):
                    'create_date', 'last_updttm' )
 
 class PlanProduccionSerializer(serializers.ModelSerializer):
+    last_updttm = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
+
     class Meta:
         model = PlanProduccion
         fields = ( 'id_compania', 'id_sede','id_planta',
@@ -92,6 +103,11 @@ class PlanProduccionSerializer(serializers.ModelSerializer):
                    'mes',  'create_date', 'last_updttm' )
 
 class OrdenProduccionPlaneadaSerializer(serializers.ModelSerializer):
+    fechahora_inicial = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
+    fechahora_final = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
+    create_date = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
+    last_updttm = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
+
     class Meta:
         model = OrdenProduccionPlaneada
         fields = ( 'id_compania', 'id_sede','id_planta',
@@ -103,6 +119,11 @@ class OrdenProduccionPlaneadaSerializer(serializers.ModelSerializer):
                    'create_date', 'last_updttm' )
 
 class ParadaPlaneadaSerializer(serializers.ModelSerializer):
+    fechahora_inicial = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
+    fechahora_final = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
+    create_date = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
+    last_updttm = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
+    
     class Meta:
         model = ParadaPlaneada
         fields = ( 'id_compania', 'id_sede','id_planta',

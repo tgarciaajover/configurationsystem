@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from rest_framework.parsers import JSONParser
+from rest_framework.renderers import JSONRenderer
 
 from canonical.models import Compania
 from canonical.models import Sede
@@ -19,7 +20,6 @@ from canonical.models import PlanProduccion
 from canonical.models import OrdenProduccionPlaneada
 from canonical.models import ParadaPlaneada
 
-from setup.models import PlantHostSystem
 from canonical.serializers import CompaniaSerializer
 from canonical.serializers import SedeSerializer
 from canonical.serializers import PlantaSerializer
@@ -29,9 +29,16 @@ from canonical.serializers import MaquinaSerializer
 from canonical.serializers import PlanProduccionSerializer
 from canonical.serializers import OrdenProduccionPlaneadaSerializer
 from canonical.serializers import ParadaPlaneadaSerializer
+
+from setup.models import PlantHostSystem
+from setup.models import MachineHostSystem
+
 from setup.serializers import PlantHostSystemSerializer
+from setup.serializers import MachineHostSystemSerializer
 
 from django_q.tasks import async
+from canonical.tasks import delReasonCode
+from canonical.tasks import putReasonCode
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
@@ -247,7 +254,7 @@ def razon_parada_list(request, format=None):
                                                   id_razon_parada = data.get('id_razon_parada'))
             return Response(status=status.HTTP_302_FOUND)
         except RazonParada.DoesNotExist:
-            serializer = RazonParadaSerializer(data=request.data)
+            serializer = RazonParadaSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
                 content = JSONRenderer().render(serializer.data)
@@ -270,14 +277,17 @@ def razon_parada_detail(request, pk, format=None):
                                                   id_planta = data.get('id_planta'),
                                                   id_razon_parada = data.get('id_razon_parada'))
     except RazonParada.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'DELETE':
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = RazonParadaSerializer(razonparada)
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = RazonParadaSerializer(razonparada, data=request.data)
+        serializer = RazonParadaSerializer(razonparada, data=data)
         if serializer.is_valid():
             serializer.save()
             content = JSONRenderer().render(serializer.data)
@@ -286,7 +296,7 @@ def razon_parada_detail(request, pk, format=None):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
-        serializer = RazonParadaSerializer(razonparada, data=request.data)
+        serializer = RazonParadaSerializer(razonparada)
         razonparada.delete()
         content = JSONRenderer().render(serializer.data)
         async(delReasonCode, content)
@@ -314,7 +324,7 @@ def grupo_maquina_list(request, format=None):
                                                     id_grupo_maquina = data.get('id_grupo_maquina'))
             return Response(status=status.HTTP_302_FOUND)
         except GrupoMaquina.DoesNotExist:
-            serializer = GrupoMaquinaSerializer(data=request.data)
+            serializer = GrupoMaquinaSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -335,14 +345,17 @@ def grupo_maquina_detail(request, pk, format=None):
                                                     id_planta = data.get('id_planta'),
                                                     id_grupo_maquina = data.get('id_grupo_maquina'))
     except GrupoMaquina.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'DELETE':
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = GrupoMaquinaSerializer(grupomaquina)
         return JsonResponse(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = GrupoMaquinaSerializer(grupomaquina, data=request.data)
+        serializer = GrupoMaquinaSerializer(grupomaquina, data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -377,10 +390,13 @@ def maquina_list(request, format=None):
         except Maquina.DoesNotExist:
             serializer_p = MaquinaSerializer(data=data)
             serializer_mhs = MachineHostSystemSerializer(data=data)
+            print (serializer_p.is_valid())
+            print (serializer_mhs.is_valid())
+            print (serializer_mhs.errors)
             if serializer_p.is_valid() and serializer_mhs.is_valid():
-                serializer_.save()
+                serializer_p.save()
                 serializer_mhs.save()
-                return serializer_mhs(serializer_p.data, status=201)
+                return Response(serializer_p.data, status=status.HTTP_201_CREATED)
             return Response(serializer_p.errors, status=400)
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -405,15 +421,18 @@ def maquina_detail(request, pk, format=None):
                                               id_maquina = data.get('id_maquina'))
 
     except ( Maquina.DoesNotExist, MachineHostSystem.DoesNotExist) as e:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'DELETE':
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = MaquinaSerializer(maquina)
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = MaquinaSerializer(maquina, data=request.data)
-        serializer_mhs = MachineHostSystemSerializer( machinehs, data=request.data)
+        serializer = MaquinaSerializer(maquina, data=data)
+        serializer_mhs = MachineHostSystemSerializer( machinehs, data=data)
         if serializer.is_valid() and serializer_mhs.is_valid():
             serializer.save()
             serializer_mhs.save()
@@ -450,7 +469,7 @@ def plan_produccion_list(request, format=None):
                                                 mes = data.get('mes'))
             return Response(status=status.HTTP_302_FOUND)
         except PlanProduccion.DoesNotExist:
-            serializer = PlanProduccionSerializer(data=request.data)
+            serializer = PlanProduccionSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -474,14 +493,17 @@ def plan_produccion_detail(request, pk, format=None):
                                                ano = data.get('ano'),
                                                 mes = data.get('mes'))
     except PlanProduccion.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'DELETE':
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = PlanProduccionSerializer(planproduccion)
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = PlanProduccionSerializer(planproduccion, data=request.data)
+        serializer = PlanProduccionSerializer(planproduccion, data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -507,6 +529,16 @@ def orden_produccion_planeada_list(request, format=None):
     elif request.method == 'POST':
         data = JSONParser().parse(request)
         try:
+
+            print (OrdenProduccionPlaneada.objects.filter(id_compania = data.get('id_compania'),
+                                           id_sede = data.get('id_sede'),
+                                            id_planta = data.get('id_planta'),
+                                             id_grupo_maquina = data.get('id_grupo_maquina'),
+                                              id_maquina = data.get('id_maquina'),
+                                               ano = data.get('ano'),
+                                                mes = data.get('mes'),
+                                                 id_produccion = data.get('id_produccion')).query)
+
             ordenproduccionplaneada = OrdenProduccionPlaneada.objects.get(id_compania = data.get('id_compania'),
                                            id_sede = data.get('id_sede'),
                                             id_planta = data.get('id_planta'),
@@ -515,9 +547,10 @@ def orden_produccion_planeada_list(request, format=None):
                                                ano = data.get('ano'),
                                                 mes = data.get('mes'),
                                                  id_produccion = data.get('id_produccion'))
+
             return Response(status=status.HTTP_302_FOUND)
         except OrdenProduccionPlaneada.DoesNotExist:
-            serializer = OrdenProduccionPlaneadaSerializer(data=request.data)
+            serializer = OrdenProduccionPlaneadaSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -541,15 +574,19 @@ def orden_produccion_planeada_detail(request, pk, format=None):
                                                ano = data.get('ano'),
                                                 mes = data.get('mes'),
                                                  id_produccion = data.get('id_produccion'))
+
     except OrdenProduccionPlaneada.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'DELETE':
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = OrdenProduccionPlaneadaSerializer(ordenproduccionplaneada)
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = OrdenProduccionPlaneadaSerializer(ordenproduccionplaneada, data=request.data)
+        serializer = OrdenProduccionPlaneadaSerializer(ordenproduccionplaneada, data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -584,7 +621,7 @@ def parada_planeada_list(request, format=None):
                                                 mes = data.get('mes'))
             return Response(status=status.HTTP_302_FOUND)
         except ParadaPlaneada.DoesNotExist:
-            serializer = ParadaPlaneadaSerializer(data=request.data)
+            serializer = ParadaPlaneadaSerializer(data=data)
             if serializer.is_valid():
                serializer.save()
                return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -608,14 +645,17 @@ def parada_planeada_detail(request, pk, format=None):
                                                ano = data.get('ano'),
                                                 mes = data.get('mes'))
     except ParadaPlaneada.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'DELETE':
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = ParadaPlaneadaSerializer(paradaplaneada)
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = ParadaPlaneadaSerializer(paradaplaneada, data=request.data)
+        serializer = ParadaPlaneadaSerializer(paradaplaneada, data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

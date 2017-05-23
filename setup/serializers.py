@@ -98,14 +98,15 @@ class DisplayDeviceSerializer(serializers.ModelSerializer):
 
 
 class MachineHostSystemSerializer(serializers.Serializer):
-    code = serializers.CharField(max_length=20)
+    code = serializers.CharField(source='get_code', read_only=True)
     id_compania = serializers.CharField(max_length=60)
     id_sede = serializers.CharField(max_length=60)
     id_planta = serializers.CharField(max_length=60)
     id_grupo_maquina = serializers.CharField(max_length=60)
     id_maquina = serializers.CharField(max_length=60)
     descr = serializers.CharField(max_length=200)
-    last_updttm = serializers.DateTimeField()
+    last_updttm = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", required=False, read_only=True)
+
     
     def create(self, validated_data):
         """
@@ -119,7 +120,7 @@ class MachineHostSystemSerializer(serializers.Serializer):
         machineHostSystem.id_maquina = validated_data.get('id_maquina')
         machineHostSystem.descr = validated_data.get('descr')
         machineHostSystem.last_updttm = validated_data.get('last_updttm')
-        machineHostSymtem.code = str( hash ( validated_data.get('id_compania') +
+        machineHostSystem.code = str( hash ( validated_data.get('id_compania') +
                                          validated_data.get('id_sede')+
                                           validated_data.get('id_planta')+
                                            validated_data.get('id_grupo_maquina')+
