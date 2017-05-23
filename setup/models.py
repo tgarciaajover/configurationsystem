@@ -6,7 +6,30 @@ from xml.etree.ElementTree import Element, tostring
 import xml.etree.ElementTree as ET
 import requests
 
-# Create your models here.
+import logging
+import os
+import logging.handlers
+
+
+# Get an instance of a logger
+LOG_FILENAME = 'iotsettings.log'
+
+# Check if log exists and should therefore be rolled
+needRoll = os.path.isfile(LOG_FILENAME)
+
+logger = logging.getLogger('models')
+
+fh = logging.handlers.RotatingFileHandler(LOG_FILENAME, backupCount=5)
+fh.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+
+# This is a stale log, so roll it
+if needRoll:
+	# Roll over on application start
+    logger.handlers[0].doRollover()
+
 
 class SignalType(models.Model):
     name = models.CharField(max_length=60)
@@ -112,18 +135,23 @@ class MeasuredEntityBehavior(models.Model):
             url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
             url = url + defaults.CONTEXT_ROOT + '/'
             url = url + 'checker/behavior'
-            r = requests.put(url, data = xml)
-            if (r.status_code == 400):
-                raise ValidationError("Invalid language request")
-            else: 
-                tree = ET.ElementTree(ET.fromstring(r.content))
-                root = tree.getroot()
-                for child in root:
-                    lineNumber = child[0].text
-                    positionInLine = child[1].text
-                    message = child[2].text
-                    raise ValidationError("Error in line:" + str(lineNumber) + 
+            try:
+                r = requests.put(url, data = xml)
+                if (r.status_code == 400):
+                    raise ValidationError("Invalid language request")
+                else: 
+                    tree = ET.ElementTree(ET.fromstring(r.content))
+                    root = tree.getroot()
+                    for child in root:
+                       lineNumber = child[0].text
+                       positionInLine = child[1].text
+                       message = child[2].text
+                       raise ValidationError("Error in line:" + str(lineNumber) + 
 					   " character:" + str(positionInLine) + " " + str(message))
+            except requests.exceptions.RequestException as e:
+                logger.info(e)
+                raise ValidationError("An error occurs when connecting to the Syntax Validation Server")
+
     def __str__(self):
         return self.name  + ' ' + self.descr 
    
@@ -136,24 +164,28 @@ class InputOutputPort(models.Model):
 
     def clean(self):
         if len(self.transformation_text) > 0:
-            root = Element('program')
-            root.text = self.transformation_text
-            xml = tostring(root)
-            url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
-            url = url + defaults.CONTEXT_ROOT + '/'
-            url = url + 'checker/transformation'
-            r = requests.put(url, data = xml)
-            if (r.status_code == 400):
-                raise ValidationError("Invalid language request")
-            else: 
-                tree = ET.ElementTree(ET.fromstring(r.content))
-                root = tree.getroot()
-                for child in root:
-                    lineNumber = child[0].text
-                    positionInLine = child[1].text
-                    message = child[2].text
-                    raise ValidationError("Error in line:" + str(lineNumber) + 
+           root = Element('program')
+           root.text = self.transformation_text
+           xml = tostring(root)
+           url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+           url = url + defaults.CONTEXT_ROOT + '/'
+           url = url + 'checker/transformation'
+           try:
+                r = requests.put(url, data = xml)
+                if (r.status_code == 400):
+                    raise ValidationError("Invalid language request")
+                else: 
+                    tree = ET.ElementTree(ET.fromstring(r.content))
+                    root = tree.getroot()
+                    for child in root:
+                        lineNumber = child[0].text
+                        positionInLine = child[1].text
+                        message = child[2].text
+                        raise ValidationError("Error in line:" + str(lineNumber) + 
 					   " character:" + str(positionInLine) + " " + str(message))
+           except requests.exceptions.RequestException as e:
+                logger.info(e)
+                raise ValidationError("An error occurs when connecting to the Syntax Validation Server")
 
     def __str__(self):
         return self.port_label

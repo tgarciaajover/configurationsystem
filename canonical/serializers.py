@@ -27,7 +27,6 @@ class CompaniaSerializer(serializers.Serializer):
         instance = Compania.objects.get(id_compania=validated_data.get('id_compania',instance.id_compania))
         instance.id_compania = validated_data.get('id_compania',instance.id_compania)
         instance.descr = validated_data.get('descr',instance.descr)
-        instance.last_updttm =  validated_data.get('descr',instance.last_updttm)
         instance.save()
         return instance
 
@@ -41,7 +40,7 @@ class PlantaSerializer(serializers.Serializer):
     id_sede = serializers.CharField(max_length=60)
     id_planta = serializers.CharField(max_length=60)
     descr = serializers.CharField(max_length=200)
-    last_updttm = serializers.DateTimeField()
+    last_updttm = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S", required=False, read_only=True)
 
     def create(self, validated_data):
         """

@@ -147,7 +147,7 @@ class PlantHostSystemSerializer(serializers.Serializer):
     id_sede = serializers.CharField(max_length=60)
     id_planta = serializers.CharField(max_length=60)
     descr = serializers.CharField(max_length=200)
-    last_updttm = serializers.DateTimeField()
+    last_updttm = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S", required=False, read_only=True)
 
     def create(self, validated_data):
         """

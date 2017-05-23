@@ -24,26 +24,64 @@ from setup.serializers import MeasuredEntitySerializer
 from setup.serializers import DisplayTypeSerializer
 from setup.serializers import DisplayDeviceSerializer
 
+import logging
+import os
+import logging.handlers
+
 from rest_framework.renderers import JSONRenderer
 import setup.defaults as defaults
 from django_ace import AceWidget
 
 # Register your models here.
 
+# Get an instance of a logger
+LOG_FILENAME = 'iotsettings.log'
+
+# Check if log exists and should therefore be rolled
+needRoll = os.path.isfile(LOG_FILENAME)
+
+logger = logging.getLogger('admin')
+
+fh = logging.handlers.RotatingFileHandler(LOG_FILENAME, backupCount=5)
+fh.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+
+# This is a stale log, so roll it
+if needRoll:
+	# Roll over on application start
+    logger.handlers[0].doRollover()
+
 class SignalTypeForm(ModelForm):
     class Meta:
         model = SignalType
         fields = ['name', 'class_name']
 
+    def getFromFileSystem(self, available_choices):
+       f = open('workfile', 'r')
+       for line in f:
+          available_choices.append((line, line))
+       f.close()       
+ 
     def formfield_for_choice_field(self, available_choices):
+       # This method let the classes names in a temporal file in case 
+       # of proceeed to configure without being connected to the fog server.
        url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
        url = url + defaults.CONTEXT_ROOT + '/'
        url = url + 'TranslationClasses'
-       r = requests.get(url)
-       json = r.json()
-       for className in json:
-           className = className.split('.')[0]
-           available_choices.append((className, className))
+       try:
+           r = requests.get(url)
+           json = r.json()
+           f = open('workfile', 'w')
+           for className in json:
+               className = className.split('.')[0]
+               available_choices.append((className, className))
+               f.write(className + '\n')
+           f.close()
+       except requests.exceptions.RequestException as e:
+           logger.info(e)
+           available_choices = self.getFromFileSystem(available_choices)
 
     def __init__(self, *args, **kwargs):
         super(SignalTypeForm, self).__init__(*args, **kwargs)
@@ -61,10 +99,14 @@ class SignalTypeAdmin(admin.ModelAdmin):
        url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
        url = url + defaults.CONTEXT_ROOT + '/'
        url = url + 'SignalType' + '/' + str(obj.id)
-       r = requests.put(url, data = content)
-       # TODO: exception handling.
+       try:
+           r = requests.put(url, data = content)
+       except requests.exceptions.RequestException as e:
+           logger.info(e)
+           pass
+   
     pass
-
+ 
 class SignalUnitAdmin(admin.ModelAdmin):
     list_display = ('descr','create_date')
 
@@ -75,8 +117,12 @@ class SignalUnitAdmin(admin.ModelAdmin):
         url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
         url = url + defaults.CONTEXT_ROOT + '/'
         url = url + 'SignalUnit' + '/' + str(obj.id)
-        r = requests.put(url, data = content)
-        # TODO: exception handling.
+        try:
+            r = requests.put(url, data = content)
+        except requests.exceptions.RequestException as e:
+            logger.info(e)
+            pass
+    
     pass
 
 class SignalAdmin(admin.ModelAdmin):
@@ -89,10 +135,14 @@ class SignalAdmin(admin.ModelAdmin):
         url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
         url = url + defaults.CONTEXT_ROOT + '/'
         url = url + 'Signal' + '/' + str(obj.id)
-        r = requests.put(url, data = content)
-        # TODO: exception handling.
-
+        try:
+            r = requests.put(url, data = content)
+        except requests.exceptions.RequestException as e:
+           logger.info(e)
+           pass
+  
     pass
+
 
 class IOSignalsDeviceTypeInline(admin.TabularInline):
     model = IOSignalsDeviceType
@@ -110,8 +160,11 @@ class DeviceTypeAdmin(admin.ModelAdmin):
         url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
         url = url + defaults.CONTEXT_ROOT + '/'
         url = url + 'DeviceType' + '/' + str(obj.id)
-        r = requests.put(url, data = content)
-        # TODO: exception handling.
+        try:
+            r = requests.put(url, data = content)
+        except requests.exceptions.RequestException as e:
+           logger.info(e)
+           pass
 
     pass
 
@@ -140,8 +193,11 @@ class MeasuredEntityAdmin(admin.ModelAdmin):
         url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
         url = url + defaults.CONTEXT_ROOT + '/'
         url = url + 'MeasuredEntity' + '/' + str(obj.id)
-        r = requests.put(url, data = content)
-        # TODO: exception handling.
+        try:
+            r = requests.put(url, data = content)
+        except requests.exceptions.RequestException as e:
+           logger.info(e)
+           pass
     pass
 
 class InputOutputPortForm(forms.ModelForm):
@@ -168,8 +224,11 @@ class MonitoringDeviceAdmin(admin.ModelAdmin):
         url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
         url = url + defaults.CONTEXT_ROOT + '/'
         url = url + 'MonitoringDevice' + '/' + str(obj.id)
-        r = requests.put(url, data = content)
-        # TODO: exception handling.
+        try:
+            r = requests.put(url, data = content)
+        except requests.exceptions.RequestException as e:
+           logger.info(e)
+           pass
 
     pass
 
@@ -201,8 +260,11 @@ class DisplayTypeAdmin(admin.ModelAdmin):
         url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
         url = url + defaults.CONTEXT_ROOT + '/'
         url = url + 'DisplayType' + '/' + str(obj.id)
-        r = requests.put(url, data = content)
-        # TODO: exception handling.
+        try:
+            r = requests.put(url, data = content)
+        except requests.exceptions.RequestException as e:
+           logger.info(e)
+           pass
 
 class DisplayDeviceAdmin(admin.ModelAdmin):
     list_display =  ('descr', 'display', 'ip_address', 'port')
@@ -214,8 +276,11 @@ class DisplayDeviceAdmin(admin.ModelAdmin):
         url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
         url = url + defaults.CONTEXT_ROOT + '/'
         url = url + 'DisplayDevice' + '/' + str(obj.id)
-        r = requests.put(url, data = content)
-        # TODO: exception handling.
+        try:
+            r = requests.put(url, data = content)
+        except requests.exceptions.RequestException as e:
+           logger.info(e)
+           pass
 
 admin.site.register(SignalType, SignalTypeAdmin)
 admin.site.register(SignalUnit, SignalUnitAdmin)
