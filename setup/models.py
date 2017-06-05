@@ -5,6 +5,7 @@ import setup.defaults as defaults
 from xml.etree.ElementTree import Element, tostring
 import xml.etree.ElementTree as ET
 import requests
+from django.contrib.auth.models import User
 
 import logging
 import os
@@ -158,6 +159,45 @@ class MeasuredEntityBehavior(models.Model):
 
     def __str__(self):
         return self.name  + ' ' + self.descr 
+
+class MeasuredEntityStateBehavior(models.Model):
+    STATE_BEHAVIOR_TYPE = ( 
+       ('AR', 'Activity Registration'),
+    )
+    measure_entity =  models.ForeignKey(MeasuredEntity, related_name='state_behaviors', on_delete=models.CASCADE)
+    state_behavior_type = models.CharField(max_length=2, choices=STATE_BEHAVIOR_TYPE, default=0)
+    descr = models.CharField(max_length=160, null=False, blank=False)
+    behavior_text = models.TextField(null=True, blank=True)
+    create_date = models.DateTimeField('create datetime', auto_now=False, auto_now_add=True)
+    last_updttm = models.DateTimeField('last datetime', auto_now=True)
+
+    def clean(self):
+        if len(self.behavior_text) > 0:
+            root = Element('program')
+            root.text = self.behavior_text
+            xml = tostring(root)
+            url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+            url = url + defaults.CONTEXT_ROOT + '/'
+            url = url + 'checker/behavior'
+            try:
+                r = requests.put(url, data = xml)
+                if (r.status_code == 400):
+                    raise ValidationError("Invalid language request")
+                else: 
+                    tree = ET.ElementTree(ET.fromstring(r.content))
+                    root = tree.getroot()
+                    for child in root:
+                       lineNumber = child[0].text
+                       positionInLine = child[1].text
+                       message = child[2].text
+                       raise ValidationError("Error in line:" + str(lineNumber) + 
+					   " character:" + str(positionInLine) + " " + str(message))
+            except requests.exceptions.RequestException as e:
+                logger.info(e)
+                raise ValidationError("An error occurs when connecting to the Syntax Validation Server")
+
+    def __str__(self):
+        return str(self.measure_entity) + '-' + self.descr 
    
 class InputOutputPort(models.Model):
     device = models.ForeignKey(MonitoringDevice,related_name='io_ports', on_delete=models.CASCADE)
@@ -296,3 +336,8 @@ class DisplayDevice(models.Model):
     ip_address = models.GenericIPAddressField()
     port = models.IntegerField(null=False, blank=False, default=3001, validators=[MaxValueValidator(65535), MinValueValidator(1)])
     
+class Employee(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    id_compania = models.CharField(max_length=60)
+    id_sede = models.CharField(max_length=60)
+    id_planta = models.CharField(max_length=60)

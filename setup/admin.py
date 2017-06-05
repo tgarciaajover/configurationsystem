@@ -14,6 +14,8 @@ from setup.models import MeasuredEntityGroup
 from setup.models import IdleReason
 from setup.models import DisplayType
 from setup.models import DisplayDevice
+from setup.models import MeasuredEntityStateBehavior
+
 import requests
 from setup.serializers import SignalUnitSerializer
 from setup.serializers import SignalTypeSerializer
@@ -23,6 +25,12 @@ from setup.serializers import MonitoringDeviceSerializer
 from setup.serializers import MeasuredEntitySerializer
 from setup.serializers import DisplayTypeSerializer
 from setup.serializers import DisplayDeviceSerializer
+from setup.serializers import MeasuredEntityBehaviorSerializer
+from setup.serializers import MeasuredEntityStateBehaviorSerializer
+
+from canonical.models import Compania
+from canonical.models import Sede
+from canonical.models import Planta
 
 import logging
 import os
@@ -31,6 +39,10 @@ import logging.handlers
 from rest_framework.renderers import JSONRenderer
 import setup.defaults as defaults
 from django_ace import AceWidget
+
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
+from setup.models import Employee
 
 # Register your models here.
 
@@ -174,17 +186,30 @@ class BehaviorForm(forms.ModelForm):
         model = MeasuredEntityBehavior
         fields = ['name','descr', 'behavior_text']
 
-class BehaviorInline(admin.StackedInline):
+class MeasuredEntityBehaviorAdmin(admin.ModelAdmin):
     model = MeasuredEntityBehavior
     form = BehaviorForm
-    extra = 0 
+    list_display = ('measure_entity', 'name', 'descr')
+    list_filter = ('measure_entity',)
+
+    def save_model(self,request, obj, form, change):
+        obj.save()
+        serializer = MeasuredEntityBehaviorSerializer(obj)
+        content = JSONRenderer().render(serializer.data)
+        url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+        url = url + defaults.CONTEXT_ROOT + '/'
+        url = url + 'MeasuredEntity' + '/' + str(obj.measure_entity_id) + '/Behavior/' + str(obj.name) 
+        try:
+            r = requests.put(url, data = content)
+        except requests.exceptions.RequestException as e:
+           logger.info(e)
+           pass
+
     pass
+
 
 class MeasuredEntityAdmin(admin.ModelAdmin):
     list_display = ('code', 'descr')
-    inlines = [
-        BehaviorInline,
-      ]
 
     def save_model(self,request, obj, form, change):
         obj.save()
@@ -199,6 +224,30 @@ class MeasuredEntityAdmin(admin.ModelAdmin):
            logger.info(e)
            pass
     pass
+
+class BehaviorStateForm(forms.ModelForm):
+    behavior_text = forms.CharField(widget=AceWidget(mode='behavior', width="700px", height="300px", showprintmargin=True))
+    class Meta:
+        model = MeasuredEntityStateBehavior
+        fields = ['measure_entity','state_behavior_type','descr', 'behavior_text']
+
+
+class MeauredEntityStateBehaviorAdmin(admin.ModelAdmin):
+    model = MeasuredEntityStateBehavior
+    form = BehaviorStateForm
+
+    def save_model(self,request, obj, form, change):
+        obj.save()
+        serializer = MeasuredEntityStateBehaviorSerializer(obj)
+        content = JSONRenderer().render(serializer.data)
+        url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+        url = url + defaults.CONTEXT_ROOT + '/'
+        url = url + 'MeasuredEntity' + '/' + str(obj.measure_entity_id) + '/StateBehavior/' + str(obj.name) 
+        try:
+            r = requests.put(url, data = content)
+        except requests.exceptions.RequestException as e:
+           logger.info(e)
+           pass
 
 class InputOutputPortForm(forms.ModelForm):
     transformation_text = forms.CharField(widget=AceWidget(mode='transform', width="700px", height="300px", showprintmargin=True))
@@ -282,13 +331,68 @@ class DisplayDeviceAdmin(admin.ModelAdmin):
            logger.info(e)
            pass
 
+# Define an inline admin descriptor for Employee model
+# which acts a bit like a singleton
+class EmployeeInLineForm(forms.ModelForm):
+    class Meta:
+        model = Employee
+        fields = '__all__'
+
+    verbose_name_plural = 'employee'
+    can_delete = False
+
+    def compania_for_choice_field(self, available_choices):
+        all_companies = Compania.objects.all()
+        for compania in all_companies:
+            available_choices.append((compania.id, compania.descr)) 
+
+    def sede_for_choice_field(self, available_choices):
+        all_sedes = Sede.objects.all()
+        for sede in all_sedes:
+            available_choices.append((sede.id, sede.descr))
+
+    def planta_for_choice_fields(self, available_choices):
+        all_plantas = Planta.objects.all()
+        for planta in all_plantas:
+            available_choices.append((planta.id, planta.descr))
+
+    def __init__(self, *args, **kwargs):
+        super(EmployeeInLineForm, self).__init__(*args, **kwargs)
+
+        compania_available_choices = []
+        self.compania_for_choice_field(compania_available_choices)
+        self.fields['id_compania'] = forms.ChoiceField(choices=compania_available_choices)
+
+        sede_available_choices = []
+        self.sede_for_choice_field(sede_available_choices)
+        self.fields['id_sede'] = forms.ChoiceField(choices=sede_available_choices)
+
+        planta_available_choices = []
+        self.planta_for_choice_fields(planta_available_choices)
+        self.fields['id_planta'] = forms.ChoiceField(choices=planta_available_choices)
+        
+     
+class EmployeeInLineAdmin(admin.StackedInline):
+    model = Employee
+    form = EmployeeInLineForm
+
+# Define a new User admin
+class UserAdmin(BaseUserAdmin):
+     inlines = (EmployeeInLineAdmin, )
+
 admin.site.register(SignalType, SignalTypeAdmin)
 admin.site.register(SignalUnit, SignalUnitAdmin)
 admin.site.register(Signal, SignalAdmin)
 admin.site.register(DeviceType, DeviceTypeAdmin)
 admin.site.register(MeasuredEntity, MeasuredEntityAdmin)
+admin.site.register(MeasuredEntityStateBehavior, MeauredEntityStateBehaviorAdmin)
+admin.site.register(MeasuredEntityBehavior, MeasuredEntityBehaviorAdmin)
 admin.site.register(MonitoringDevice, MonitoringDeviceAdmin)
 admin.site.register(MeasuredEntityGroup, MeasuredEntityGroupAdmin)
 admin.site.register(IdleReason,IdleReasonAdmin)
 admin.site.register(DisplayType, DisplayTypeAdmin)
 admin.site.register(DisplayDevice, DisplayDeviceAdmin)
+
+# Re-register UserAdmin
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)

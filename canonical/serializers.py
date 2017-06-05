@@ -8,6 +8,7 @@ from canonical.models import Maquina
 from canonical.models import PlanProduccion
 from canonical.models import OrdenProduccionPlaneada
 from canonical.models import ParadaPlaneada
+from canonical.models import ActivityRegister
 
 
 class CompaniaSerializer(serializers.Serializer):
@@ -131,4 +132,13 @@ class ParadaPlaneadaSerializer(serializers.ModelSerializer):
                    'mes', 'fechahora_inicial', 'fechahora_final',
                    'create_date', 'last_updttm' )
 
+class ActivityRegisterSerializer(serializers.ModelSerializer):
+    create_date = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
+    last_updttm = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", input_formats=["%Y-%b-%d %H:%M:%S.%f"])
 
+    class Meta:
+        model = ActivityRegister
+        fields = ( 'id_compania', 'id_sede','id_planta',
+                   'id_grupo_maquina', 'id_maquina', 'ano',
+                   'mes', 'tipo_actividad', 'id_razon_parada',
+                   'id_produccion', 'create_date', 'last_updttm' )

@@ -30,8 +30,11 @@ from canonical.serializers import PlanProduccionSerializer
 from canonical.serializers import OrdenProduccionPlaneadaSerializer
 from canonical.serializers import ParadaPlaneadaSerializer
 
+from canonical.models import ActivityRegister
+
 from setup.models import PlantHostSystem
 from setup.models import MachineHostSystem
+from setup.models import Employee
 
 from setup.serializers import PlantHostSystemSerializer
 from setup.serializers import MachineHostSystemSerializer
@@ -39,6 +42,19 @@ from setup.serializers import MachineHostSystemSerializer
 from django_q.tasks import async
 from canonical.tasks import delReasonCode
 from canonical.tasks import putReasonCode
+from canonical.tasks import putActivityRegister
+
+from django.views.generic import ListView
+from django.views.generic import CreateView
+from django import forms
+from django.forms import ModelForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+import json
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+
+import datetime
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
@@ -664,3 +680,168 @@ def parada_planeada_detail(request, pk, format=None):
     elif request.method == 'DELETE':
         paradaplaneada.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ListActivityRegisterView(ListView):
+
+    model = ActivityRegister
+    template_name = 'ActivityRegister_list.html'
+
+def ordenes_from_maquina(request):
+    _id_compania =request.GET.get('id_compania')
+    _id_sede=request.GET.get('id_sede')
+    _id_planta=request.GET.get('id_planta')
+    _id_grupo_maquina=request.GET.get('id_grupo_maquina')
+    _id_maquina=request.GET.get('id_maquina')
+    _ano=request.GET.get('ano')
+    _mes=request.GET.get('mes')
+    
+    ret=[]
+    sqlText = "SELECT f.id, f.id_produccion \
+		FROM canonical_maquina e, canonical_grupomaquina a, canonical_compania b, canonical_sede c, canonical_planta d, canonical_ordenproduccionplaneada f \
+	       WHERE b.id = %s AND c.id = %s AND d.id = %s AND a.id = %s AND e.id = %s AND f.ano = %s AND f.mes = %s \
+                 AND c.id_compania = b.id_compania AND d.id_compania = c.id_compania AND d.id_sede = c.id_sede \
+		 AND a.id_compania = d.id_compania AND a.id_sede = d.id_sede AND a.id_planta = d.id_planta \
+		 AND e.id_compania = a.id_compania AND e.id_sede = a.id_sede AND e.id_planta = a.id_planta \
+		 AND e.id_grupo_maquina = a.id_grupo_maquina AND f.id_compania = e.id_compania AND f.id_sede = e.id_sede \
+		 AND f.id_planta = e.id_planta AND f.id_grupo_maquina = e.id_grupo_maquina AND f.id_maquina = e.id_maquina"
+
+    if _id_maquina:
+        all_Orders = OrdenProduccionPlaneada.objects.raw(sqlText, [_id_compania, _id_sede, _id_planta, _id_grupo_maquina, _id_maquina, _ano, _mes] ) 
+        for order in all_Orders:
+            ret.append(dict(id=order.id, value=order.id_produccion))
+
+    if len(ret)!=1:
+        ret.insert(0, dict(id='', value='---'))
+    return HttpResponse(json.dumps(ret), 
+              content_type='application/json')
+
+
+def maquinas_from_group(request):
+    _id_compania =request.GET.get('id_compania')
+    _id_sede=request.GET.get('id_sede')
+    _id_planta=request.GET.get('id_planta')
+    _id_grupo_maquina=request.GET.get('id_grupo_maquina')
+    ret=[]
+    if _id_grupo_maquina:
+        all_gMaquina = Maquina.objects.raw("SELECT e.id, e.descr \
+			  FROM canonical_maquina e, canonical_grupomaquina a, canonical_compania b, canonical_sede c, canonical_planta d \
+			 WHERE b.id = %s AND c.id = %s AND d.id = %s AND a.id = %s \
+			   AND c.id_compania = b.id_compania AND d.id_compania = c.id_compania \
+			   AND d.id_sede = c.id_sede AND a.id_compania = d.id_compania \
+			   AND a.id_sede = d.id_sede AND a.id_planta = d.id_planta \
+			   AND e.id_compania = a.id_compania AND e.id_sede = a.id_sede \
+			   AND e.id_planta = a.id_planta AND e.id_grupo_maquina = a.id_grupo_maquina", [_id_compania, _id_sede, _id_planta, _id_grupo_maquina] )
+        for maquina in all_gMaquina:
+            ret.append(dict(id=maquina.id, value=maquina.descr))
+
+    if len(ret)!=1:
+        ret.insert(0, dict(id='', value='---'))
+    return HttpResponse(json.dumps(ret), 
+              content_type='application/json')
+
+
+class ActivityRegisterForm(ModelForm):
+    id_maquina=forms.ModelChoiceField(Maquina.objects.none())
+    id_produccion=forms.ModelChoiceField(OrdenProduccionPlaneada.objects.none())
+    class Meta:
+        model = ActivityRegister
+        fields = ['id_compania', 'id_sede', 'id_planta', 'id_grupo_maquina', 'id_maquina', 'ano', 'mes', 'tipo_actividad', 'id_razon_parada', 'id_produccion']
+
+    def grupo_maquina_for_choice_field(self, available_choices):
+        all_gMaquina = GrupoMaquina.objects.raw("SELECT a.id, a.descr \
+						   FROM canonical_grupomaquina a, canonical_compania b, canonical_sede c, canonical_planta d \
+						  WHERE b.id = %s \
+						    AND c.id = %s \
+						    AND d.id = %s \
+						    AND c.id_compania = b.id_compania \
+						    AND d.id_compania = c.id_compania \
+						    AND d.id_sede = c.id_sede \
+					    	    AND a.id_compania = d.id_compania \
+						    AND a.id_sede = d.id_sede \
+						    AND a.id_planta = d.id_planta", [self.id_compania, self.id_sede, self.id_planta] )
+
+        for gMaquina in all_gMaquina:
+            available_choices.append((gMaquina.id, gMaquina.descr))
+
+    def razones_parada_for_choice_field(self, available_choices):
+        all_rParada = RazonParada.objects.raw("SELECT a.id, a.descr \
+						   FROM canonical_razonparada a, canonical_compania b, canonical_sede c, canonical_planta d \
+						  WHERE b.id = %s \
+						    AND c.id = %s \
+						    AND d.id = %s \
+						    AND c.id_compania = b.id_compania \
+						    AND d.id_compania = c.id_compania \
+						    AND d.id_sede = c.id_sede \
+					    	    AND a.id_compania = d.id_compania \
+						    AND a.id_sede = d.id_sede \
+						    AND a.id_planta = d.id_planta", [self.id_compania, self.id_sede, self.id_planta] )
+
+        for rParada in all_rParada:
+            available_choices.append((rParada.id, rParada.descr))
+
+    def __init__(self, request, *args, **kwargs):
+        if 'initial' in kwargs:
+            initial_values = kwargs.get('initial')
+            id_compania = initial_values['id_compania'] 
+            id_sede = initial_values['id_sede'] 
+            id_planta = initial_values['id_planta']
+        else:
+            id_compania = None
+            id_sede = None
+            id_planta = None
+
+        super(ActivityRegisterForm, self).__init__(*args, **kwargs)
+
+        self.fields['id_compania'].widget.attrs['readonly'] = True
+        self.fields['id_sede'].widget.attrs['readonly'] = True
+        self.fields['id_planta'].widget.attrs['readonly'] = True
+
+        # Save in the form default values.
+        self.id_compania = id_compania
+        self.id_sede = id_sede
+        self.id_planta = id_planta
+
+        # Set posible values for the field grupo maquina.
+        gMaquina_choices = []
+        rParada_choices = []
+        self.grupo_maquina_for_choice_field(gMaquina_choices)
+        self.razones_parada_for_choice_field(rParada_choices)
+        self.fields['id_grupo_maquina'] = forms.ChoiceField(choices=gMaquina_choices)
+        self.fields['id_razon_parada'] = forms.ChoiceField(choices=rParada_choices)
+
+
+class CreateRegisterView(LoginRequiredMixin, CreateView):
+
+    model = ActivityRegister
+    template_name = 'ActivityRegister_edit.html'
+    fields = '__all__'
+               
+    def getDefaults(self, user):
+        initial = {}
+        employeeData = Employee.objects.get(pk=user.id)
+        initial ['id_compania'] = employeeData.id_compania
+        initial ['id_sede'] = employeeData.id_sede
+        initial ['id_planta'] = employeeData.id_planta
+        initial ['author'] = user.id
+        now = datetime.datetime.now()
+        initial ['ano'] = now.year
+        initial ['mes'] = now.month
+        return initial
+   
+    def form_valid(self, form):
+        self.object = form.save()
+        serializer = DisplayDeviceSerializer(self.object)
+        content = JSONRenderer().render(serializer.data)
+        async(putActivityRegister, content)
+        return HttpResponseRedirect(self.get_success_url())    
+
+    # if a GET (or any other method) we'll create a blank form
+    def get(self, request, *args, **kwargs):
+        initial = self.getDefaults(request.user)
+        form = ActivityRegisterForm(request, initial=initial)
+        return render(request, self.template_name, {'form': form})
+
+    def get_success_url(self):
+        return reverse('activity-register-list-view')
+

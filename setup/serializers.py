@@ -65,6 +65,14 @@ class MeasuredEntityBehaviorSerializer(serializers.Serializer):
     behavior_text = serializers.CharField()
     create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
 
+
+class MeasuredEntityStateBehaviorSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(max_length=40)
+    descr = serializers.CharField(max_length=160)
+    behavior_text = serializers.CharField()
+    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+
 class MeasuredEntitySerializer(serializers.ModelSerializer):
     create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
     behaviors = MeasuredEntityBehaviorSerializer(many=True,read_only=True)

@@ -16,6 +16,8 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.conf.urls import url, include
+import views
+
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -25,4 +27,15 @@ urlpatterns = [
 urlpatterns += [
     url(r'^api-auth/', include('rest_framework.urls',
                                namespace='rest_framework')),
+]
+urlpatterns += [
+ url(r'^accounts/', include('django.contrib.auth.urls')),
+]
+
+urlpatterns += [
+    url(r'^$', views.index, name='index'),
+]
+
+urlpatterns += [
+    url(r'^registro/', include('canonical.urls_register')),
 ]

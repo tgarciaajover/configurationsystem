@@ -1,5 +1,7 @@
 from django.db import models
 import datetime
+from django.contrib.auth.models import User
+
 
 # Create your models here.
 
@@ -124,5 +126,26 @@ class ParadaPlaneada(models.Model):
     fechahora_inicial = models.DateTimeField('fecha hora inicio')
     fechahora_final =  models.DateTimeField('fecha hora fin')
     create_date = models.DateTimeField('create datetime',  auto_now=False,  auto_now_add=True)
+    last_updttm = models.DateTimeField('last datetime', auto_now=True)
+
+class ActivityRegister(models.Model):
+    ACTIVITY_TYPE = (
+        ('S', 'Comienzo Orden de Produccion'),
+        ('E', 'Fin Orden de Produccion'),
+        ('C', 'Comienzo de Parada'),
+        ('F', 'Fin de Parada'),
+    )
+    id_compania = models.CharField(max_length=60)
+    id_sede = models.CharField(max_length=60)
+    id_planta = models.CharField(max_length=60)
+    id_grupo_maquina = models.CharField(max_length=60)
+    id_maquina =  models.CharField(max_length=60)
+    ano = models.IntegerField()
+    mes = models.IntegerField()
+    tipo_actividad = models.CharField(max_length=1, choices=ACTIVITY_TYPE, default='S')
+    id_razon_parada = models.CharField(max_length=60)
+    id_produccion = models.CharField(max_length=30)
+    author = models.IntegerField(null=True, blank=True)    
+    create_date =  models.DateTimeField('create datetime',  auto_now=False,  auto_now_add=True)
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
 

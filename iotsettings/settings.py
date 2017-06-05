@@ -62,7 +62,7 @@ ROOT_URLCONF = 'iotsettings.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['./templates',],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -162,3 +162,8 @@ Q_CLUSTER = {
     'bulk': 10,
     'orm': 'default'
 }
+
+LOGIN_URL = '/accounts/login/'
+
+# Redirect to home URL after login (Default redirects to /registro/add)
+LOGIN_REDIRECT_URL = '/registro/add/'
