@@ -8,6 +8,8 @@ from setup.models import InputOutputPort
 from setup.models import IdleReason
 from setup.models import DisplayType
 from setup.models import DisplayDevice
+from setup.models import MeasuredEntityStateBehavior
+from setup.models import MeasuredEntityTransitionState
 
 
 class SignalUnitSerializer(serializers.Serializer):
@@ -18,7 +20,8 @@ class SignalUnitSerializer(serializers.Serializer):
 class SignalTypeSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name =  serializers.CharField(max_length=60)
-    class_name = serializers.CharField(max_length=200) 
+    class_name = serializers.CharField(max_length=200)
+    protocol = serializers.CharField(max_length=1)
     create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
 
 class SignalSerializer(serializers.Serializer):
@@ -65,13 +68,12 @@ class MeasuredEntityBehaviorSerializer(serializers.Serializer):
     behavior_text = serializers.CharField()
     create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
 
-
-class MeasuredEntityStateBehaviorSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
-    name = serializers.CharField(max_length=40)
-    descr = serializers.CharField(max_length=160)
-    behavior_text = serializers.CharField()
+class MeasuredEntityStateBehaviorSerializer(serializers.ModelSerializer):
     create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+
+    class Meta:
+        model = MeasuredEntityStateBehavior
+        fields = ('id', 'state_behavior_type', 'descr', 'behavior_text', 'create_date')
 
 class MeasuredEntitySerializer(serializers.ModelSerializer):
     create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
@@ -88,6 +90,12 @@ class IdleReasonSerializer(serializers.ModelSerializer):
         model = IdleReason
         fields = ('id', 'descr', 'classification', 'group_cd','down', 'create_date')
 
+class MeasuredEntityTransitionStateSerializer(serializers.ModelSerializer):
+    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+
+    class Meta:
+        model = MeasuredEntityTransitionState
+        fields = ('id', 'state_from', 'reason_code', 'behavior', 'create_date')
 
 class DisplayTypeSerializer(serializers.ModelSerializer):
     create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
@@ -182,6 +190,43 @@ class PlantHostSystemSerializer(serializers.Serializer):
         instance = PlantHostSystem.objects.get(id_compania=validated_data.get('id_compania',instance.id_compania),
                                                id_sede=validated_data.get('id_sede',instance.id_sede),
                                                id_planta= validated_data.get('id_planta', instance.id_planta))
+        instance.descr =  validated_data.get('descr')
+        instance.last_updttm = validated_data.get('last_updttm')
+        instance.save()
+        return instance
+
+
+class IdleReasonHostSystemSerializer(serializers.Serializer):
+    id_compania = serializers.CharField(max_length=60)
+    id_sede = serializers.CharField(max_length=60)
+    id_planta = serializers.CharField(max_length=60)
+    id_razon_parada = serializers.CharField(max_length=60)
+    descr = serializers.CharField(max_length=200)
+    group_cd = serializers.CharField(max_length=60)
+    classification = serializers.CharField(max_length=1)
+    down = serializers.CharField(max_length=1)
+
+    def create(self, validated_data):
+        """
+        Create and return a new `IdleReasonHostSystem` instance, given the validated data.
+        """
+        idleReasonHostSystem = IdleReasonHostSystem()
+        idleReasonHostSystem.id_compania = validated_data.get('id_compania')
+        idleReasonHostSystem.id_sede = validated_data.get('id_sede')
+        idleReasonHostSystem.id_planta = validated_data.get('id_planta')
+        idleReasonHostSystem.id_razon_parada = validated_data.get('id_razon_parada')
+
+        idleReasonHostSystem.save()
+        return idleReasonHostSystem
+
+    def update(self, instance, validated_data):
+        """
+        Update and return an existing `Idle Reason` instance, given the validated data.
+        """
+        instance = IdleReasonHostSystem.objects.get(id_compania=validated_data.get('id_compania',instance.id_compania),
+                                               id_sede=validated_data.get('id_sede',instance.id_sede),
+                                               id_planta= validated_data.get('id_planta', instance.id_planta),
+					       id_razon_parada = validated_data.get('id_razon_parada', instance.id_razon_parada))
         instance.descr =  validated_data.get('descr')
         instance.last_updttm = validated_data.get('last_updttm')
         instance.save()

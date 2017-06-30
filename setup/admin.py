@@ -15,6 +15,7 @@ from setup.models import IdleReason
 from setup.models import DisplayType
 from setup.models import DisplayDevice
 from setup.models import MeasuredEntityStateBehavior
+from setup.models import MeasuredEntityTransitionState
 
 import requests
 from setup.serializers import SignalUnitSerializer
@@ -27,6 +28,7 @@ from setup.serializers import DisplayTypeSerializer
 from setup.serializers import DisplayDeviceSerializer
 from setup.serializers import MeasuredEntityBehaviorSerializer
 from setup.serializers import MeasuredEntityStateBehaviorSerializer
+from setup.serializers import MeasuredEntityTransitionStateSerializer
 
 from canonical.models import Compania
 from canonical.models import Sede
@@ -68,7 +70,7 @@ if needRoll:
 class SignalTypeForm(ModelForm):
     class Meta:
         model = SignalType
-        fields = ['name', 'class_name']
+        fields = ['name', 'class_name', 'protocol']
 
     def getFromFileSystem(self, available_choices):
        f = open('workfile', 'r')
@@ -242,7 +244,7 @@ class MeauredEntityStateBehaviorAdmin(admin.ModelAdmin):
         content = JSONRenderer().render(serializer.data)
         url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
         url = url + defaults.CONTEXT_ROOT + '/'
-        url = url + 'MeasuredEntity' + '/' + str(obj.measure_entity_id) + '/StateBehavior/' + str(obj.name) 
+        url = url + 'MeasuredEntity' + '/' + str(obj.measure_entity_id) + '/StateBehavior/' + str(obj.id) 
         try:
             r = requests.put(url, data = content)
         except requests.exceptions.RequestException as e:
@@ -288,6 +290,31 @@ class MeasuredEntityGroupAdmin(admin.ModelAdmin):
 class IdleReasonAdmin(admin.ModelAdmin):
     list_display = ('descr','group_cd', 'classification','down')
     pass
+
+class MeasuredStateTransitionForm(forms.ModelForm):
+    class Meta:
+        model = MeasuredEntityTransitionState
+        fields = ['measure_entity','state_from','reason_code', 'behavior']
+
+class MeasuredStateTransitionAdmin(admin.ModelAdmin):
+    model = MeasuredEntityTransitionState
+    form = MeasuredStateTransitionForm
+    list_display = ('measure_entity', 'state_from', 'reason_code', 'behavior')
+    list_filter = ('measure_entity',)
+
+    def save_model(self,request, obj, form, change):
+        obj.save()
+        serializer = MeasuredEntityTransitionStateSerializer(obj)
+        content = JSONRenderer().render(serializer.data)
+        url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+        url = url + defaults.CONTEXT_ROOT + '/'
+        url = url + 'MeasuredEntity' + '/' + str(obj.measure_entity_id) + '/StateTransition/' + str(obj.id) 
+        try:
+            print (content)
+            r = requests.put(url, data = content)
+        except requests.exceptions.RequestException as e:
+           logger.info(e)
+           pass
 
 class DisplayTypeAdmin(admin.ModelAdmin):
     fieldsets = (
@@ -390,6 +417,7 @@ admin.site.register(MeasuredEntityBehavior, MeasuredEntityBehaviorAdmin)
 admin.site.register(MonitoringDevice, MonitoringDeviceAdmin)
 admin.site.register(MeasuredEntityGroup, MeasuredEntityGroupAdmin)
 admin.site.register(IdleReason,IdleReasonAdmin)
+admin.site.register(MeasuredEntityTransitionState, MeasuredStateTransitionAdmin)
 admin.site.register(DisplayType, DisplayTypeAdmin)
 admin.site.register(DisplayDevice, DisplayDeviceAdmin)
 

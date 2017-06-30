@@ -1,4 +1,4 @@
-JAVA_CONFIGURATION_SERVER = 'http://localhost'
+JAVA_CONFIGURATION_SERVER = 'http://192.168.0.10'
 PORT = 8111
 CONTEXT_ROOT = 'iotserver'
 

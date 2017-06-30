@@ -1,0 +1,65 @@
+{% extends 'base_generic.html' %}
+
+<h1>Adicionar Registro Actividad</h1>
+
+{% block javascript %}
+  <script>
+    $("#id_tipo_actividad").change(function () {
+      console.log( $(this).val() );
+    });
+
+
+    $("#id_id_grupo_maquina").change(function () {
+      var form = $(this).closest("form");
+      $.ajax({
+        url:  form.attr("change-grupo-maquina"),
+        data: form.serialize(),
+        dataType: 'json',
+        success: function (data) {
+
+	   var opt=$("#id_id_maquina");
+           var old_val=opt.val();
+           opt.html('');
+           $.each(data, function () {
+               opt.append($('<option/>').val(this.id).text(this.value));
+           });
+           opt.val(old_val);
+           opt.change();
+        }
+      });
+    });
+
+
+    $("#id_id_maquina").change(function () {
+      var form = $(this).closest("form");
+      $.ajax({
+        url:  form.attr("change-maquina"),
+        data: form.serialize(),
+        dataType: 'json',
+        success: function (data) {
+
+	   var opt=$("#id_id_produccion");
+           var old_val=opt.val();
+           opt.html('');
+           $.each(data, function () {
+               opt.append($('<option/>').val(this.id).text(this.value));
+           });
+           opt.val(old_val);
+           opt.change();
+        }
+      });
+    });
+
+  </script>
+{% endblock %}
+
+
+{% block content %}
+<form action="{% url "activity-register-create-view" %}" method="POST", change-grupo-maquina = "{% url "maquinas-from-group" %}", change-maquina = "{% url "ordenes-from-maquina" %}" >
+  {% csrf_token %}
+  {{ form.as_ul }}
+  <input id="save_act_reg" type="submit" value="Save" />
+</form>
+
+<a href="{% url "activity-register-list-view" %}">back to list</a>
+{% endblock %}

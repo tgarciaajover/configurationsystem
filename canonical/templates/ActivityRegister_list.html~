@@ -1,0 +1,11 @@
+{% extends 'base_generic.html' %}
+
+<h1>Actividades Registradas</h1>
+
+<ul>
+  {% for act_reg in object_list %}
+    <li>{{ act_reg.id_maquina }} - {{ act_reg.tipo_actividad }}</li>
+  {% empty %}
+    <li>Sin actividades registradas.</li>
+  {% endfor %}
+</ul>

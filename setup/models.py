@@ -33,8 +33,13 @@ if needRoll:
 
 
 class SignalType(models.Model):
+    PROTOCOL_TYPE = (
+        ('Q', 'MQTT'),
+        ('M', 'ModBus'),
+    )
     name = models.CharField(max_length=60)
     class_name = models.CharField(max_length=200)
+    protocol = models.CharField(max_length=1, choices=PROTOCOL_TYPE)
     create_date = models.DateTimeField('create datetime',  auto_now=False,  auto_now_add=True)
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
 
@@ -197,11 +202,12 @@ class MeasuredEntityStateBehavior(models.Model):
                 raise ValidationError("An error occurs when connecting to the Syntax Validation Server")
 
     def __str__(self):
-        return str(self.measure_entity) + '-' + self.descr 
+        return str(self.measure_entity) + '-' + self.descr
+    
    
 class InputOutputPort(models.Model):
     device = models.ForeignKey(MonitoringDevice,related_name='io_ports', on_delete=models.CASCADE)
-    port_label = models.CharField(max_length=10, default='COM1',help_text="This field must be included in the mqtt topic")
+    port_label = models.CharField(max_length=60, default='COM1',help_text="This field must be included in the mqtt and modbus topic")
     signal_type = models.ForeignKey(Signal, on_delete=models.CASCADE)
     measured_entity = models.ForeignKey(MeasuredEntity, related_name='measured_entity', blank= True, null= True, on_delete=models.SET_NULL)
     transformation_text = models.TextField(null=True, blank=True)
@@ -264,6 +270,26 @@ class IdleReason(models.Model):
     
     def __str__(self):
         return self.descr
+
+class IdleReasonHostSystem(IdleReason):
+    id_compania = models.CharField(max_length=60)
+    id_sede = models.CharField(max_length=60)
+    id_planta = models.CharField(max_length=60)
+    id_razon_parada = models.CharField(max_length=60)
+
+class MeasuredEntityTransitionState(models.Model):
+    STATE_OPTIONS = (
+       ('O', 'Operating'),
+       ('S', 'Schedule Down'),
+       ('U', 'Unchedule Down'),
+       ('D', 'Undefined'),
+    )
+    measure_entity = models.ForeignKey(MeasuredEntity, related_name='measured_states', on_delete=models.CASCADE)
+    state_from = models.CharField(max_length=1, choices=STATE_OPTIONS, default='S')
+    reason_code = models.ForeignKey(IdleReason, related_name='reasons', on_delete=models.CASCADE)
+    behavior = models.ForeignKey(MeasuredEntityStateBehavior, on_delete=models.CASCADE)
+    create_date = models.DateTimeField('create datetime', auto_now=False, auto_now_add=True)
+    last_updttm = models.DateTimeField('last datetime', auto_now=True)
 
 class DisplayType(models.Model):
     COLOR_OPTIONS = ( 
