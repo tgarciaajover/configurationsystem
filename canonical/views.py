@@ -819,7 +819,7 @@ class CreateRegisterView(LoginRequiredMixin, CreateView):
                
     def getDefaults(self, user):
         initial = {}
-        employeeData = Employee.objects.get(pk=user.id)
+        employeeData = Employee.objects.get(user_id=user.id)
         initial ['id_compania'] = employeeData.id_compania
         initial ['id_sede'] = employeeData.id_sede
         initial ['id_planta'] = employeeData.id_planta

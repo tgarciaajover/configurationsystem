@@ -186,7 +186,7 @@ class BehaviorForm(forms.ModelForm):
     behavior_text = forms.CharField(widget=AceWidget(mode='behavior', width="700px", height="300px", showprintmargin=True))
     class Meta:
         model = MeasuredEntityBehavior
-        fields = ['name','descr', 'behavior_text']
+        fields = ['measure_entity','name','descr', 'behavior_text']
 
 class MeasuredEntityBehaviorAdmin(admin.ModelAdmin):
     model = MeasuredEntityBehavior

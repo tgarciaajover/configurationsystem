@@ -15,21 +15,21 @@ from setup.models import MeasuredEntityTransitionState
 class SignalUnitSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     descr = serializers.CharField(max_length=60)
-    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+    create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
 
 class SignalTypeSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name =  serializers.CharField(max_length=60)
     class_name = serializers.CharField(max_length=200)
     protocol = serializers.CharField(max_length=1)
-    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+    create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
 
 class SignalSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     descr = serializers.CharField(max_length=200) 
     unit = SignalUnitSerializer(required=True)
     type = SignalTypeSerializer(required=True)
-    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+    create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
 
 class IOSignalDeviceTypeSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -37,7 +37,7 @@ class IOSignalDeviceTypeSerializer(serializers.Serializer):
     signal = SignalSerializer(required=True)
 
 class DeviceTypeSerializer(serializers.ModelSerializer):
-    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+    create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
     io_signals = IOSignalDeviceTypeSerializer(many=True, read_only=True)
 
     class Meta:
@@ -50,11 +50,11 @@ class InputOutputPortSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = InputOutputPort
-        fields = ('id','port_label','signal_type','measured_entity','transformation_text')
+        fields = ('id','port_label','signal_type','refresh_time_ms','measured_entity','transformation_text')
 
 class MonitoringDeviceSerializer(serializers.ModelSerializer):
     device_type = DeviceTypeSerializer()
-    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+    create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
     io_ports = InputOutputPortSerializer(many=True,read_only=True)
 
     class Meta:
@@ -66,17 +66,17 @@ class MeasuredEntityBehaviorSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=40)
     descr = serializers.CharField(max_length=160)
     behavior_text = serializers.CharField()
-    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+    create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
 
 class MeasuredEntityStateBehaviorSerializer(serializers.ModelSerializer):
-    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+    create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
 
     class Meta:
         model = MeasuredEntityStateBehavior
         fields = ('id', 'state_behavior_type', 'descr', 'behavior_text', 'create_date')
 
 class MeasuredEntitySerializer(serializers.ModelSerializer):
-    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+    create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
     behaviors = MeasuredEntityBehaviorSerializer(many=True,read_only=True)
 
     class Meta:
@@ -84,21 +84,21 @@ class MeasuredEntitySerializer(serializers.ModelSerializer):
         fields= ('id', 'code', 'descr', 'type', 'create_date', 'behaviors')
 
 class IdleReasonSerializer(serializers.ModelSerializer):
-    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+    create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
     
     class Meta:
         model = IdleReason
         fields = ('id', 'descr', 'classification', 'group_cd','down', 'create_date')
 
 class MeasuredEntityTransitionStateSerializer(serializers.ModelSerializer):
-    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+    create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
 
     class Meta:
         model = MeasuredEntityTransitionState
         fields = ('id', 'state_from', 'reason_code', 'behavior', 'create_date')
 
 class DisplayTypeSerializer(serializers.ModelSerializer):
-    create_date = serializers.DateTimeField('%Y-%b-%d %H:%M:%S.%f')
+    create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
 
     class Meta:
         model = DisplayType
@@ -121,7 +121,7 @@ class MachineHostSystemSerializer(serializers.Serializer):
     id_grupo_maquina = serializers.CharField(max_length=60)
     id_maquina = serializers.CharField(max_length=60)
     descr = serializers.CharField(max_length=200)
-    last_updttm = serializers.DateTimeField(format="%Y-%b-%d %H:%M:%S.%f", required=False, read_only=True)
+    last_updttm = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", required=False, read_only=True)
 
     
     def create(self, validated_data):

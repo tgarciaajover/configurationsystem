@@ -209,6 +209,7 @@ class InputOutputPort(models.Model):
     device = models.ForeignKey(MonitoringDevice,related_name='io_ports', on_delete=models.CASCADE)
     port_label = models.CharField(max_length=60, default='COM1',help_text="This field must be included in the mqtt and modbus topic")
     signal_type = models.ForeignKey(Signal, on_delete=models.CASCADE)
+    refresh_time_ms = models.IntegerField(default=5000, help_text="It specifies how often a new measured is obtained in milliseconds")
     measured_entity = models.ForeignKey(MeasuredEntity, related_name='measured_entity', blank= True, null= True, on_delete=models.SET_NULL)
     transformation_text = models.TextField(null=True, blank=True)
 
