@@ -3,35 +3,32 @@
 <!DOCTYPE html>
 <html>
 <head lang="en">
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-	<meta http-equiv="x-ua-compatible" content="ie=edge">
-	{% block title %}
-	<title>
-    StartUI - Premium Bootstrap 4 Admin Dashboard Template
-    </title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    {% block title %}
+    <title>DashBoard Avicetec</title>
     {% endblock title %}
+    <link href="{% static 'img/favicon.144x144.png' %}" rel="apple-touch-icon" type="image/png" sizes="144x144">
+    <link href="{% static 'img/favicon.114x114.png' %}" rel="apple-touch-icon" type="image/png" sizes="114x114">
+    <link href="{% static 'img/favicon.72x72.png' %}" rel="apple-touch-icon" type="image/png" sizes="72x72">
+    <link href="{% static 'img/favicon.57x57.png' %}" rel="apple-touch-icon" type="image/png">
+    <link href="{% static 'img/favicon.png' %}" rel="icon" type="image/png">
+    <link href="{% static 'img/favicon.ico' %}" rel="shortcut icon">
 
-	<link href="{% static 'img/favicon.144x144.png' %}" rel="apple-touch-icon" type="image/png" sizes="144x144">
-	<link href="{% static 'img/favicon.114x114.png' %}" rel="apple-touch-icon" type="image/png" sizes="114x114">
-	<link href="{% static 'img/favicon.72x72.png' %}" rel="apple-touch-icon" type="image/png" sizes="72x72">
-	<link href="{% static 'img/favicon.57x57.png' %}" rel="apple-touch-icon" type="image/png">
-	<link href="{% static 'img/favicon.png' %}" rel="icon" type="image/png">
-	<link href="{% static 'img/favicon.ico' %}" rel="shortcut icon">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
 
-	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-	<!--[if lt IE 9]>
-	<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-	<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-	<![endif]-->
-
-<link href="{% static 'css/separate/vendor/lobipanel.min.css' %}" rel="stylesheet" media="all" />
-<link href="{% static 'css/lib/jqueryui/jquery-ui.min.css' %}" rel="stylesheet" media="all" />
-<link href="{% static 'css/separate/pages/widgets.min.css' %}" rel="stylesheet" media="all" />
-<link href="{% static 'css/lib/font-awesome/font-awesome.min.css' %}" rel="stylesheet" media="all" />
-<link href="{% static 'css/lib/bootstrap/bootstrap.min.css' %}" rel="stylesheet" media="all" />
-<link href="{% static 'css/main.css' %}" rel="stylesheet" media="all" />
-
+    <link href="{% static 'css/separate/vendor/lobipanel.min.css' %}" rel="stylesheet" media="all" />
+    <link href="{% static 'css/separate/vendor/bootstrap-daterangepicker.min.css' %}" rel="stylesheet" media="all" />
+    <link href="{% static 'css/lib/jqueryui/jquery-ui.min.css' %}" rel="stylesheet" media="all" />
+    <link href="{% static 'css/separate/pages/widgets.min.css' %}" rel="stylesheet" media="all" />
+    <link href="{% static 'css/lib/font-awesome/font-awesome.min.css' %}" rel="stylesheet" media="all" />
+    <link href="{% static 'css/lib/bootstrap/bootstrap.min.css' %}" rel="stylesheet" media="all" />
+    <link href="{% static 'css/main.css' %}" rel="stylesheet" media="all" />
 </head>
 
 {% block body-content %}
@@ -42,8 +39,8 @@
 	    <div class="container-fluid">
 	
 	        <a href="#" class="site-logo">
-	            <img class="hidden-md-down" src="img/logo-2.png" alt="">
-	            <img class="hidden-lg-up" src="img/logo-2-mob.png" alt="">
+	            <img class="hidden-md-down" src="{% static 'img/logo-2.png' %}" alt="">
+	            <img class="hidden-lg-up" src="{% static 'img/logo-2-mob.png' %}" alt="">
 	        </a>
 	
 	        <button id="show-hide-sidebar-toggle" class="show-hide-sidebar">
@@ -55,7 +52,18 @@
 	        </button>
 	        <div class="site-header-content">
 	            <div class="site-header-content-in">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <div id="div_daterange" class="input-group date">
+                                    <input id="daterange" type="text" class="form-control">
+                                    <span class="input-group-addon">
+                                    <i id="iDaterange" class="font-icon font-icon-calend"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
 	                <div class="site-header-shown">
+	                {% block notif-list %}
 	                    <div class="dropdown dropdown-notification notif">
 	                        <a href="#"
 	                           class="header-alarm dropdown-toggle active"
@@ -71,15 +79,13 @@
 	                                <span class="label label-pill label-danger">4</span>
 	                            </div>
 	                            <div class="dropdown-menu-notif-list">
-									{% block notif-list %}	
-									{% endblock notif-list %}
 	                            </div>
 	                            <div class="dropdown-menu-notif-more">
 	                                <a href="#">See more</a>
 	                            </div>
 	                        </div>
 	                    </div>
-		
+	                {% endblock notif-list %}
 	                    <div class="dropdown dropdown-lang">
 	                        <button class="dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 	                            <span class="flag-icon flag-icon-us"></span>
@@ -96,7 +102,7 @@
 	
 	                    <div class="dropdown user-menu">
 	                        <button class="dropdown-toggle" id="dd-user-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-	                            <img src="img/avatar-2-64.png" alt="">
+	                            <img src="{% static 'img/avatar-2-64.png' %}" alt="">
 	                        </button>
 	                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dd-user-menu">
 	                            <a class="dropdown-item" href="#"><span class="font-icon glyphicon glyphicon-user"></span>Profile</a>
@@ -106,11 +112,11 @@
 	                            <a class="dropdown-item" href="#"><span class="font-icon glyphicon glyphicon-log-out"></span>Logout</a>
 	                        </div>
 	                    </div>
-	
+
 	                </div><!--.site-header-shown-->
 	
 	                <div class="mobile-menu-right-overlay"></div>
-	                <div class="site-header-collapsed">
+	                <!--<div class="site-header-collapsed">
 	                    <div class="site-header-collapsed-in">
 
 	                        <div class="dropdown dropdown-typical">
@@ -168,8 +174,8 @@
 	                                <a class="dropdown-item" href="#"><span class="font-icon font-icon-comments"></span>Third Party Test</a>
 	                            </div>
 	                        </div>
-		                        
-	                    </div><!--.site-header-collapsed-in-->
+
+	                    </div><!--.site-header-collapsed-in
 	                </div><!--.site-header-collapsed-->
 	            </div><!--site-header-content-in-->
 	        </div><!--.site-header-content-->
@@ -180,68 +186,21 @@
 	<div class="mobile-menu-left-overlay"></div>
 	{% block side-menu %}
 	<nav class="side-menu">
-	    <ul class="side-menu-list">
-	        <li class="grey with-sub">
-	            <span>
-	                <i class="font-icon font-icon-dashboard"></i>
-	                <span class="lbl">Dashboard</span>
-	            </span>
-	            <ul>
-	                <li><a href="index.html"><span class="lbl">Default</span><span class="label label-custom label-pill label-danger">new</span></a></li>
-	                <li><a href="dashboard-top-menu.html"><span class="lbl">Top menu</span></a></li>
-	                <li><a href="side-menu-compact-full.html"><span class="lbl">Compact menu</span></a></li>
-	                <li><a href="dashboard-addl-menu.html"><span class="lbl">Submenu</span></a></li>
-	                <li><a href="side-menu-avatar.html"><span class="lbl">Menu with avatar</span></a></li>
-	                <li><a href="side-menu-avatar.html"><span class="lbl">Compact menu with avatar</span></a></li>
-	                <li><a href="dark-menu.html"><span class="lbl">Dark menu</span></a></li>
-	                <li><a href="dark-menu-blue.html"><span class="lbl">Blue dark menu</span></a></li>
-	                <li><a href="dark-menu-green.html"><span class="lbl">Green dark menu</span></a></li>
-	                <li><a href="dark-menu-green-compact.html"><span class="lbl">Green compact dark menu</span></a></li>
-	                <li><a href="dark-menu-ultramarine.html"><span class="lbl">Ultramarine dark menu</span></a></li>
-	                <li><a href="asphalt-menu.html"><span class="lbl">Asphalt top menu</span></a></li>
-	                <li><a href="side-menu-big-icon.html"><span class="lbl">Big menu</span></a></li>
-	            </ul>
-	        </li>
-	        <li class="brown with-sub">
-	            <span>
-	                <i class="font-icon glyphicon glyphicon-tint"></i>
-	                <span class="lbl">Skins</span>
-	            </span>
-	            <ul>
-	                <li><a href="theme-side-ebony-clay.html"><span class="lbl">Ebony Clay</span></a></li>
-	                <li><a href="theme-side-madison-caribbean.html"><span class="lbl">Madison Caribbean</span></a></li>
-	                <li><a href="theme-side-caesium-dark-caribbean.html"><span class="lbl">Caesium Dark Caribbean</span></a></li>
-	                <li><a href="theme-side-tin.html"><span class="lbl">Tin</span></a></li>
-	                <li><a href="theme-side-litmus-blue.html"><span class="lbl">Litmus Blue</span></a></li>
-	                <li><a href="theme-rebecca-purple.html"><span class="lbl">Rebecca Purple</span></a></li>
-	                <li><a href="theme-picton-blue.html"><span class="lbl">Picton Blue</span></a></li>
-	                <li><a href="theme-picton-blue-white-ebony.html"><span class="lbl">Picton Blue White Ebony</span></a></li>
-	            </ul>
-	        </li>
-	        <li class="purple with-sub">
-	            <span>
-	                <i class="font-icon font-icon-comments active"></i>
-	                <span class="lbl">Messages</span>
-	            </span>
-	            <ul>
-	                <li><a href="messenger.html"><span class="lbl">Messenger</span></a></li>
-	                <li><a href="chat.html"><span class="lbl">Messages</span><span class="label label-custom label-pill label-danger">8</span></a></li>
-	                <li><a href="chat-write.html"><span class="lbl">Write Message</span></a></li>
-	                <li><a href="chat-index.html"><span class="lbl">Select User</span></a></li>
-	            </ul>
-	        </li>
+	<section>
+            <header class="side-menu-title">Plantas</header>
+	    <ul id="plant_list" class="side-menu-list">
 	    </ul>
-	
-	    <section>
-	        <header class="side-menu-title">Tags</header>
-	        <ul class="side-menu-list">
-	            <li>
-	                <a href="#">
-	                    <i class="tag-color green"></i>
-	                    <span class="lbl">Website</span>
-	                </a>
-	            </li>
-	            <li>
+	<section>
+         <section>
+            <header class="side-menu-title">Reportes</header>
+            <ul class="side-menu-list">
+                <li>
+                    <a href="#">
+                        <i class="tag-color green"></i>
+                        <span class="lbl">Evolución de variables</span>
+                    </a>
+                </li>
+	            <!--<li>
 	                <a href="#">
 	                    <i class="tag-color grey-blue"></i>
 	                    <span class="lbl">Bugs/Errors</span>
@@ -264,7 +223,7 @@
 	                    <i class="tag-color orange"></i>
 	                    <span class="lbl">Ideas</span>
 	                </a>
-	            </li>
+	            </li>-->
 	        </ul>
 	    </section>
 	</nav><!--.side-menu-->
@@ -272,21 +231,26 @@
 
 	{% block page-content %}
 	<div class="page-content">
-	    <div class="container-fluid">
+	    <div id="prueba" class="container-fluid">
 	    </div><!--.container-fluid-->
 	</div><!--.page-content-->
 	{% endblock page-content %}
 
 
-	<script type="text/javascript" src="{% static 'js/lib/jquery/jquery.min.js' %}"></script>
+	<!--<script type="text/javascript" src="{% static 'js/lib/jquery/jquery.min.js' %}"></script>-->
+	<script type="text/JavaScript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 	<script src="{% static 'js/lib/tether/tether.min.js' %}"></script>
 	<script src="{% static 'js/lib/bootstrap/bootstrap.min.js' %}"></script>
 	<script src="{% static 'js/plugins.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/lib/jqueryui/jquery-ui.min.js' %}"></script>
-	<script type="text/javascript" src="{% static 'js/lib/lobipanel/lobipanel.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/lib/jqueryui/jquery-ui.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/lib/match-height/jquery.matchHeight.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/lib/moment/moment-with-locales.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/lib/eonasdan-bootstrap-datetimepicker/bootstrap-datetimepicker.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/lib/daterangepicker/daterangepicker.js' %}"></script>
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-	<script>
+	<script type="text/javascript" src="{% static 'js/lib/avicetec/template_data.js' %}"></script>
+	<!--<script>
 		$(document).ready(function() {
 
 			$('.panel').lobiPanel({
@@ -382,7 +346,7 @@
 				}, 1000);
 			});
 		});
-	</script>
+	</script>-->
 	<script src="{% static 'js/app.js' %}"></script>
 </body>
 {% endblock body-content %}

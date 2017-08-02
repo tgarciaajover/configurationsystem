@@ -1,0 +1,71 @@
+{"plants":[{"plant_id":"plant_01","descr":"Planta de ejemplo 01","machine_groups":[
+{
+"machine_group_id":"group_01",
+"descr":"Grupo de maquinas de ejemplo 01",
+"machines":[
+{
+"machine_id":"machine_01",
+"descr":"Maquina de ejemplo 01"
+},
+{
+"machine_id":"machine_02",
+"descr":"Maquina de ejemplo 02"
+}
+]
+},
+{
+"machine_group_id":"group_02",
+"descr":"Grupo de maquinas de ejemplo 02",
+"machines":[
+{
+"machine_id":"machine_03",
+"descr":"Maquina de ejemplo 03"
+},
+{
+"machine_id":"machine_04",
+"descr":"Maquina de ejemplo 04"
+}
+]
+}
+]
+},
+{
+"plant_id":"plant_02",
+"descr":"Planta de ejemplo 02",
+"machine_groups":[
+{
+"machine_group_id":"group_03",
+"descr":"Grupo de maquinas de ejemplo 03",
+"machines":[
+{
+"machine_id":"machine_05",
+"descr":"Maquina de ejemplo 05"
+}
+]
+},
+{
+"machine_group_id":"group_04",
+"descr":"Grupo de maquinas de ejemplo 04",
+"machines":[
+{
+"machine_id":"machine_06",
+"descr":"Maquina de ejemplo 06"
+},
+{
+"machine_id":"machine_07",
+"descr":"Maquina de ejemplo 07"
+},
+{
+"machine_id":"machine_08",
+"descr":"Maquina de ejemplo 08"
+},
+{
+"machine_id":"machine_09",
+"descr":"Maquina de ejemplo 09"
+}
+]
+}
+]
+}
+]
+}
