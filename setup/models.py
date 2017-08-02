@@ -6,6 +6,7 @@ from xml.etree.ElementTree import Element, tostring
 import xml.etree.ElementTree as ET
 import requests
 from django.contrib.auth.models import User
+from recurrence.fields import RecurrenceField
 
 import logging
 import os
@@ -124,6 +125,12 @@ class MachineHostSystem(MeasuredEntity):
     id_planta = models.CharField(max_length=60)
     id_grupo_maquina = models.CharField(max_length=60)
     id_maquina = models.CharField(max_length=60)
+    tasa_vel_esperada = models.FloatField()
+    tiempo_esperado_config = models.FloatField()
+    factor_conversion_kg_ciclo = models.FloatField()
+    factor_conversion_mil_ciclo = models.FloatField()
+    factor_conversion_emp_ciclo = models.FloatField()
+    descripcion_sin_trabajo = models.CharField(max_length=200)
 
     @property
     def get_code(self):
@@ -203,7 +210,19 @@ class MeasuredEntityStateBehavior(models.Model):
 
     def __str__(self):
         return str(self.measure_entity) + '-' + self.descr
+
+class MeasureEntityScheduleEvent(models.Model):
+    EVENT_TYPE = ( 
+       ('AG', 'OEE Aggregation'),
+    )
+    measure_entity =  models.ForeignKey(MeasuredEntity, related_name='schedule_event', on_delete=models.CASCADE)
+    scheduled_event_type = models.CharField(max_length=2, choices=EVENT_TYPE, default=0)
+    descr = models.CharField(max_length=160, null=False, blank=False)
+    recurrences = RecurrenceField()
+    create_date = models.DateTimeField('create datetime', auto_now=False, auto_now_add=True)
+    last_updttm = models.DateTimeField('last datetime', auto_now=True)
     
+	
    
 class InputOutputPort(models.Model):
     device = models.ForeignKey(MonitoringDevice,related_name='io_ports', on_delete=models.CASCADE)
