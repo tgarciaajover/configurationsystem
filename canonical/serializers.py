@@ -91,8 +91,10 @@ class MaquinaSerializer(serializers.ModelSerializer):
         model = Maquina
         fields = ( 'id_compania', 'id_sede','id_planta', 
                    'id_grupo_maquina', 'id_maquina',
-                   'descr', 'estado_actual',
-                   'create_date', 'last_updttm' )
+                   'descr', 'estado_actual', 'tasa_vel_esperada',
+                   'tiempo_esperado_config', 'factor_conversion_kg_ciclo',
+                   'factor_conversion_mil_ciclo', 'factor_conversion_emp_ciclo',
+                   'descripcion_sin_trabajo', 'create_date', 'last_updttm' )
 
 class PlanProduccionSerializer(serializers.ModelSerializer):
     last_updttm = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"])
