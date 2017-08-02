@@ -16,6 +16,7 @@ from setup.models import DisplayType
 from setup.models import DisplayDevice
 from setup.models import MeasuredEntityStateBehavior
 from setup.models import MeasuredEntityTransitionState
+from setup.models import MeasureEntityScheduleEvent
 
 import requests
 from setup.serializers import SignalUnitSerializer
@@ -251,6 +252,16 @@ class MeauredEntityStateBehaviorAdmin(admin.ModelAdmin):
            logger.info(e)
            pass
 
+class ScheduleEventForm(forms.ModelForm):
+    class Meta:
+        model = MeasureEntityScheduleEvent
+        fields = ['measure_entity','scheduled_event_type','descr', 'recurrences' ]
+
+class MeauredEntityScheduleEventAdmin(admin.ModelAdmin):
+    model = MeasureEntityScheduleEvent
+    form = ScheduleEventForm
+
+
 class InputOutputPortForm(forms.ModelForm):
     transformation_text = forms.CharField(widget=AceWidget(mode='transform', width="700px", height="300px", showprintmargin=True))
     class Meta:
@@ -413,6 +424,7 @@ admin.site.register(Signal, SignalAdmin)
 admin.site.register(DeviceType, DeviceTypeAdmin)
 admin.site.register(MeasuredEntity, MeasuredEntityAdmin)
 admin.site.register(MeasuredEntityStateBehavior, MeauredEntityStateBehaviorAdmin)
+admin.site.register(MeasureEntityScheduleEvent, MeauredEntityScheduleEventAdmin)
 admin.site.register(MeasuredEntityBehavior, MeasuredEntityBehaviorAdmin)
 admin.site.register(MonitoringDevice, MonitoringDeviceAdmin)
 admin.site.register(MeasuredEntityGroup, MeasuredEntityGroupAdmin)
