@@ -13,6 +13,8 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
+
+import django
 from django.conf.urls import url
 from django.contrib import admin
 from django.conf.urls import url, include
@@ -38,4 +40,13 @@ urlpatterns += [
 
 urlpatterns += [
     url(r'^registro/', include('canonical.urls_register')),
+]
+
+js_info_dict = {
+    'packages' : ('recurrence', ), 
+}
+
+#jsi18n can be anything you like here
+urlpatterns += [
+   url(r'^jsi18n/$', django.views.i18n.javascript_catalog,js_info_dict),
 ]
