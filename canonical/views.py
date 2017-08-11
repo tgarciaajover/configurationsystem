@@ -99,7 +99,7 @@ def compania_detail(request, pk, format=None):
     if request.method == 'GET':
         if len(companias) > 1:
             return Response(serializer.errors, status=status.HTTP_412_PRECONDITION_FAILED)
-        
+
         compania = companias[0]
         serializer = CompaniaSerializer(compania)
         return Response(serializer.data)
@@ -137,7 +137,7 @@ def sede_list(request, format=None):
     elif request.method == 'POST':
         try:
             data = JSONParser().parse(request)
-            sede = Sede.objects.get(id_compania=data.get('id_compania'), 
+            sede = Sede.objects.get(id_compania=data.get('id_compania'),
                                  id_sede = data.get('id_sede'))
             return Response(status=status.HTTP_302_FOUND)
         except Sede.DoesNotExist:
@@ -154,10 +154,10 @@ def sede_detail(request, pk, format=None):
     """
     Obtiene, actualiza or borra una sede.
     """
-   
+
     try:
         data = JSONParser().parse(request)
-        sede = Sede.objects.get(id_compania=data.get('id_compania'), 
+        sede = Sede.objects.get(id_compania=data.get('id_compania'),
                                  id_sede = data.get('id_sede'))
     except Sede.DoesNotExist:
         if request.method == 'DELETE':
@@ -195,8 +195,8 @@ def planta_list(request, format=None):
     elif request.method == 'POST':
         data = JSONParser().parse(request)
         try:
-            planta = Planta.objects.get(id_compania = data.get('id_compania') , 
-                                        id_sede = data.get('id_sede'), 
+            planta = Planta.objects.get(id_compania = data.get('id_compania') ,
+                                        id_sede = data.get('id_sede'),
 	                                id_planta = data.get('id_planta'))
             return Response(status=status.HTTP_302_FOUND)
         except Planta.DoesNotExist:
@@ -206,7 +206,7 @@ def planta_list(request, format=None):
                 serializer_p.save()
                 serializer_phs.save()
                 return JsonResponse(serializer_p.data, status=201)
-            return JsonResponse(serializer_p.errors, status=400) 
+            return JsonResponse(serializer_p.errors, status=400)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
@@ -215,14 +215,14 @@ def planta_detail(request, pk, format=None):
     """
     Obtiene, actualiza or borra una planta.
     """
-    
+
     try:
         data = JSONParser().parse(request)
-        planta = Planta.objects.get(id_compania=data.get('id_compania'), 
-                                     id_sede = data.get('id_sede'), 
+        planta = Planta.objects.get(id_compania=data.get('id_compania'),
+                                     id_sede = data.get('id_sede'),
                                       id_planta = data.get('id_planta'))
-        planths = PlantHostSystem.objects.get(id_compania=data.get('id_compania'), 
-                                               id_sede = data.get('id_sede'), 
+        planths = PlantHostSystem.objects.get(id_compania=data.get('id_compania'),
+                                               id_sede = data.get('id_sede'),
                                                 id_planta = data.get('id_planta'))
     except ( Planta.DoesNotExist, PlantHostSystem.DoesNotExist ) as e:
         if request.method == 'DELETE':
@@ -264,8 +264,8 @@ def razon_parada_list(request, format=None):
     elif request.method == 'POST':
         data = JSONParser().parse(request)
         try:
-            razonparada = RazonParada.objects.get(id_compania=data.get('id_compania'), 
-                                                  id_sede = data.get('id_sede'), 
+            razonparada = RazonParada.objects.get(id_compania=data.get('id_compania'),
+                                                  id_sede = data.get('id_sede'),
                                                   id_planta = data.get('id_planta'),
                                                   id_razon_parada = data.get('id_razon_parada'))
             return Response(status=status.HTTP_302_FOUND)
@@ -288,8 +288,8 @@ def razon_parada_detail(request, pk, format=None):
 
     try:
         data = JSONParser().parse(request)
-        razonparada = RazonParada.objects.get(id_compania=data.get('id_compania'), 
-                                                  id_sede = data.get('id_sede'), 
+        razonparada = RazonParada.objects.get(id_compania=data.get('id_compania'),
+                                                  id_sede = data.get('id_sede'),
                                                   id_planta = data.get('id_planta'),
                                                   id_razon_parada = data.get('id_razon_parada'))
     except RazonParada.DoesNotExist:
@@ -325,7 +325,7 @@ def grupo_maquina_list(request, format=None):
     """
     Lista todas los grupos de maquina, or crea un nuevo grupo de maquina.
     """
-   
+
     if request.method == 'GET':
         grupomaquina = GrupoMaquina.objects.all()
         serializer = GrupoMaquinaSerializer(grupomaquina, many=True)
@@ -334,8 +334,8 @@ def grupo_maquina_list(request, format=None):
     elif request.method == 'POST':
         data = JSONParser().parse(request)
         try:
-            grupomaquina = GrupoMaquina.objects.get(id_compania=data.get('id_compania'), 
-                                                    id_sede = data.get('id_sede'), 
+            grupomaquina = GrupoMaquina.objects.get(id_compania=data.get('id_compania'),
+                                                    id_sede = data.get('id_sede'),
                                                     id_planta = data.get('id_planta'),
                                                     id_grupo_maquina = data.get('id_grupo_maquina'))
             return Response(status=status.HTTP_302_FOUND)
@@ -356,8 +356,8 @@ def grupo_maquina_detail(request, pk, format=None):
 
     try:
         data = JSONParser().parse(request)
-        grupomaquina = GrupoMaquina.objects.get(id_compania=data.get('id_compania'), 
-                                                    id_sede = data.get('id_sede'), 
+        grupomaquina = GrupoMaquina.objects.get(id_compania=data.get('id_compania'),
+                                                    id_sede = data.get('id_sede'),
                                                     id_planta = data.get('id_planta'),
                                                     id_grupo_maquina = data.get('id_grupo_maquina'))
     except GrupoMaquina.DoesNotExist:
@@ -695,7 +695,7 @@ def ordenes_from_maquina(request):
     _id_maquina=request.GET.get('id_maquina')
     _ano=request.GET.get('ano')
     _mes=request.GET.get('mes')
-    
+
     ret=[]
     sqlText = "SELECT f.id, f.id_produccion \
 		FROM canonical_maquina e, canonical_grupomaquina a, canonical_compania b, canonical_sede c, canonical_planta d, canonical_ordenproduccionplaneada f \
@@ -707,13 +707,13 @@ def ordenes_from_maquina(request):
 		 AND f.id_planta = e.id_planta AND f.id_grupo_maquina = e.id_grupo_maquina AND f.id_maquina = e.id_maquina"
 
     if _id_maquina:
-        all_Orders = OrdenProduccionPlaneada.objects.raw(sqlText, [_id_compania, _id_sede, _id_planta, _id_grupo_maquina, _id_maquina, _ano, _mes] ) 
+        all_Orders = OrdenProduccionPlaneada.objects.raw(sqlText, [_id_compania, _id_sede, _id_planta, _id_grupo_maquina, _id_maquina, _ano, _mes] )
         for order in all_Orders:
             ret.append(dict(id=order.id, value=order.id_produccion))
 
     if len(ret)!=1:
         ret.insert(0, dict(id='', value='---'))
-    return HttpResponse(json.dumps(ret), 
+    return HttpResponse(json.dumps(ret),
               content_type='application/json')
 
 
@@ -737,7 +737,7 @@ def maquinas_from_group(request):
 
     if len(ret)!=1:
         ret.insert(0, dict(id='', value='---'))
-    return HttpResponse(json.dumps(ret), 
+    return HttpResponse(json.dumps(ret),
               content_type='application/json')
 
 
@@ -783,8 +783,8 @@ class ActivityRegisterForm(ModelForm):
     def __init__(self, request, *args, **kwargs):
         if 'initial' in kwargs:
             initial_values = kwargs.get('initial')
-            id_compania = initial_values['id_compania'] 
-            id_sede = initial_values['id_sede'] 
+            id_compania = initial_values['id_compania']
+            id_sede = initial_values['id_sede']
             id_planta = initial_values['id_planta']
         else:
             id_compania = None
@@ -816,7 +816,7 @@ class CreateRegisterView(LoginRequiredMixin, CreateView):
     model = ActivityRegister
     template_name = 'ActivityRegister_edit.html'
     fields = '__all__'
-               
+
     def getDefaults(self, user):
         initial = {}
         employeeData = Employee.objects.get(user_id=user.id)
@@ -828,13 +828,13 @@ class CreateRegisterView(LoginRequiredMixin, CreateView):
         initial ['ano'] = now.year
         initial ['mes'] = now.month
         return initial
-   
+
     def form_valid(self, form):
         self.object = form.save()
         serializer = DisplayDeviceSerializer(self.object)
         content = JSONRenderer().render(serializer.data)
         async(putActivityRegister, content)
-        return HttpResponseRedirect(self.get_success_url())    
+        return HttpResponseRedirect(self.get_success_url())
 
     # if a GET (or any other method) we'll create a blank form
     def get(self, request, *args, **kwargs):
@@ -845,3 +845,5 @@ class CreateRegisterView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse('activity-register-list-view')
 
+def reports(request):
+    return render(request, 'reports.html', {})

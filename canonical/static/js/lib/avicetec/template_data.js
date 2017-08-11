@@ -62,15 +62,37 @@ plants_tree = {
 
         if(group == 'plant'){
                 find_machines = $.grep(this.machines, function(e){ return e.plant == group_id });
+                plant = $.grep(this.plants, function(e){ return e.plant_id == group_id });
+                plant[0].selected = selected;
+                $.each(plant[0].machine_groups, function(i){
+                    plant[0].machine_groups[i].selected = selected;
+                    $.each(plant[0].machine_groups[i].machines,function(j){
+                        plant[0].machine_groups[i].machines[j].selected = selected;
+                        })
+                    });
+
             }
 
         if(group == 'machine_group'){
                 find_machines = $.grep(this.machines, function(e){ return e.machine_group == group_id });
-            }
+                plant = $.grep(this.plants, function(e){ return e.plant_id == find_machines[0].plant });
+                plant[0].selected = (selected)?true:$('input:checkbox[id="' +find_machines[0].plant+ '"]').prop("checked");
+                machine_group = $.grep(plant[0].machine_groups, function(e){ return e.machine_group_id == group_id });
+                machine_group[0].selected = selected;
+                $.each(machine_group[0].machines,function(i){
+                    machine_group[0].machines[i].selected = selected;
+                    })
+                }
 
         if(group == 'machine'){
                 find_machines = $.grep(this.machines, function(e){ return e.machine == group_id });
-            }
+                plant = $.grep(this.plants, function(e){ return e.plant_id == find_machines[0].plant });
+                plant[0].selected = (selected)?true:$('input:checkbox[id="' +find_machines[0].plant+ '"]').prop("checked");
+                machine_group = $.grep(plant[0].machine_groups, function(e){ return e.machine_group_id == find_machines[0].machine_group });
+                machine_group[0].selected = (selected)?true:$('input:checkbox[id="' +find_machines[0].machine_group+ '"]').prop("checked");
+                machine = $.grep(machine_group[0].machines, function(e){ return e.machine_id == group_id });
+                machine[0].selected = selected;
+                }
 
         for(var i in find_machines){
             for(var j in this.machines){
@@ -88,8 +110,7 @@ plants_tree = {
             plant_id = checkbox_selected.attr('id');
             var machine_groups = $('input:checkbox[name="' + plant_id + '"]');
             machine_groups.prop("checked", selected);
-            var plant = $.grep(this.plants, function(e){ return e.plant_id == plant_id; });
-
+            var plant = $.grep(this.plants, function(e){return e.plant_id == plant_id; });
             for(var i in plant[0].machine_groups){
                 var machine_group = plant[0].machine_groups[i];
                 var machines = $('input:checkbox[name="' + machine_group.machine_group_id + '"]');
@@ -109,12 +130,13 @@ plants_tree = {
             machines.prop("checked", selected);
             this.select_machines('machine',machine_id,selected);
             }
-        $("#prueba").html(JSON.stringify(this.machines));
         }
     }
 
 data_query = {
-    consolidate : 'N'
+    consolidate : 'N',
+    company_id:0,//This value is obteined in the user variables.
+    attributes:[]
     }
 
 plants_tree.obtein_plants("/static/data/plants.json");
@@ -124,6 +146,31 @@ $(function() {
         $('#daterange').val(start.format('MMMM D, YYYY HH:mm') + ' - ' + end.format('MMMM D, YYYY HH:mm'));
         data_query.start_dttm = start.format('YYYY-MM-DD hh.mm.ss.SSSS');
         data_query.end_dttm = end.format('YYYY-MM-DD hh.mm.ss.SSSS');
+        diff_days = end.diff(start,"days");
+
+        $("input:radio[name='time_unit']:checked").parent().removeClass("active");
+        switch(true){
+            case (diff_days == 0):
+                $("input:radio[id='rb_na']").prop("checked",true);
+                break;
+            case (diff_days > 0 && diff_days <= 7)://min:24 points - max: 168 points
+                $("input:radio[id='rb_hours']").prop("checked",true);
+                break;
+            case (diff_days > 7 && diff_days <= 180)://min:8 points - max: 180 points
+                $("input:radio[id='rb_days']").prop("checked",true);
+                break;
+            case (diff_days > 180 && diff_days <= 720)://min:24 points - max: 104 points
+                $("input:radio[id='rb_weeks']").prop("checked",true);
+                break;
+            case (diff_days > 720 && diff_days <= 3600)://min:24 points - max: 120 points
+                $("input:radio[id='rb_months']").prop("checked",true);
+                break;
+            case (diff_days > 3600)://min:5 points
+                $("input:radio[id='rb_years']").prop("checked",true);
+                break;
+            }
+        data_query.time_unit = $("input:radio[name='time_unit']:checked").prop("value");
+        $("input:radio[name='time_unit']:checked").parent().addClass("active");
     }
     var drp_parameters = {
         "timePicker": true,
@@ -147,11 +194,5 @@ $(function() {
 
     cb(moment().subtract(1, 'month'), moment());
 
-    /*$('.datetimepicker-1').datetimepicker({
-        widgetPositioning: {
-            horizontal: 'right'
-        },
-        debug: false
-    });*/
 
 });

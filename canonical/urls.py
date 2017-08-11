@@ -21,7 +21,6 @@ urlpatterns = [
     url(r'^orden_produccion_planeada/(?P<pk>[0-9]+)/$', views.orden_produccion_planeada_detail),
     url(r'^parada_planeada/$', views.parada_planeada_list),
     url(r'^parada_planeada/(?P<pk>[0-9]+)/$', views.parada_planeada_detail),
-
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -1,0 +1,35 @@
+.col-variables{
+    float:left;
+    padding-right:15px;
+    }
+
+.col-variables-for-machines{
+    float:left;
+    padding-right:20px;
+    }
+
+.col-variables .checkbox-bird input+label {
+    display: block;
+    min-width: 130px;
+    height: 20px;
+    line-height: 20px;
+    padding: 0 0 0 28px;
+    position: relative;
+    font-size:12pt;
+}
+
+.col-variables-for-machines .checkbox-bird input+label {
+    display: block;
+    min-width: 200px;
+    height: 20px;
+    line-height: 20px;
+    padding: 0 0 0 28px;
+    position: relative;
+    font-size:12pt;
+}
+
+.variables-block {
+    padding:0 16px 0 16px;
+    height: 160px;
+    overflow-y: auto;
+}

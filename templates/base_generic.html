@@ -29,12 +29,14 @@
     <link href="{% static 'css/lib/font-awesome/font-awesome.min.css' %}" rel="stylesheet" media="all" />
     <link href="{% static 'css/lib/bootstrap/bootstrap.min.css' %}" rel="stylesheet" media="all" />
     <link href="{% static 'css/main.css' %}" rel="stylesheet" media="all" />
+    <link href="{% static 'css/separate/custom/advicetec.css' %}" rel="stylesheet" media="all" />
+    <link href="{% static 'css/separate/custom/graph.css' %}" rel="stylesheet" media="all" />
 </head>
 
 {% block body-content %}
-<body class="with-side-menu control-panel control-panel-compact">
+<body class="with-side-menu control-panel-compact">
 
-	{% block site-header %}	
+	{% block site-header %}
 	<header class="site-header">
 	    <div class="container-fluid">
 	
@@ -112,71 +114,8 @@
 	                            <a class="dropdown-item" href="#"><span class="font-icon glyphicon glyphicon-log-out"></span>Logout</a>
 	                        </div>
 	                    </div>
-
 	                </div><!--.site-header-shown-->
-	
 	                <div class="mobile-menu-right-overlay"></div>
-	                <!--<div class="site-header-collapsed">
-	                    <div class="site-header-collapsed-in">
-
-	                        <div class="dropdown dropdown-typical">
-	                            <a class="dropdown-toggle" id="dd-header-marketing" data-target="#" href="http://example.com" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-	                                <span class="font-icon font-icon-cogwheel"></span>
-	                                <span class="lbl">Marketing automation</span>
-	                            </a>
-	
-	                            <div class="dropdown-menu" aria-labelledby="dd-header-marketing">
-	                                <a class="dropdown-item" href="#">Current Search</a>
-	                                <a class="dropdown-item" href="#">Search for Issues</a>
-	                                <div class="dropdown-divider"></div>
-	                                <div class="dropdown-header">Recent issues</div>
-	                                <a class="dropdown-item" href="#"><span class="font-icon font-icon-home"></span>Quant and Verbal</a>
-	                                <a class="dropdown-item" href="#"><span class="font-icon font-icon-cart"></span>Real Gmat Test</a>
-	                                <a class="dropdown-item" href="#"><span class="font-icon font-icon-speed"></span>Prep Official App</a>
-	                                <a class="dropdown-item" href="#"><span class="font-icon font-icon-users"></span>CATprer Test</a>
-	                                <a class="dropdown-item" href="#"><span class="font-icon font-icon-comments"></span>Third Party Test</a>
-	                                <div class="dropdown-more">
-	                                    <div class="dropdown-more-caption padding">more...</div>
-	                                    <div class="dropdown-more-sub">
-	                                        <div class="dropdown-more-sub-in">
-	                                            <a class="dropdown-item" href="#"><span class="font-icon font-icon-home"></span>Quant and Verbal</a>
-	                                            <a class="dropdown-item" href="#"><span class="font-icon font-icon-cart"></span>Real Gmat Test</a>
-	                                            <a class="dropdown-item" href="#"><span class="font-icon font-icon-speed"></span>Prep Official App</a>
-	                                            <a class="dropdown-item" href="#"><span class="font-icon font-icon-users"></span>CATprer Test</a>
-	                                            <a class="dropdown-item" href="#"><span class="font-icon font-icon-comments"></span>Third Party Test</a>
-	                                        </div>
-	                                    </div>
-	                                </div>
-	                                <div class="dropdown-divider"></div>
-	                                <a class="dropdown-item" href="#">Import Issues from CSV</a>
-	                                <div class="dropdown-divider"></div>
-	                                <div class="dropdown-header">Filters</div>
-	                                <a class="dropdown-item" href="#">My Open Issues</a>
-	                                <a class="dropdown-item" href="#">Reported by Me</a>
-	                                <div class="dropdown-divider"></div>
-	                                <a class="dropdown-item" href="#">Manage filters</a>
-	                                <div class="dropdown-divider"></div>
-	                                <div class="dropdown-header">Timesheet</div>
-	                                <a class="dropdown-item" href="#">Subscribtions</a>
-	                            </div>
-	                        </div>
-	                        <div class="dropdown dropdown-typical">
-	                            <a class="dropdown-toggle" id="dd-header-social" data-target="#" href="http://example.com" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-	                                <span class="font-icon font-icon-share"></span>
-	                                <span class="lbl">Social media</span>
-	                            </a>
-	
-	                            <div class="dropdown-menu" aria-labelledby="dd-header-social">
-	                                <a class="dropdown-item" href="#"><span class="font-icon font-icon-home"></span>Quant and Verbal</a>
-	                                <a class="dropdown-item" href="#"><span class="font-icon font-icon-cart"></span>Real Gmat Test</a>
-	                                <a class="dropdown-item" href="#"><span class="font-icon font-icon-speed"></span>Prep Official App</a>
-	                                <a class="dropdown-item" href="#"><span class="font-icon font-icon-users"></span>CATprer Test</a>
-	                                <a class="dropdown-item" href="#"><span class="font-icon font-icon-comments"></span>Third Party Test</a>
-	                            </div>
-	                        </div>
-
-	                    </div><!--.site-header-collapsed-in
-	                </div><!--.site-header-collapsed-->
 	            </div><!--site-header-content-in-->
 	        </div><!--.site-header-content-->
 	    </div><!--.container-fluid-->
@@ -200,153 +139,31 @@
                         <span class="lbl">Evolución de variables</span>
                     </a>
                 </li>
-	            <!--<li>
-	                <a href="#">
-	                    <i class="tag-color grey-blue"></i>
-	                    <span class="lbl">Bugs/Errors</span>
-	                </a>
-	            </li>
-	            <li>
-	                <a href="#">
-	                    <i class="tag-color red"></i>
-	                    <span class="lbl">General Problem</span>
-	                </a>
-	            </li>
-	            <li>
-	                <a href="#">
-	                    <i class="tag-color pink"></i>
-	                    <span class="lbl">Questions</span>
-	                </a>
-	            </li>
-	            <li>
-	                <a href="#">
-	                    <i class="tag-color orange"></i>
-	                    <span class="lbl">Ideas</span>
-	                </a>
-	            </li>-->
-	        </ul>
+            </ul>
 	    </section>
 	</nav><!--.side-menu-->
 	{% endblock side-menu %}
 
 	{% block page-content %}
 	<div class="page-content">
-	    <div id="prueba" class="container-fluid">
-	    </div><!--.container-fluid-->
 	</div><!--.page-content-->
 	{% endblock page-content %}
 
-
-	<!--<script type="text/javascript" src="{% static 'js/lib/jquery/jquery.min.js' %}"></script>-->
 	<script type="text/JavaScript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-	<script src="{% static 'js/lib/tether/tether.min.js' %}"></script>
-	<script src="{% static 'js/lib/bootstrap/bootstrap.min.js' %}"></script>
-	<script src="{% static 'js/plugins.js' %}"></script>
+	<script type="text/javascript" src="{% static 'data/data_consolidated.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/lib/tether/tether.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/lib/bootstrap/bootstrap.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/plugins.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/lib/jqueryui/jquery-ui.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/lib/jqueryui/jquery-ui.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/lib/underscore/underscore-min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/lib/match-height/jquery.matchHeight.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/lib/moment/moment-with-locales.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/lib/eonasdan-bootstrap-datetimepicker/bootstrap-datetimepicker.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/lib/daterangepicker/daterangepicker.js' %}"></script>
-	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script type="text/javascript" src="{% static 'js/lib/chartjs/Chart.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/lib/avicetec/template_data.js' %}"></script>
-	<!--<script>
-		$(document).ready(function() {
-
-			$('.panel').lobiPanel({
-				sortable: true
-			});
-			$('.panel').on('dragged.lobiPanel', function(ev, lobiPanel){
-				$('.dahsboard-column').matchHeight();
-			});
-
-			google.charts.load('current', {'packages':['corechart']});
-			google.charts.setOnLoadCallback(drawChart);
-			function drawChart() {
-				var dataTable = new google.visualization.DataTable();
-				dataTable.addColumn('string', 'Day');
-				dataTable.addColumn('number', 'Values');
-				// A column for custom tooltip content
-				dataTable.addColumn({type: 'string', role: 'tooltip', 'p': {'html': true}});
-				dataTable.addRows([
-					['MON',  130, ' '],
-					['TUE',  130, '130'],
-					['WED',  180, '180'],
-					['THU',  175, '175'],
-					['FRI',  200, '200'],
-					['SAT',  170, '170'],
-					['SUN',  250, '250'],
-					['MON',  220, '220'],
-					['TUE',  220, ' ']
-				]);
-
-				var options = {
-					height: 314,
-					legend: 'none',
-					areaOpacity: 0.18,
-					axisTitlesPosition: 'out',
-					hAxis: {
-						title: '',
-						textStyle: {
-							color: '#fff',
-							fontName: 'Proxima Nova',
-							fontSize: 11,
-							bold: true,
-							italic: false
-						},
-						textPosition: 'out'
-					},
-					vAxis: {
-						minValue: 0,
-						textPosition: 'out',
-						textStyle: {
-							color: '#fff',
-							fontName: 'Proxima Nova',
-							fontSize: 11,
-							bold: true,
-							italic: false
-						},
-						baselineColor: '#16b4fc',
-						ticks: [0,25,50,75,100,125,150,175,200,225,250,275,300,325,350],
-						gridlines: {
-							color: '#1ba0fc',
-							count: 15
-						}
-					},
-					lineWidth: 2,
-					colors: ['#fff'],
-					curveType: 'function',
-					pointSize: 5,
-					pointShapeType: 'circle',
-					pointFillColor: '#f00',
-					backgroundColor: {
-						fill: '#008ffb',
-						strokeWidth: 0,
-					},
-					chartArea:{
-						left:0,
-						top:0,
-						width:'100%',
-						height:'100%'
-					},
-					fontSize: 11,
-					fontName: 'Proxima Nova',
-					tooltip: {
-						trigger: 'selection',
-						isHtml: true
-					}
-				};
-
-				var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
-				chart.draw(dataTable, options);
-			}
-			$(window).resize(function(){
-				drawChart();
-				setTimeout(function(){
-				}, 1000);
-			});
-		});
-	</script>-->
+	<script type="text/javascript" src="{% static 'js/lib/avicetec/reports.js' %}"></script>
 	<script src="{% static 'js/app.js' %}"></script>
 </body>
 {% endblock body-content %}

@@ -9,6 +9,7 @@ urlpatterns = [
 
 urlpatterns += [
     url(r'^$', views.ListActivityRegisterView.as_view(), name='activity-register-list-view'),
+    url(r'^reports/$', views.reports),
 
 ]
 
