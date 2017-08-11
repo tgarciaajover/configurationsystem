@@ -70,6 +70,12 @@ class Maquina(models.Model):
     id_maquina = models.CharField(max_length=60)
     descr = models.CharField(max_length=200)
     estado_actual = models.CharField(max_length=2)
+    tasa_vel_esperada = models.FloatField()
+    tiempo_esperado_config = models.FloatField()
+    factor_conversion_kg_ciclo = models.FloatField()
+    factor_conversion_mil_ciclo = models.FloatField()
+    factor_conversion_emp_ciclo = models.FloatField()
+    descripcion_sin_trabajo = models.CharField(max_length=200)    
     create_date = models.DateTimeField('create datetime',  auto_now=False,  auto_now_add=True)
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
 

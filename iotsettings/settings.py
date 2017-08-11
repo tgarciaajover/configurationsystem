@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'django_ace',
     'mod_wsgi.server',
     # other apps
-    'django_q'
+    'django_q',
+    'recurrence'
 ]
 
 MIDDLEWARE = [
