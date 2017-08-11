@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 import requests
 from django.contrib.auth.models import User
 from recurrence.fields import RecurrenceField
+from macaddress.fields import MACAddressField
 
 import logging
 import os
@@ -88,10 +89,19 @@ class MonitoringDevice(models.Model):
     device_type = models.ForeignKey(DeviceType, on_delete=models.CASCADE)
     descr = models.CharField(max_length=100, null=True, blank=True)
     serial = models.CharField(max_length=40, null=True, blank=True)
-    mac_address = models.CharField(max_length=40,null=False, blank=False)
-    ip_address = models.CharField(max_length=30,null=True, blank=True)
+    mac_address = MACAddressField(null=True, blank=True, integer=False)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
     create_date = models.DateTimeField('create date', auto_now=False, auto_now_add=True)
     last_updttm = models.DateTimeField('last datetime', auto_now=True)    
+
+    def clean(self):
+        """
+        This function verifies that the user has provided at least one of the key field for 
+        the measuring device
+        """
+        if (not self.serial) and (not self.mac_address) and (not self.ip_address):
+            raise ValidationError("A key for the measuring device has not been provided. Please fill the serial or mac_addrees or ip_address")
+    
     
     def __str__(self):                                       
         return self.descr
@@ -107,7 +117,7 @@ class MeasuredEntity(models.Model):
     serial = models.CharField(max_length=60, null=True, blank=True)
     create_date = models.DateTimeField('create datetime', auto_now=False, auto_now_add=True)
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
-
+    
     def __str__(self):
         return self.code + ' ' + self.descr
 
@@ -134,7 +144,7 @@ class MachineHostSystem(MeasuredEntity):
 
     @property
     def get_code(self):
-        return str( hash( id_planta + id_grupo_maquina + id_maquina))
+        return str( id_compania + '-' + id_sede + '-' + id_planta + '-' + id_grupo_maquina + '-' + id_maquina )
 
 class MeasuredEntityBehavior(models.Model):
     measure_entity =  models.ForeignKey(MeasuredEntity, related_name='behaviors', on_delete=models.CASCADE)
@@ -232,30 +242,30 @@ class InputOutputPort(models.Model):
     measured_entity = models.ForeignKey(MeasuredEntity, related_name='measured_entity', blank= True, null= True, on_delete=models.SET_NULL)
     transformation_text = models.TextField(null=True, blank=True)
 
-    def clean(self):
-        if len(self.transformation_text) > 0:
-           root = Element('program')
-           root.text = self.transformation_text
-           xml = tostring(root)
-           url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
-           url = url + defaults.CONTEXT_ROOT + '/'
-           url = url + 'checker/transformation'
-           try:
-                r = requests.put(url, data = xml)
-                if (r.status_code == 400):
-                    raise ValidationError("Invalid language request")
-                else: 
-                    tree = ET.ElementTree(ET.fromstring(r.content))
-                    root = tree.getroot()
-                    for child in root:
-                        lineNumber = child[0].text
-                        positionInLine = child[1].text
-                        message = child[2].text
-                        raise ValidationError("Error in line:" + str(lineNumber) + 
-					   " character:" + str(positionInLine) + " " + str(message))
-           except requests.exceptions.RequestException as e:
-                logger.info(e)
-                raise ValidationError("An error occurs when connecting to the Syntax Validation Server")
+    #def clean(self):
+        #if len(self.transformation_text) > 0:
+           #root = Element('program')
+           #root.text = self.transformation_text
+           #xml = tostring(root)
+           #url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+           #url = url + defaults.CONTEXT_ROOT + '/'
+           #url = url + 'checker/transformation'
+           #try:
+                #r = requests.put(url, data = xml)
+                #if (r.status_code == 400):
+                    #raise ValidationError("Invalid language request")
+                #else: 
+                    #tree = ET.ElementTree(ET.fromstring(r.content))
+                    #root = tree.getroot()
+                    #for child in root:
+                        #lineNumber = child[0].text
+                        #positionInLine = child[1].text
+                        #message = child[2].text
+                        #raise ValidationError("Error in line:" + str(lineNumber) + 
+					   #" character:" + str(positionInLine) + " " + str(message))
+           #except requests.exceptions.RequestException as e:
+                #logger.info(e)
+                #raise ValidationError("An error occurs when connecting to the Syntax Validation Server")
 
     def __str__(self):
         return self.port_label
