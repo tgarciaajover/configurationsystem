@@ -168,3 +168,5 @@ LOGIN_URL = '/accounts/login/'
 
 # Redirect to home URL after login (Default redirects to /registro/add)
 LOGIN_REDIRECT_URL = '/registro/add/'
+
+MACADDRESS_DEFAULT_DIALECT = 'netaddr.mac_eui48'
