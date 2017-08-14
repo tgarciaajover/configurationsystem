@@ -70,7 +70,7 @@ class RazonParadaSerializer(serializers.ModelSerializer):
         model = RazonParada
         fields = ( 'id_compania', 'id_sede','id_planta', 
                    'id_razon_parada', 'descr', 'grupo_razon_parada',
-                   'causa_raiz_parada', 'afecta_capacidad',
+                   'causa_raiz_parada', 'afecta_capacidad', 'clasificacion',
                    'create_date', 'last_updttm' )
 
 class GrupoMaquinaSerializer(serializers.ModelSerializer):
@@ -106,8 +106,8 @@ class PlanProduccionSerializer(serializers.ModelSerializer):
                    'mes',  'create_date', 'last_updttm' )
 
 class OrdenProduccionPlaneadaSerializer(serializers.ModelSerializer):
-    fechahora_inicial = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"])
-    fechahora_final = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"])
+    fechahora_inicial = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S"])
+    fechahora_final = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S"])
     create_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"], required=False, read_only=True)
     last_updttm = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"], required=False, read_only=True)
 
@@ -122,8 +122,8 @@ class OrdenProduccionPlaneadaSerializer(serializers.ModelSerializer):
                    'create_date', 'last_updttm' )
 
 class ParadaPlaneadaSerializer(serializers.ModelSerializer):
-    fechahora_inicial = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"])
-    fechahora_final = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"])
+    fechahora_inicial = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S"])
+    fechahora_final = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S"])
     create_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"], required=False, read_only=True)
     last_updttm = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"], required=False, read_only=True)
     
