@@ -10,6 +10,26 @@ from setup.models import DisplayType
 from setup.models import DisplayDevice
 from setup.models import MeasuredEntityStateBehavior
 from setup.models import MeasuredEntityTransitionState
+from setup.models import IdleReasonHostSystem
+
+import logging
+import os
+import logging.handlers
+
+
+# Get an instance of a logger
+LOG_FILENAME = 'iotsettings.log'
+
+# Check if log exists and should therefore be rolled
+needRoll = os.path.isfile(LOG_FILENAME)
+
+logger = logging.getLogger('setup.serializers')
+
+fh = logging.handlers.RotatingFileHandler(LOG_FILENAME, backupCount=5)
+fh.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
 
 
 class SignalUnitSerializer(serializers.Serializer):
@@ -50,7 +70,7 @@ class InputOutputPortSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = InputOutputPort
-        fields = ('id','port_label','signal_type','refresh_time_ms','measured_entity','transformation_text')
+        fields = ('id','port_label','signal_type','refresh_time_ms', 'measured_entity','transformation_text')
 
 class MonitoringDeviceSerializer(serializers.ModelSerializer):
     device_type = DeviceTypeSerializer()
@@ -202,19 +222,27 @@ class IdleReasonHostSystemSerializer(serializers.Serializer):
     id_planta = serializers.CharField(max_length=60)
     id_razon_parada = serializers.CharField(max_length=60)
     descr = serializers.CharField(max_length=200)
-    group_cd = serializers.CharField(max_length=60)
-    classification = serializers.CharField(max_length=1)
-    down = serializers.CharField(max_length=1)
+    grupo_razon_parada = serializers.CharField(max_length=60)
+    causa_raiz_parada = serializers.CharField(max_length=60)
+    clasificacion = serializers.CharField(max_length=1)
+    afecta_capacidad = serializers.CharField(max_length=1)
+    
 
     def create(self, validated_data):
         """
         Create and return a new `IdleReasonHostSystem` instance, given the validated data.
         """
+        logger.info('In IdleReasonHostSystem serializer method create')
         idleReasonHostSystem = IdleReasonHostSystem()
         idleReasonHostSystem.id_compania = validated_data.get('id_compania')
         idleReasonHostSystem.id_sede = validated_data.get('id_sede')
         idleReasonHostSystem.id_planta = validated_data.get('id_planta')
         idleReasonHostSystem.id_razon_parada = validated_data.get('id_razon_parada')
+        idleReasonHostSystem.descr = validated_data.get('descr')
+        idleReasonHostSystem.group_cd = validated_data.get('grupo_razon_parada')
+        idleReasonHostSystem.cause = validated_data.get('causa_raiz_parada')
+        idleReasonHostSystem.down = validated_data.get('afecta_capacidad')
+        idleReasonHostSystem.classification = validated_data.get('clasificacion')
 
         idleReasonHostSystem.save()
         return idleReasonHostSystem
@@ -223,11 +251,16 @@ class IdleReasonHostSystemSerializer(serializers.Serializer):
         """
         Update and return an existing `Idle Reason` instance, given the validated data.
         """
+        logger.info('In IdleReasonHostSystem serializer method update')
         instance = IdleReasonHostSystem.objects.get(id_compania=validated_data.get('id_compania',instance.id_compania),
                                                id_sede=validated_data.get('id_sede',instance.id_sede),
                                                id_planta= validated_data.get('id_planta', instance.id_planta),
 					       id_razon_parada = validated_data.get('id_razon_parada', instance.id_razon_parada))
         instance.descr =  validated_data.get('descr')
+        instance.group_cd = validated_data.get('grupo_razon_parada')
+        instance.cause = validated_data.get('causa_raiz_parada')
+        instance.down = validated_data.get('afecta_capacidad')        
+        instance.classification = validated_data.get('clasificacion')
         instance.last_updttm = validated_data.get('last_updttm')
         instance.save()
         return instance
