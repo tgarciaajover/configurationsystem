@@ -242,30 +242,32 @@ class InputOutputPort(models.Model):
     measured_entity = models.ForeignKey(MeasuredEntity, related_name='measured_entity', blank= True, null= True, on_delete=models.SET_NULL)
     transformation_text = models.TextField(null=True, blank=True)
 
-    #def clean(self):
-        #if len(self.transformation_text) > 0:
-           #root = Element('program')
-           #root.text = self.transformation_text
-           #xml = tostring(root)
-           #url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
-           #url = url + defaults.CONTEXT_ROOT + '/'
-           #url = url + 'checker/transformation'
-           #try:
-                #r = requests.put(url, data = xml)
-                #if (r.status_code == 400):
-                    #raise ValidationError("Invalid language request")
-                #else: 
-                    #tree = ET.ElementTree(ET.fromstring(r.content))
-                    #root = tree.getroot()
-                    #for child in root:
-                        #lineNumber = child[0].text
-                        #positionInLine = child[1].text
-                        #message = child[2].text
-                        #raise ValidationError("Error in line:" + str(lineNumber) + 
-					   #" character:" + str(positionInLine) + " " + str(message))
-           #except requests.exceptions.RequestException as e:
-                #logger.info(e)
-                #raise ValidationError("An error occurs when connecting to the Syntax Validation Server")
+    def clean(self):
+        if (self.transformation_text != None): 
+           if (len(self.transformation_text) > 0):
+               print(len(self.transformation_text))
+               root = Element('program')
+               root.text = self.transformation_text
+               xml = tostring(root)
+               url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+               url = url + defaults.CONTEXT_ROOT + '/'
+               url = url + 'checker/transformation'
+               try:
+                    r = requests.put(url, data = xml)
+                    if (r.status_code == 400):
+                        raise ValidationError("Invalid language request")
+                    else: 
+                        tree = ET.ElementTree(ET.fromstring(r.content))
+                        root = tree.getroot()
+                        for child in root:
+                            lineNumber = child[0].text
+                            positionInLine = child[1].text
+                            message = child[2].text
+                            raise ValidationError("Error in line:" + str(lineNumber) + 
+                           " character:" + str(positionInLine) + " " + str(message))
+               except requests.exceptions.RequestException as e:
+                    logger.info(e)
+                    raise ValidationError("An error occurs when connecting to the Syntax Validation Server")
 
     def __str__(self):
         return self.port_label
@@ -293,6 +295,7 @@ class IdleReason(models.Model):
 
     descr = models.CharField(max_length=160, null=False, blank=False)
     group_cd = models.CharField(max_length=60, null=True, blank=True)
+    cause = models.CharField(max_length=60, null=True, blank=True)
     classification = models.CharField(max_length=1, choices=IDLE_CLASSIFICATION, default='A')
     down = models.CharField(max_length=1, choices=IDLE_DOWN, default='Y')
     create_date = models.DateTimeField('create datetime', auto_now=False, auto_now_add=True)
