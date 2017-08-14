@@ -187,7 +187,7 @@ class BehaviorForm(forms.ModelForm):
     behavior_text = forms.CharField(widget=AceWidget(mode='behavior', width="700px", height="300px", showprintmargin=True))
     class Meta:
         model = MeasuredEntityBehavior
-        fields = ['measure_entity','name','descr', 'behavior_text']
+        fields = ['measure_entity', 'name','descr', 'behavior_text']
 
 class MeasuredEntityBehaviorAdmin(admin.ModelAdmin):
     model = MeasuredEntityBehavior
@@ -266,7 +266,7 @@ class InputOutputPortForm(forms.ModelForm):
     transformation_text = forms.CharField(widget=AceWidget(mode='transform', width="700px", height="300px", showprintmargin=True))
     class Meta:
         model = InputOutputPort
-        fields = ['port_label', 'signal_type', 'measured_entity', 'transformation_text']  
+        fields = ['port_label', 'signal_type', 'refresh_time_ms', 'measured_entity', 'transformation_text']  
 
 class InputOutputPortInline(admin.StackedInline):
     model = InputOutputPort
