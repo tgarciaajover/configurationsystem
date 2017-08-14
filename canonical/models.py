@@ -44,6 +44,7 @@ class RazonParada(models.Model):
     grupo_razon_parada = models.CharField(max_length=60)
     causa_raiz_parada =  models.CharField(max_length=60)
     afecta_capacidad = models.CharField(max_length=1)
+    clasificacion = models.CharField(max_length=1)
     create_date = models.DateTimeField('create datetime',  auto_now=False,  auto_now_add=True)
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
 
