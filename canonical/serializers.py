@@ -118,8 +118,9 @@ class OrdenProduccionPlaneadaSerializer(serializers.ModelSerializer):
                    'mes', 'id_produccion', 'id_articulo',
                    'descr_articulo', 'fechahora_inicial',
                    'fechahora_final', 'num_horas', 'cantidad_producir',
-                   'tasa_esperada', 'velocidad_esperada', 
-                   'create_date', 'last_updttm' )
+                   'tasa_esperada', 'velocidad_esperada', 'tasa_vel_esperada', 
+                   'factor_conversion_kg_ciclo', 'factor_conversion_mil_ciclo',
+                   'factor_conversion_emp_ciclo', 'create_date', 'last_updttm' )
 
 class ParadaPlaneadaSerializer(serializers.ModelSerializer):
     fechahora_inicial = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S"])
