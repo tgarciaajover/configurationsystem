@@ -108,7 +108,7 @@ class IdleReasonSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = IdleReason
-        fields = ('id', 'descr', 'classification', 'group_cd','down', 'create_date')
+        fields = ('id', 'descr', 'group_cd', 'cause', 'classification','down', 'create_date')
 
 class MeasuredEntityTransitionStateSerializer(serializers.ModelSerializer):
     create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
@@ -265,3 +265,10 @@ class IdleReasonHostSystemSerializer(serializers.Serializer):
         instance.save()
         return instance
 
+
+class IdleReasonHostSystemOuputSerializer(serializers.ModelSerializer):
+    create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
+
+    class Meta:
+        model = IdleReasonHostSystem
+        fields = ('id', 'descr', 'group_cd', 'cause', 'classification', 'down', 'create_date') 
