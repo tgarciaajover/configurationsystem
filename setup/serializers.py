@@ -11,6 +11,7 @@ from setup.models import DisplayDevice
 from setup.models import MeasuredEntityStateBehavior
 from setup.models import MeasuredEntityTransitionState
 from setup.models import IdleReasonHostSystem
+from setup.models import MeasuredEntityScheduledEvent
 
 import logging
 import os
@@ -79,7 +80,7 @@ class MonitoringDeviceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MonitoringDevice
-        fields= ('device_type','descr','serial','mac_address','ip_address','create_date','io_ports')
+        fields= ('id', 'device_type','descr','serial','mac_address','ip_address','create_date','io_ports')
 
 class MeasuredEntityBehaviorSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -102,6 +103,13 @@ class MeasuredEntitySerializer(serializers.ModelSerializer):
     class Meta:
         model = MeasuredEntity
         fields= ('id', 'code', 'descr', 'type', 'create_date', 'behaviors')
+
+class MeasuredEntityScheduledEventSerializer(serializers.ModelSerializer):
+    create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
+
+    class Meta:
+        model = MeasuredEntityScheduledEvent
+        fields = ('id', 'scheduled_event_type', 'descr', 'recurrences', 'create_date')
 
 class IdleReasonSerializer(serializers.ModelSerializer):
     create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
@@ -141,6 +149,7 @@ class MachineHostSystemSerializer(serializers.Serializer):
     id_grupo_maquina = serializers.CharField(max_length=60)
     id_maquina = serializers.CharField(max_length=60)
     descr = serializers.CharField(max_length=200)
+    create_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", required=False, read_only=True)
     last_updttm = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", required=False, read_only=True)
 
     
@@ -155,6 +164,7 @@ class MachineHostSystemSerializer(serializers.Serializer):
         machineHostSystem.id_grupo_maquina = validated_data.get('id_grupo_maquina')
         machineHostSystem.id_maquina = validated_data.get('id_maquina')
         machineHostSystem.descr = validated_data.get('descr')
+        machineHostSystem.create_date = validated_data.get('create_date')
         machineHostSystem.last_updttm = validated_data.get('last_updttm')
         machineHostSystem.code = str( hash ( validated_data.get('id_compania') +
                                          validated_data.get('id_sede')+
@@ -175,16 +185,20 @@ class MachineHostSystemSerializer(serializers.Serializer):
                                                id_grupo_maquina = validated_data.get('id_grupo_maquina',instance.id_grupo_maquina),
                                                id_maquina = validated_data.get('id_maquina',instance.id_maquina))
         instance.descr =  validated_data.get('descr')
+        instance.create_date = validated_data.get('create_date')
         instance.last_updttm = validated_data.get('last_updttm')
         instance.save()
         return instance    
 
 class PlantHostSystemSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    type = serializers.CharField(max_length=1)
     id_compania = serializers.CharField(max_length=60)
     id_sede = serializers.CharField(max_length=60)
     id_planta = serializers.CharField(max_length=60)
     descr = serializers.CharField(max_length=200)
-    last_updttm = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S", required=False, read_only=True)
+    create_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", required=False, read_only=True)
+    last_updttm = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", required=False, read_only=True)
 
     def create(self, validated_data):
         """
@@ -195,6 +209,7 @@ class PlantHostSystemSerializer(serializers.Serializer):
         plantHostSystem.id_sede = validated_data.get('id_sede')
         plantHostSystem.id_planta = validated_data.get('id_planta')
         plantHostSystem.descr = validated_data.get('descr')
+        plantHostSystem.create_date = validated_data.get('create_date')
         plantHostSystem.last_updttm = validated_data.get('last_updttm')
         plantHostSystem.code = str( hash ( validated_data.get('id_compania') +
                                        validated_data.get('id_sede') +
@@ -212,6 +227,7 @@ class PlantHostSystemSerializer(serializers.Serializer):
                                                id_planta= validated_data.get('id_planta', instance.id_planta))
         instance.descr =  validated_data.get('descr')
         instance.last_updttm = validated_data.get('last_updttm')
+        instance.create_date = validated_data.get('create_date')
         instance.save()
         return instance
 
