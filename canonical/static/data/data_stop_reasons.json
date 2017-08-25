@@ -1,0 +1,36 @@
+{"data":[
+{"id":"reasoncode01",
+"previous_day": {"total":"10","currencies":"10","avg":"2","var":"3"},
+"previous_week": {"total":"11","currencies":"11","avg":"3","var":"4"},
+"previous_month": {"total":"12","currencies":"12","avg":"4","var":"5"},
+"previous_to_date_day": {"total":"20","currencies":"20","avg":"5","var":"6"},
+"previous_to_date_week": {"total":"21","currencies":"21","avg":"6","var":"7"},
+"previous_to_date_month": {"total":"22","currencies":"22","avg":"7","var":"8"},
+"current_day": {"total":"31","currencies":"31","avg":"8","var":"9"},
+"current_week": {"total":"32","currencies":"32","avg":"9","var":"10"},
+"current_month": {"total":"33","currencies":"33","avg":"10","var":"11"}
+},
+{"id":"reasoncode02",
+"previous_day": {"total":"10","currencies":"10","avg":"2","var":"3"},
+"previous_week": {"total":"11","currencies":"11","avg":"3","var":"4"},
+"previous_month": {"total":"12","currencies":"12","avg":"4","var":"5"},
+"previous_to_date_day": {"total":"20","currencies":"20","avg":"5","var":"6"},
+"previous_to_date_week": {"total":"21","currencies":"21","avg":"6","var":"7"},
+"previous_to_date_month": {"total":"22","currencies":"22","avg":"7","var":"8"},
+"current_day": {"total":"31","currencies":"31","avg":"8","var":"9"},
+"current_week": {"total":"32","currencies":"32","avg":"9","var":"10"},
+"current_month": {"total":"33","currencies":"33","avg":"10","var":"11"}
+},
+{"id":"reasoncode03",
+"previous_day": {"total":"10","currencies":"10","avg":"2","var":"3"},
+"previous_week": {"total":"11","currencies":"11","avg":"3","var":"4"},
+"previous_month": {"total":"12","currencies":"12","avg":"4","var":"5"},
+"previous_to_date_day": {"total":"20","currencies":"20","avg":"5","var":"6"},
+"previous_to_date_week": {"total":"21","currencies":"21","avg":"6","var":"7"},
+"previous_to_date_month": {"total":"22","currencies":"22","avg":"7","var":"8"},
+"current_day": {"total":"31","currencies":"31","avg":"8","var":"9"},
+"current_week": {"total":"32","currencies":"32","avg":"9","var":"10"},
+"current_month": {"total":"33","currencies":"33","avg":"10","var":"11"}
+}
+]
+}

@@ -845,5 +845,9 @@ class CreateRegisterView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse('activity-register-list-view')
 
-def reports(request):
-    return render(request, 'reports.html', {})
+def reports(request,report):
+    template_report = {
+        "1":"var_evolution_report.html",
+        "2":"downtime_reasons.html"
+        }
+    return render(request,template_report[report], {})

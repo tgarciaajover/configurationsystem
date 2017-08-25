@@ -1,0 +1,13 @@
+{"stop_reasons":[
+    {"id":"reasoncode01","descr":"Stop Reason 1 description","availability_flag":"Y","plant_id":"plant_01"},
+    {"id":"reasoncode02","descr":"Stop Reason 2 description","availability_flag":"N","plant_id":"plant_01"},
+    {"id":"reasoncode03","descr":"Stop Reason 3 description","availability_flag":"Y","plant_id":"plant_01"},
+    {"id":"reasoncode04","descr":"Stop Reason 4 description","availability_flag":"Y","plant_id":"plant_01"},
+    {"id":"reasoncode05","descr":"Stop Reason 5 description","availability_flag":"N","plant_id":"plant_01"},
+    {"id":"reasoncode06","descr":"Stop Reason 6 description","availability_flag":"Y","plant_id":"plant_01"},
+    {"id":"reasoncode07","descr":"Stop Reason 7 description","availability_flag":"Y","plant_id":"plant_01"},
+    {"id":"reasoncode08","descr":"Stop Reason 8 description","availability_flag":"N","plant_id":"plant_01"},
+    {"id":"reasoncode09","descr":"Stop Reason 9 description","availability_flag":"Y","plant_id":"plant_01"},
+    {"id":"reasoncode10","descr":"Stop Reason 10 description","availability_flag":"Y","plant_id":"plant_01"}
+    ]
+}

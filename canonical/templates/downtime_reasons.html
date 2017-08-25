@@ -1,0 +1,31 @@
+{% extends 'base_generic.html' %}
+{% load i18n static %}
+{% block page-content %}
+<div class="page-content">
+    <section class="widget widget-accordion" id="accordion" role="tablist" aria-multiselectable="false">
+        <article class="panel">
+            <div class="panel-heading" role="tab" id="headingOne">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" class="">
+                Razones de Parada
+                    <i class="font-icon font-icon-arrow-down"></i>
+                </a>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne" aria-expanded="true">
+                <div id="reasons_list" class="variables-block"></div>
+                <div class="card-block">
+                    <div class="col-variables">
+                        <a id="btn_consultar" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" class="btn green" onclick="stop_reasons.create_query(1)">Consultar</a>
+                    </div><!--col-variables-->
+                </div><!--card-block-->
+            </div><!--collapseOne-->
+        </article>
+    </section>
+    <div id="chartsArea" class="container-fluid" style="background-color:#FFFFFF">
+
+    </div><!--.container-fluid-->
+</div><!--.page-content-->
+{% endblock page-content %}
+{% block aditional-js %}
+<script type="text/javascript" src="{% static 'js/lib/avicetec/rep2_DTR.js' %}"></script>
+<script>reports[1].load()</script>
+{% endblock aditional-js %}

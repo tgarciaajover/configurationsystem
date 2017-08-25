@@ -9,7 +9,7 @@ urlpatterns = [
 
 urlpatterns += [
     url(r'^$', views.ListActivityRegisterView.as_view(), name='activity-register-list-view'),
-    url(r'^reports/$', views.reports),
-
+    url(r'^reports/(?P<report>[0-9]+)/$', views.reports),
+#(?P<report>[a-zA-Z0-9_])/
 ]
 

@@ -134,9 +134,15 @@
             <header class="side-menu-title">Reportes</header>
             <ul class="side-menu-list">
                 <li>
-                    <a href="#">
+                    <a id="report1" onclick="load_report(this)" value="0">
                         <i class="tag-color green"></i>
-                        <span class="lbl">Evolución de variables</span>
+                        <span class="lbl" >Evolución de variables</span>
+                    </a>
+                </li>
+                <li>
+                    <a id="report2" onclick="load_report(this)" value="1">
+                        <i class="tag-color green"></i>
+                        <span class="lbl" >Razones de inactividad</span>
                     </a>
                 </li>
             </ul>
@@ -145,8 +151,6 @@
 	{% endblock side-menu %}
 
 	{% block page-content %}
-	<div class="page-content">
-	</div><!--.page-content-->
 	{% endblock page-content %}
 
 	<script type="text/JavaScript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -167,4 +171,6 @@
 	<script src="{% static 'js/app.js' %}"></script>
 </body>
 {% endblock body-content %}
+{% block aditional-js %}
+{% endblock aditional-js %}
 </html>

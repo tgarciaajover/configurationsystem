@@ -139,9 +139,10 @@ data_query = {
     attributes:[]
     }
 
-plants_tree.obtein_plants("/static/data/plants.json");
 
-$(function() {
+
+$(document).ready(function () {
+    plants_tree.obtein_plants("/static/data/plants.json");
     function cb(start, end) {
         $('#daterange').val(start.format('MMMM D, YYYY HH:mm') + ' - ' + end.format('MMMM D, YYYY HH:mm'));
         data_query.start_dttm = start.format('YYYY-MM-DD hh.mm.ss.SSSS');
