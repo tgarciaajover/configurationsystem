@@ -70,7 +70,7 @@ class RazonParadaSerializer(serializers.ModelSerializer):
         model = RazonParada
         fields = ( 'id_compania', 'id_sede','id_planta', 
                    'id_razon_parada', 'descr', 'grupo_razon_parada',
-                   'causa_raiz_parada', 'afecta_capacidad',
+                   'causa_raiz_parada', 'afecta_capacidad', 'clasificacion',
                    'create_date', 'last_updttm' )
 
 class GrupoMaquinaSerializer(serializers.ModelSerializer):
@@ -106,8 +106,8 @@ class PlanProduccionSerializer(serializers.ModelSerializer):
                    'mes',  'create_date', 'last_updttm' )
 
 class OrdenProduccionPlaneadaSerializer(serializers.ModelSerializer):
-    fechahora_inicial = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"])
-    fechahora_final = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"])
+    fechahora_inicial = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S"])
+    fechahora_final = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S"])
     create_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"], required=False, read_only=True)
     last_updttm = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"], required=False, read_only=True)
 
@@ -118,12 +118,13 @@ class OrdenProduccionPlaneadaSerializer(serializers.ModelSerializer):
                    'mes', 'id_produccion', 'id_articulo',
                    'descr_articulo', 'fechahora_inicial',
                    'fechahora_final', 'num_horas', 'cantidad_producir',
-                   'tasa_esperada', 'velocidad_esperada', 
-                   'create_date', 'last_updttm' )
+                   'tasa_esperada', 'velocidad_esperada', 'tasa_vel_esperada', 
+                   'factor_conversion_kg_ciclo', 'factor_conversion_mil_ciclo',
+                   'factor_conversion_emp_ciclo', 'create_date', 'last_updttm' )
 
 class ParadaPlaneadaSerializer(serializers.ModelSerializer):
-    fechahora_inicial = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"])
-    fechahora_final = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"])
+    fechahora_inicial = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S"])
+    fechahora_final = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S"])
     create_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"], required=False, read_only=True)
     last_updttm = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"], required=False, read_only=True)
     

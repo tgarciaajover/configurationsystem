@@ -16,7 +16,9 @@ from setup.models import DisplayType
 from setup.models import DisplayDevice
 from setup.models import MeasuredEntityStateBehavior
 from setup.models import MeasuredEntityTransitionState
-from setup.models import MeasureEntityScheduleEvent
+from setup.models import MeasuredEntityScheduledEvent
+from setup.models import MachineHostSystem
+from setup.models import PlantHostSystem
 
 import requests
 from setup.serializers import SignalUnitSerializer
@@ -30,6 +32,10 @@ from setup.serializers import DisplayDeviceSerializer
 from setup.serializers import MeasuredEntityBehaviorSerializer
 from setup.serializers import MeasuredEntityStateBehaviorSerializer
 from setup.serializers import MeasuredEntityTransitionStateSerializer
+from setup.serializers import MeasuredEntityScheduledEventSerializer
+from setup.serializers import MachineHostSystemSerializer
+from setup.serializers import PlantHostSystemSerializer
+
 
 from canonical.models import Compania
 from canonical.models import Sede
@@ -46,6 +52,9 @@ from django_ace import AceWidget
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from setup.models import Employee
+
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 
 # Register your models here.
 
@@ -74,10 +83,13 @@ class SignalTypeForm(ModelForm):
         fields = ['name', 'class_name', 'protocol']
 
     def getFromFileSystem(self, available_choices):
-       f = open('workfile', 'r')
-       for line in f:
-          available_choices.append((line, line))
-       f.close()       
+        try:
+            f = open('workfile', 'r')
+            for line in f:
+                available_choices.append((line, line))
+            f.close()
+        except IOError:
+            raise ValidationError("No class file definition was found")
  
     def formfield_for_choice_field(self, available_choices):
        # This method let the classes names in a temporal file in case 
@@ -95,7 +107,7 @@ class SignalTypeForm(ModelForm):
                f.write(className + '\n')
            f.close()
        except requests.exceptions.RequestException as e:
-           logger.info(e)
+           logger.error(e)
            available_choices = self.getFromFileSystem(available_choices)
 
     def __init__(self, *args, **kwargs):
@@ -117,11 +129,23 @@ class SignalTypeAdmin(admin.ModelAdmin):
        try:
            r = requests.put(url, data = content)
        except requests.exceptions.RequestException as e:
-           logger.info(e)
+           logger.error(e)
            pass
    
     pass
  
+@receiver(pre_delete, sender=SignalUnit)
+def callback_delete_signal_unit(sender, instance, **kwargs):
+    url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+    url = url + defaults.CONTEXT_ROOT + '/'
+    url = url + 'SignalUnit' + '/' + str(instance.id)
+    try:
+        r = requests.delete(url)
+    except requests.exceptions.RequestException as e:
+       logger.error(e)
+    pass
+
+
 class SignalUnitAdmin(admin.ModelAdmin):
     list_display = ('descr','create_date')
 
@@ -137,7 +161,17 @@ class SignalUnitAdmin(admin.ModelAdmin):
         except requests.exceptions.RequestException as e:
             logger.info(e)
             pass
-    
+    pass
+
+@receiver(pre_delete, sender=Signal)
+def callback_delete_signal(sender, instance, **kwargs):
+    url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+    url = url + defaults.CONTEXT_ROOT + '/'
+    url = url + 'Signal' + '/' + str(instance.id)
+    try:
+        r = requests.delete(url)
+    except requests.exceptions.RequestException as e:
+       logger.error(e)
     pass
 
 class SignalAdmin(admin.ModelAdmin):
@@ -158,18 +192,29 @@ class SignalAdmin(admin.ModelAdmin):
   
     pass
 
-
 class IOSignalsDeviceTypeInline(admin.TabularInline):
     model = IOSignalsDeviceType
     extra = 0 
+    pass
+
+@receiver(pre_delete, sender=DeviceType)
+def callback_delete_device_type(sender, instance, **kwargs):
+    url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+    url = url + defaults.CONTEXT_ROOT + '/'
+    url = url + 'DeviceType' + '/' + str(instance.id)
+    try:
+        r = requests.delete(url)
+    except requests.exceptions.RequestException as e:
+       logger.error(e)
     pass
 
 class DeviceTypeAdmin(admin.ModelAdmin):
     list_display = ('descr','create_date')
     inlines = [ IOSignalsDeviceTypeInline, ]
 
-    def save_model(self,request, obj, form, change):
-        obj.save()
+    def save_formset(self, request, form, formset, change):
+        super(DeviceTypeAdmin, self).save_formset(request, form, formset, change)
+        obj = formset.instance
         serializer = DeviceTypeSerializer(obj)
         content = JSONRenderer().render(serializer.data)
         url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
@@ -180,14 +225,25 @@ class DeviceTypeAdmin(admin.ModelAdmin):
         except requests.exceptions.RequestException as e:
            logger.info(e)
            pass
-
+    
     pass
 
 class BehaviorForm(forms.ModelForm):
     behavior_text = forms.CharField(widget=AceWidget(mode='behavior', width="700px", height="300px", showprintmargin=True))
     class Meta:
         model = MeasuredEntityBehavior
-        fields = ['measure_entity','name','descr', 'behavior_text']
+        fields = ['measure_entity', 'name','descr', 'behavior_text']
+
+@receiver(pre_delete, sender=MeasuredEntityBehavior)
+def callback_delete_measure_entity_behavior(sender, instance, **kwargs):
+    url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+    url = url + defaults.CONTEXT_ROOT + '/'
+    url = url + 'MeasuredEntity' + '/' + str(instance.measure_entity_id) + '/Behavior/' + str(instance.id)
+    try:
+        r = requests.delete(url)
+    except requests.exceptions.RequestException as e:
+       logger.error(e)
+    pass
 
 class MeasuredEntityBehaviorAdmin(admin.ModelAdmin):
     model = MeasuredEntityBehavior
@@ -201,7 +257,7 @@ class MeasuredEntityBehaviorAdmin(admin.ModelAdmin):
         content = JSONRenderer().render(serializer.data)
         url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
         url = url + defaults.CONTEXT_ROOT + '/'
-        url = url + 'MeasuredEntity' + '/' + str(obj.measure_entity_id) + '/Behavior/' + str(obj.name) 
+        url = url + 'MeasuredEntity' + '/' + str(obj.measure_entity_id) + '/Behavior/' + str(obj.id) 
         try:
             r = requests.put(url, data = content)
         except requests.exceptions.RequestException as e:
@@ -210,13 +266,23 @@ class MeasuredEntityBehaviorAdmin(admin.ModelAdmin):
 
     pass
 
+@receiver(pre_delete, sender=MachineHostSystem)
+def callback_delete_machine(sender, instance, **kwargs):
+    url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+    url = url + defaults.CONTEXT_ROOT + '/'
+    url = url + 'MeasuredEntity' + '/' + str(instance.id) 
+    try:
+        r = requests.delete(url)
+    except requests.exceptions.RequestException as e:
+       logger.error(e)
+    pass
 
-class MeasuredEntityAdmin(admin.ModelAdmin):
+class MachineHostSystemAdmin(admin.ModelAdmin):
     list_display = ('code', 'descr')
 
     def save_model(self,request, obj, form, change):
         obj.save()
-        serializer = MeasuredEntitySerializer(obj)
+        serializer = MachineHostSystemSerializer(obj)
         content = JSONRenderer().render(serializer.data)
         url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
         url = url + defaults.CONTEXT_ROOT + '/'
@@ -228,14 +294,55 @@ class MeasuredEntityAdmin(admin.ModelAdmin):
            pass
     pass
 
+@receiver(pre_delete, sender=PlantHostSystem)
+def callback_delete_plant(sender, instance, **kwargs):
+
+    url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+    url = url + defaults.CONTEXT_ROOT + '/'
+    url = url + 'MeasuredEntity' + '/' + str(instance.id) 
+    try:
+        r = requests.delete(url)
+    except requests.exceptions.RequestException as e:
+       logger.error(e)
+    pass
+
+
+class PlantHostSystemAdmin(admin.ModelAdmin):
+    list_display = ('code', 'descr')
+
+    def save_model(self,request, obj, form, change):
+        obj.save()
+        serializer = PlantHostSystemSerializer(obj)
+        content = JSONRenderer().render(serializer.data)
+        url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+        url = url + defaults.CONTEXT_ROOT + '/'
+        url = url + 'MeasuredEntity' + '/' + str(obj.id)
+        try:
+            r = requests.put(url, data = content)
+        except requests.exceptions.RequestException as e:
+           logger.info(e)
+           pass
+    pass
+
+
+@receiver(pre_delete, sender=MeasuredEntityStateBehavior)
+def callback_delete_measured_entity_state_behavior(sender, instance, **kwargs):
+    url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+    url = url + defaults.CONTEXT_ROOT + '/'
+    url = url + 'MeasuredEntity' + '/' + str(instance.measure_entity_id) + '/StateBehavior/' + str(instance.id) 
+    try:
+        r = requests.delete(url)
+    except requests.exceptions.RequestException as e:
+       logger.error(e)
+    pass
+
 class BehaviorStateForm(forms.ModelForm):
     behavior_text = forms.CharField(widget=AceWidget(mode='behavior', width="700px", height="300px", showprintmargin=True))
     class Meta:
         model = MeasuredEntityStateBehavior
         fields = ['measure_entity','state_behavior_type','descr', 'behavior_text']
 
-
-class MeauredEntityStateBehaviorAdmin(admin.ModelAdmin):
+class MeasuredEntityStateBehaviorAdmin(admin.ModelAdmin):
     model = MeasuredEntityStateBehavior
     form = BehaviorStateForm
 
@@ -252,21 +359,56 @@ class MeauredEntityStateBehaviorAdmin(admin.ModelAdmin):
            logger.info(e)
            pass
 
+@receiver(pre_delete, sender=MeasuredEntityScheduledEvent)
+def callback_delete_measured_entity_schedule_event(sender, instance, **kwargs):
+    url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+    url = url + defaults.CONTEXT_ROOT + '/'
+    url = url + 'MeasuredEntity' + '/' + str(instance.measure_entity_id) + '/ScheduledEvent/' + str(instance.id) 
+    try:
+        r = requests.delete(url)
+    except requests.exceptions.RequestException as e:
+       logger.error(e)
+    pass
+
 class ScheduleEventForm(forms.ModelForm):
     class Meta:
-        model = MeasureEntityScheduleEvent
+        model = MeasuredEntityScheduledEvent
         fields = ['measure_entity','scheduled_event_type','descr', 'recurrences' ]
 
-class MeauredEntityScheduleEventAdmin(admin.ModelAdmin):
-    model = MeasureEntityScheduleEvent
+class MeasuredEntityScheduledEventAdmin(admin.ModelAdmin):
+    model = MeasuredEntityScheduledEvent
     form = ScheduleEventForm
 
+    def save_model(self,request, obj, form, change):
+        obj.save()
+        serializer = MeasuredEntityScheduledEventSerializer(obj)
+        content = JSONRenderer().render(serializer.data)
+        url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+        url = url + defaults.CONTEXT_ROOT + '/'
+        url = url + 'MeasuredEntity' + '/' + str(obj.measure_entity_id) + '/ScheduledEvent/' + str(obj.id) 
+        try:
+            r = requests.put(url, data = content)
+        except requests.exceptions.RequestException as e:
+           logger.error(e)
+           pass
+
+
+@receiver(pre_delete, sender=MonitoringDevice)
+def callback_delete_monitoring_device(sender, instance, **kwargs):
+    url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+    url = url + defaults.CONTEXT_ROOT + '/'
+    url = url + 'MonitoringDevice' + '/' + str(instance.id) 
+    try:
+        r = requests.delete(url)
+    except requests.exceptions.RequestException as e:
+       logger.error(e)
+    pass
 
 class InputOutputPortForm(forms.ModelForm):
     transformation_text = forms.CharField(widget=AceWidget(mode='transform', width="700px", height="300px", showprintmargin=True))
     class Meta:
         model = InputOutputPort
-        fields = ['port_label', 'signal_type', 'measured_entity', 'transformation_text']  
+        fields = ['port_label', 'signal_type', 'refresh_time_ms', 'measured_entity', 'transformation_text']  
 
 class InputOutputPortInline(admin.StackedInline):
     model = InputOutputPort
@@ -282,6 +424,7 @@ class MonitoringDeviceAdmin(admin.ModelAdmin):
     def save_model(self,request, obj, form, change):
         obj.save()
         serializer = MonitoringDeviceSerializer(obj)
+        print(serializer.data)
         content = JSONRenderer().render(serializer.data)
         url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
         url = url + defaults.CONTEXT_ROOT + '/'
@@ -300,6 +443,17 @@ class MeasuredEntityGroupAdmin(admin.ModelAdmin):
 
 class IdleReasonAdmin(admin.ModelAdmin):
     list_display = ('descr','group_cd', 'classification','down')
+    pass
+
+@receiver(pre_delete, sender=MeasuredEntityTransitionState)
+def callback_delete_measured_entity_transition_state(sender, instance, **kwargs):
+    url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+    url = url + defaults.CONTEXT_ROOT + '/'
+    url = url + 'MeasuredEntity' + '/' + str(instance.measure_entity_id) + '/StateTransition/' + str(instance.id) 
+    try:
+        r = requests.delete(url)
+    except requests.exceptions.RequestException as e:
+       logger.error(e)
     pass
 
 class MeasuredStateTransitionForm(forms.ModelForm):
@@ -422,14 +576,15 @@ admin.site.register(SignalType, SignalTypeAdmin)
 admin.site.register(SignalUnit, SignalUnitAdmin)
 admin.site.register(Signal, SignalAdmin)
 admin.site.register(DeviceType, DeviceTypeAdmin)
-admin.site.register(MeasuredEntity, MeasuredEntityAdmin)
-admin.site.register(MeasuredEntityStateBehavior, MeauredEntityStateBehaviorAdmin)
-admin.site.register(MeasureEntityScheduleEvent, MeauredEntityScheduleEventAdmin)
-admin.site.register(MeasuredEntityBehavior, MeasuredEntityBehaviorAdmin)
 admin.site.register(MonitoringDevice, MonitoringDeviceAdmin)
 admin.site.register(MeasuredEntityGroup, MeasuredEntityGroupAdmin)
-admin.site.register(IdleReason,IdleReasonAdmin)
+admin.site.register(MachineHostSystem, MachineHostSystemAdmin)
+admin.site.register(PlantHostSystem, PlantHostSystemAdmin)
+admin.site.register(MeasuredEntityBehavior, MeasuredEntityBehaviorAdmin)
+admin.site.register(MeasuredEntityScheduledEvent, MeasuredEntityScheduledEventAdmin)
+admin.site.register(MeasuredEntityStateBehavior, MeasuredEntityStateBehaviorAdmin)
 admin.site.register(MeasuredEntityTransitionState, MeasuredStateTransitionAdmin)
+admin.site.register(IdleReason,IdleReasonAdmin)
 admin.site.register(DisplayType, DisplayTypeAdmin)
 admin.site.register(DisplayDevice, DisplayDeviceAdmin)
 

@@ -34,10 +34,13 @@ from canonical.models import ActivityRegister
 
 from setup.models import PlantHostSystem
 from setup.models import MachineHostSystem
+from setup.models import IdleReasonHostSystem
 from setup.models import Employee
 
 from setup.serializers import PlantHostSystemSerializer
 from setup.serializers import MachineHostSystemSerializer
+from setup.serializers import IdleReasonHostSystemSerializer
+from setup.serializers import IdleReasonHostSystemOuputSerializer
 
 from django_q.tasks import async
 from canonical.tasks import delReasonCode
@@ -54,7 +57,30 @@ import json
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 
+import setup.defaults as defaults
+import requests
+
 import datetime
+
+import logging
+import os
+import logging.handlers
+
+
+# Get an instance of a logger
+LOG_FILENAME = 'iotsettings.log'
+
+# Check if log exists and should therefore be rolled
+needRoll = os.path.isfile(LOG_FILENAME)
+
+logger = logging.getLogger('canonical.views')
+
+fh = logging.handlers.RotatingFileHandler(LOG_FILENAME, backupCount=5)
+fh.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
@@ -78,7 +104,9 @@ def compania_list(request, format=None):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                logger.error(serializer.errors)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
@@ -99,7 +127,7 @@ def compania_detail(request, pk, format=None):
     if request.method == 'GET':
         if len(companias) > 1:
             return Response(serializer.errors, status=status.HTTP_412_PRECONDITION_FAILED)
-
+        
         compania = companias[0]
         serializer = CompaniaSerializer(compania)
         return Response(serializer.data)
@@ -113,7 +141,9 @@ def compania_detail(request, pk, format=None):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            logger.error(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         for compania in companias:
@@ -137,7 +167,7 @@ def sede_list(request, format=None):
     elif request.method == 'POST':
         try:
             data = JSONParser().parse(request)
-            sede = Sede.objects.get(id_compania=data.get('id_compania'),
+            sede = Sede.objects.get(id_compania=data.get('id_compania'), 
                                  id_sede = data.get('id_sede'))
             return Response(status=status.HTTP_302_FOUND)
         except Sede.DoesNotExist:
@@ -145,7 +175,9 @@ def sede_list(request, format=None):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                logger.error(serializer.errors)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
@@ -154,10 +186,10 @@ def sede_detail(request, pk, format=None):
     """
     Obtiene, actualiza or borra una sede.
     """
-
+   
     try:
         data = JSONParser().parse(request)
-        sede = Sede.objects.get(id_compania=data.get('id_compania'),
+        sede = Sede.objects.get(id_compania=data.get('id_compania'), 
                                  id_sede = data.get('id_sede'))
     except Sede.DoesNotExist:
         if request.method == 'DELETE':
@@ -174,7 +206,9 @@ def sede_detail(request, pk, format=None):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            logger.error(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         sede.delete()
@@ -195,8 +229,8 @@ def planta_list(request, format=None):
     elif request.method == 'POST':
         data = JSONParser().parse(request)
         try:
-            planta = Planta.objects.get(id_compania = data.get('id_compania') ,
-                                        id_sede = data.get('id_sede'),
+            planta = Planta.objects.get(id_compania = data.get('id_compania') , 
+                                        id_sede = data.get('id_sede'), 
 	                                id_planta = data.get('id_planta'))
             return Response(status=status.HTTP_302_FOUND)
         except Planta.DoesNotExist:
@@ -206,7 +240,10 @@ def planta_list(request, format=None):
                 serializer_p.save()
                 serializer_phs.save()
                 return JsonResponse(serializer_p.data, status=201)
-            return JsonResponse(serializer_p.errors, status=400)
+            else:
+                logger.error(serializer_p.errors)
+                logger.error(serializer_phs.errors)
+                return JsonResponse(serializer_p.errors, status=400) 
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
@@ -215,19 +252,20 @@ def planta_detail(request, pk, format=None):
     """
     Obtiene, actualiza or borra una planta.
     """
-
+    
     try:
         data = JSONParser().parse(request)
-        planta = Planta.objects.get(id_compania=data.get('id_compania'),
-                                     id_sede = data.get('id_sede'),
+        planta = Planta.objects.get(id_compania=data.get('id_compania'), 
+                                     id_sede = data.get('id_sede'), 
                                       id_planta = data.get('id_planta'))
-        planths = PlantHostSystem.objects.get(id_compania=data.get('id_compania'),
-                                               id_sede = data.get('id_sede'),
+        planths = PlantHostSystem.objects.get(id_compania=data.get('id_compania'), 
+                                               id_sede = data.get('id_sede'), 
                                                 id_planta = data.get('id_planta'))
     except ( Planta.DoesNotExist, PlantHostSystem.DoesNotExist ) as e:
         if request.method == 'DELETE':
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
+            logger.error('The plant already exists')
             return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
@@ -241,7 +279,10 @@ def planta_detail(request, pk, format=None):
             serializer.save()
             serializer_phs.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            logger.error(serializer.errors)
+            logger.error(serializer_phs.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         planta.delete()
@@ -264,19 +305,43 @@ def razon_parada_list(request, format=None):
     elif request.method == 'POST':
         data = JSONParser().parse(request)
         try:
-            razonparada = RazonParada.objects.get(id_compania=data.get('id_compania'),
-                                                  id_sede = data.get('id_sede'),
+            razonparada = RazonParada.objects.get(id_compania=data.get('id_compania'), 
+                                                  id_sede = data.get('id_sede'), 
                                                   id_planta = data.get('id_planta'),
                                                   id_razon_parada = data.get('id_razon_parada'))
-            return Response(status=status.HTTP_302_FOUND)
-        except RazonParada.DoesNotExist:
+
+            idlehs = IdleReasonHostSystem.objects.get(id_compania=data.get('id_compania'), 
+                                                  id_sede = data.get('id_sede'), 
+                                                  id_planta = data.get('id_planta'),
+                                                  id_razon_parada = data.get('id_razon_parada'))
+                                                                                        
+            return Response(('The given reason code already exist'), status=status.HTTP_302_FOUND)
+        except ( RazonParada.DoesNotExist, IdleReasonHostSystem.DoesNotExist) as e:
             serializer = RazonParadaSerializer(data=data)
-            if serializer.is_valid():
-                serializer.save()
-                content = JSONRenderer().render(serializer.data)
-                async(putReasonCode, content)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer_irhs = IdleReasonHostSystemSerializer(data=data)
+            if serializer.is_valid() and serializer_irhs.is_valid():
+                try:
+                    razonparada = serializer.save()
+                    idlehs = serializer_irhs.save()
+                    serializer_output = IdleReasonHostSystemOuputSerializer(idlehs)
+                    content = JSONRenderer().render(serializer_output.data)
+                    logger.info(content)
+                    url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+                    url = url + defaults.CONTEXT_ROOT + '/'
+                    url = url + 'ReasonCode' + '/' + str( idlehs.id )
+                    r = requests.put(url, data = content)
+                    if (r.status_code == 204):
+                        return Response(serializer.data, status=status.HTTP_201_CREATED)
+                    else:
+                        # TODO: BORRAR LAS ENTRADAS.
+                        return Response(r.text, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                except requests.exceptions.RequestException as e:
+                    logger.error(e)
+                    return Response(serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                logger.error(serializer.errors)
+                logger.error(serializer_irhs.errors)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
@@ -288,11 +353,16 @@ def razon_parada_detail(request, pk, format=None):
 
     try:
         data = JSONParser().parse(request)
-        razonparada = RazonParada.objects.get(id_compania=data.get('id_compania'),
-                                                  id_sede = data.get('id_sede'),
+        razonparada = RazonParada.objects.get(id_compania=data.get('id_compania'), 
+                                                  id_sede = data.get('id_sede'), 
                                                   id_planta = data.get('id_planta'),
                                                   id_razon_parada = data.get('id_razon_parada'))
-    except RazonParada.DoesNotExist:
+        idlehs = IdleReasonHostSystem.objects.get(id_compania=data.get('id_compania'), 
+                                                  id_sede = data.get('id_sede'), 
+                                                  id_planta = data.get('id_planta'),
+                                                  id_razon_parada = data.get('id_razon_parada'))
+                                                  
+    except (RazonParada.DoesNotExist, IdleReasonHostSystem.DoesNotExist) :
         if request.method == 'DELETE':
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
@@ -304,19 +374,51 @@ def razon_parada_detail(request, pk, format=None):
 
     elif request.method == 'PUT':
         serializer = RazonParadaSerializer(razonparada, data=data)
+        serializer_irhs = IdleReasonHostSystemSerializer(idlehs, data=data)
         if serializer.is_valid():
-            serializer.save()
-            content = JSONRenderer().render(serializer.data)
-            async(putReasonCode, content)
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            if serializer_irhs.is_valid():
+                try:
+                    serializer.save()
+                    serializer_irhs.save()
+                    content = JSONRenderer().render(serializer_irhs.data)
+                    url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+                    url = url + defaults.CONTEXT_ROOT + '/'
+                    url = url + 'ReasonCode' + '/' + str(serializer_irhs.data.get('id') )
+                    r = requests.put(url, data = content)
+                    if (r.status_code == 204):
+                        return Response(serializer.data, status=status.HTTP_201_CREATED)
+                    else:
+                        # TODO: BORRAR LAS ENTRADAS.
+                        return Response(r.text, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                except requests.exceptions.RequestException as e:
+                    logger.error(e)
+                    return Response(e, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                logger.error(serializer_irhs.errors)            
+                return Response(serializer_irhs.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            logger.error(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         serializer = RazonParadaSerializer(razonparada)
-        razonparada.delete()
-        content = JSONRenderer().render(serializer.data)
-        async(delReasonCode, content)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        try:
+            idlereasonserializer = IdleReasonHostSystemOuputSerializer(idlehs)
+            content = JSONRenderer().render(idlereasonserializer.data)
+            url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+            url = url + defaults.CONTEXT_ROOT + '/'
+            url = url + 'ReasonCode' + '/' + str(idlehs.id)
+            logger.info('calling url:' + url)
+            r = requests.delete(url, data = content)
+            if (r.status_code == 204):
+                razonparada.delete()
+                idlehs.delete()
+                return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+            else:
+                return Response(r.text, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except requests.exceptions.RequestException as e:
+            logger.error(e)
+            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
@@ -325,7 +427,7 @@ def grupo_maquina_list(request, format=None):
     """
     Lista todas los grupos de maquina, or crea un nuevo grupo de maquina.
     """
-
+   
     if request.method == 'GET':
         grupomaquina = GrupoMaquina.objects.all()
         serializer = GrupoMaquinaSerializer(grupomaquina, many=True)
@@ -334,8 +436,8 @@ def grupo_maquina_list(request, format=None):
     elif request.method == 'POST':
         data = JSONParser().parse(request)
         try:
-            grupomaquina = GrupoMaquina.objects.get(id_compania=data.get('id_compania'),
-                                                    id_sede = data.get('id_sede'),
+            grupomaquina = GrupoMaquina.objects.get(id_compania=data.get('id_compania'), 
+                                                    id_sede = data.get('id_sede'), 
                                                     id_planta = data.get('id_planta'),
                                                     id_grupo_maquina = data.get('id_grupo_maquina'))
             return Response(status=status.HTTP_302_FOUND)
@@ -344,7 +446,9 @@ def grupo_maquina_list(request, format=None):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                logger.error(serializer.errors)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
@@ -356,8 +460,8 @@ def grupo_maquina_detail(request, pk, format=None):
 
     try:
         data = JSONParser().parse(request)
-        grupomaquina = GrupoMaquina.objects.get(id_compania=data.get('id_compania'),
-                                                    id_sede = data.get('id_sede'),
+        grupomaquina = GrupoMaquina.objects.get(id_compania=data.get('id_compania'), 
+                                                    id_sede = data.get('id_sede'), 
                                                     id_planta = data.get('id_planta'),
                                                     id_grupo_maquina = data.get('id_grupo_maquina'))
     except GrupoMaquina.DoesNotExist:
@@ -406,14 +510,14 @@ def maquina_list(request, format=None):
         except Maquina.DoesNotExist:
             serializer_p = MaquinaSerializer(data=data)
             serializer_mhs = MachineHostSystemSerializer(data=data)
-            print (serializer_p.is_valid())
-            print (serializer_mhs.is_valid())
-            print (serializer_mhs.errors)
             if serializer_p.is_valid() and serializer_mhs.is_valid():
                 serializer_p.save()
                 serializer_mhs.save()
                 return Response(serializer_p.data, status=status.HTTP_201_CREATED)
-            return Response(serializer_p.errors, status=400)
+            else:
+                logger.error(serializer_p.errors)
+                logger.error(serializer_mhs.errors)
+                return Response(serializer_p.errors, status=400)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
@@ -570,7 +674,9 @@ def orden_produccion_planeada_list(request, format=None):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                logger.error(serializer.errors)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
@@ -610,7 +716,29 @@ def orden_produccion_planeada_detail(request, pk, format=None):
 
     elif request.method == 'DELETE':
         ordenproduccionplaneada.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        # If the job was running, then the system should stop it.
+        dict = { 'company' : data.get('id_compania'), 
+                'location' : data.get('id_sede'),
+                'plant' : data.get('id_planta'),
+                'machineGroup' : data.get('id_grupo_maquina'),
+                'machineId' : data.get('id_maquina'),
+                'year' : data.get('ano'),
+                'month' : data.get('mes') ,
+                'activityType' : 'E', 
+                'stopReason': '',
+                'productionOrder' : data.get('id_produccion') }
+        jsonText = json.dumps(dict)
+        url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+        url = url + defaults.CONTEXT_ROOT + '/'
+        url = url + 'Register/ActivityRegister' 
+        try:
+            r = requests.put(url, data = json_data)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except requests.exceptions.RequestException as e:
+            logger.error(e)
+            return Response(serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
@@ -695,7 +823,7 @@ def ordenes_from_maquina(request):
     _id_maquina=request.GET.get('id_maquina')
     _ano=request.GET.get('ano')
     _mes=request.GET.get('mes')
-
+    
     ret=[]
     sqlText = "SELECT f.id, f.id_produccion \
 		FROM canonical_maquina e, canonical_grupomaquina a, canonical_compania b, canonical_sede c, canonical_planta d, canonical_ordenproduccionplaneada f \
@@ -707,13 +835,13 @@ def ordenes_from_maquina(request):
 		 AND f.id_planta = e.id_planta AND f.id_grupo_maquina = e.id_grupo_maquina AND f.id_maquina = e.id_maquina"
 
     if _id_maquina:
-        all_Orders = OrdenProduccionPlaneada.objects.raw(sqlText, [_id_compania, _id_sede, _id_planta, _id_grupo_maquina, _id_maquina, _ano, _mes] )
+        all_Orders = OrdenProduccionPlaneada.objects.raw(sqlText, [_id_compania, _id_sede, _id_planta, _id_grupo_maquina, _id_maquina, _ano, _mes] ) 
         for order in all_Orders:
             ret.append(dict(id=order.id, value=order.id_produccion))
 
     if len(ret)!=1:
         ret.insert(0, dict(id='', value='---'))
-    return HttpResponse(json.dumps(ret),
+    return HttpResponse(json.dumps(ret), 
               content_type='application/json')
 
 
@@ -737,7 +865,7 @@ def maquinas_from_group(request):
 
     if len(ret)!=1:
         ret.insert(0, dict(id='', value='---'))
-    return HttpResponse(json.dumps(ret),
+    return HttpResponse(json.dumps(ret), 
               content_type='application/json')
 
 
@@ -783,8 +911,8 @@ class ActivityRegisterForm(ModelForm):
     def __init__(self, request, *args, **kwargs):
         if 'initial' in kwargs:
             initial_values = kwargs.get('initial')
-            id_compania = initial_values['id_compania']
-            id_sede = initial_values['id_sede']
+            id_compania = initial_values['id_compania'] 
+            id_sede = initial_values['id_sede'] 
             id_planta = initial_values['id_planta']
         else:
             id_compania = None
@@ -816,9 +944,10 @@ class CreateRegisterView(LoginRequiredMixin, CreateView):
     model = ActivityRegister
     template_name = 'ActivityRegister_edit.html'
     fields = '__all__'
-
+               
     def getDefaults(self, user):
         initial = {}
+        print("userid:" + str(user.id))
         employeeData = Employee.objects.get(user_id=user.id)
         initial ['id_compania'] = employeeData.id_compania
         initial ['id_sede'] = employeeData.id_sede
@@ -828,13 +957,13 @@ class CreateRegisterView(LoginRequiredMixin, CreateView):
         initial ['ano'] = now.year
         initial ['mes'] = now.month
         return initial
-
+   
     def form_valid(self, form):
         self.object = form.save()
         serializer = DisplayDeviceSerializer(self.object)
         content = JSONRenderer().render(serializer.data)
         async(putActivityRegister, content)
-        return HttpResponseRedirect(self.get_success_url())
+        return HttpResponseRedirect(self.get_success_url())    
 
     # if a GET (or any other method) we'll create a blank form
     def get(self, request, *args, **kwargs):

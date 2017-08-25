@@ -58,8 +58,8 @@ class SignalUnit(models.Model):
 
 
 class Signal(models.Model):
-    unit = models.ForeignKey(SignalUnit, on_delete=models.CASCADE)
-    type = models.ForeignKey(SignalType, on_delete=models.CASCADE)
+    unit = models.ForeignKey(SignalUnit, on_delete=models.PROTECT)
+    type = models.ForeignKey(SignalType, on_delete=models.PROTECT)
     descr = models.CharField(max_length=300)
     create_date = models.DateTimeField('create date', auto_now=False, auto_now_add=True)
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
@@ -82,11 +82,14 @@ class IOSignalsDeviceType(models.Model):
         ('O', 'Output'),
     )
     device = models.ForeignKey(DeviceType, related_name='io_signals', on_delete=models.CASCADE)
-    signal = models.ForeignKey(Signal, on_delete=models.CASCADE)
+    signal = models.ForeignKey(Signal, on_delete=models.PROTECT)
     i_o = models.CharField(max_length=1, choices=IO_TYPE)
 
+    def __str__(self):
+        return self.device.__str__() + '- signal:' + self.signal.__str__() + ' type:' + self.i_o
+
 class MonitoringDevice(models.Model):
-    device_type = models.ForeignKey(DeviceType, on_delete=models.CASCADE)
+    device_type = models.ForeignKey(DeviceType, on_delete=models.PROTECT)
     descr = models.CharField(max_length=100, null=True, blank=True)
     serial = models.CharField(max_length=40, null=True, blank=True)
     mac_address = MACAddressField(null=True, blank=True, integer=False)
@@ -145,6 +148,45 @@ class MachineHostSystem(MeasuredEntity):
     @property
     def get_code(self):
         return str( id_compania + '-' + id_sede + '-' + id_planta + '-' + id_grupo_maquina + '-' + id_maquina )
+
+class InputOutputPort(models.Model):
+    device = models.ForeignKey(MonitoringDevice,related_name='io_ports', on_delete=models.CASCADE)
+    port_label = models.CharField(max_length=60, default='COM1',help_text="This field must be included in the mqtt and modbus topic")
+    signal_type = models.ForeignKey(Signal, on_delete=models.PROTECT)
+    refresh_time_ms = models.IntegerField(default=5000, help_text="It specifies how often a new measured is obtained in milliseconds")
+    measured_entity = models.ForeignKey(MeasuredEntity, related_name='measured_entity', blank= True, null= True, on_delete=models.SET_NULL)
+    transformation_text = models.TextField(null=True, blank=True)
+
+    def clean(self):
+        if (self.transformation_text != None): 
+           if (len(self.transformation_text) > 0):
+               print(len(self.transformation_text))
+               root = Element('program')
+               root.text = self.transformation_text
+               xml = tostring(root)
+               url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+               url = url + defaults.CONTEXT_ROOT + '/'
+               url = url + 'checker/transformation'
+               try:
+                    r = requests.put(url, data = xml)
+                    if (r.status_code == 400):
+                        raise ValidationError("Invalid language request")
+                    else: 
+                        tree = ET.ElementTree(ET.fromstring(r.content))
+                        root = tree.getroot()
+                        for child in root:
+                            lineNumber = child[0].text
+                            positionInLine = child[1].text
+                            message = child[2].text
+                            raise ValidationError("Error in line:" + str(lineNumber) + 
+                           " character:" + str(positionInLine) + " " + str(message))
+               except requests.exceptions.RequestException as e:
+                    logger.info(e)
+                    raise ValidationError("An error occurs when connecting to the Syntax Validation Server")
+
+    def __str__(self):
+        return self.port_label
+
 
 class MeasuredEntityBehavior(models.Model):
     measure_entity =  models.ForeignKey(MeasuredEntity, related_name='behaviors', on_delete=models.CASCADE)
@@ -221,7 +263,7 @@ class MeasuredEntityStateBehavior(models.Model):
     def __str__(self):
         return str(self.measure_entity) + '-' + self.descr
 
-class MeasureEntityScheduleEvent(models.Model):
+class MeasuredEntityScheduledEvent(models.Model):
     EVENT_TYPE = ( 
        ('AG', 'OEE Aggregation'),
     )
@@ -232,44 +274,6 @@ class MeasureEntityScheduleEvent(models.Model):
     create_date = models.DateTimeField('create datetime', auto_now=False, auto_now_add=True)
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
     
-	
-   
-class InputOutputPort(models.Model):
-    device = models.ForeignKey(MonitoringDevice,related_name='io_ports', on_delete=models.CASCADE)
-    port_label = models.CharField(max_length=60, default='COM1',help_text="This field must be included in the mqtt and modbus topic")
-    signal_type = models.ForeignKey(Signal, on_delete=models.CASCADE)
-    refresh_time_ms = models.IntegerField(default=5000, help_text="It specifies how often a new measured is obtained in milliseconds")
-    measured_entity = models.ForeignKey(MeasuredEntity, related_name='measured_entity', blank= True, null= True, on_delete=models.SET_NULL)
-    transformation_text = models.TextField(null=True, blank=True)
-
-    #def clean(self):
-        #if len(self.transformation_text) > 0:
-           #root = Element('program')
-           #root.text = self.transformation_text
-           #xml = tostring(root)
-           #url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
-           #url = url + defaults.CONTEXT_ROOT + '/'
-           #url = url + 'checker/transformation'
-           #try:
-                #r = requests.put(url, data = xml)
-                #if (r.status_code == 400):
-                    #raise ValidationError("Invalid language request")
-                #else: 
-                    #tree = ET.ElementTree(ET.fromstring(r.content))
-                    #root = tree.getroot()
-                    #for child in root:
-                        #lineNumber = child[0].text
-                        #positionInLine = child[1].text
-                        #message = child[2].text
-                        #raise ValidationError("Error in line:" + str(lineNumber) + 
-					   #" character:" + str(positionInLine) + " " + str(message))
-           #except requests.exceptions.RequestException as e:
-                #logger.info(e)
-                #raise ValidationError("An error occurs when connecting to the Syntax Validation Server")
-
-    def __str__(self):
-        return self.port_label
-
 class MeasuredEntityGroup(models.Model):
     descr = models.CharField(max_length=160, null=False, blank=False)
     create_date = models.DateTimeField('create datetime', auto_now=False, auto_now_add=True)
@@ -293,6 +297,7 @@ class IdleReason(models.Model):
 
     descr = models.CharField(max_length=160, null=False, blank=False)
     group_cd = models.CharField(max_length=60, null=True, blank=True)
+    cause = models.CharField(max_length=60, null=True, blank=True)
     classification = models.CharField(max_length=1, choices=IDLE_CLASSIFICATION, default='A')
     down = models.CharField(max_length=1, choices=IDLE_DOWN, default='Y')
     create_date = models.DateTimeField('create datetime', auto_now=False, auto_now_add=True)
@@ -316,8 +321,8 @@ class MeasuredEntityTransitionState(models.Model):
     )
     measure_entity = models.ForeignKey(MeasuredEntity, related_name='measured_states', on_delete=models.CASCADE)
     state_from = models.CharField(max_length=1, choices=STATE_OPTIONS, default='S')
-    reason_code = models.ForeignKey(IdleReason, related_name='reasons', on_delete=models.CASCADE)
-    behavior = models.ForeignKey(MeasuredEntityStateBehavior, on_delete=models.CASCADE)
+    reason_code = models.ForeignKey(IdleReason, related_name='reasons', on_delete=models.PROTECT)
+    behavior = models.ForeignKey(MeasuredEntityStateBehavior, on_delete=models.PROTECT)
     create_date = models.DateTimeField('create datetime', auto_now=False, auto_now_add=True)
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
 
@@ -387,7 +392,7 @@ class DisplayType(models.Model):
 
 class DisplayDevice(models.Model):
     reference_cd = models.CharField(max_length=20, null=False, blank=False)
-    display = models.ForeignKey(DisplayType,on_delete=models.CASCADE)
+    display = models.ForeignKey(DisplayType,on_delete=models.PROTECT)
     descr = models.CharField(max_length=160, null=False, blank=False)
     ip_address = models.GenericIPAddressField()
     port = models.IntegerField(null=False, blank=False, default=3001, validators=[MaxValueValidator(65535), MinValueValidator(1)])

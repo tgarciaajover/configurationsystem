@@ -10,6 +10,27 @@ from setup.models import DisplayType
 from setup.models import DisplayDevice
 from setup.models import MeasuredEntityStateBehavior
 from setup.models import MeasuredEntityTransitionState
+from setup.models import IdleReasonHostSystem
+from setup.models import MeasuredEntityScheduledEvent
+
+import logging
+import os
+import logging.handlers
+
+
+# Get an instance of a logger
+LOG_FILENAME = 'iotsettings.log'
+
+# Check if log exists and should therefore be rolled
+needRoll = os.path.isfile(LOG_FILENAME)
+
+logger = logging.getLogger('setup.serializers')
+
+fh = logging.handlers.RotatingFileHandler(LOG_FILENAME, backupCount=5)
+fh.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
 
 
 class SignalUnitSerializer(serializers.Serializer):
@@ -50,7 +71,7 @@ class InputOutputPortSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = InputOutputPort
-        fields = ('id','port_label','signal_type','refresh_time_ms','measured_entity','transformation_text')
+        fields = ('id','port_label','signal_type','refresh_time_ms', 'measured_entity','transformation_text')
 
 class MonitoringDeviceSerializer(serializers.ModelSerializer):
     device_type = DeviceTypeSerializer()
@@ -59,7 +80,7 @@ class MonitoringDeviceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MonitoringDevice
-        fields= ('device_type','descr','serial','mac_address','ip_address','create_date','io_ports')
+        fields= ('id', 'device_type','descr','serial','mac_address','ip_address','create_date','io_ports')
 
 class MeasuredEntityBehaviorSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -83,12 +104,19 @@ class MeasuredEntitySerializer(serializers.ModelSerializer):
         model = MeasuredEntity
         fields= ('id', 'code', 'descr', 'type', 'create_date', 'behaviors')
 
+class MeasuredEntityScheduledEventSerializer(serializers.ModelSerializer):
+    create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
+
+    class Meta:
+        model = MeasuredEntityScheduledEvent
+        fields = ('id', 'scheduled_event_type', 'descr', 'recurrences', 'create_date')
+
 class IdleReasonSerializer(serializers.ModelSerializer):
     create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
     
     class Meta:
         model = IdleReason
-        fields = ('id', 'descr', 'classification', 'group_cd','down', 'create_date')
+        fields = ('id', 'descr', 'group_cd', 'cause', 'classification','down', 'create_date')
 
 class MeasuredEntityTransitionStateSerializer(serializers.ModelSerializer):
     create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
@@ -121,6 +149,7 @@ class MachineHostSystemSerializer(serializers.Serializer):
     id_grupo_maquina = serializers.CharField(max_length=60)
     id_maquina = serializers.CharField(max_length=60)
     descr = serializers.CharField(max_length=200)
+    create_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", required=False, read_only=True)
     last_updttm = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", required=False, read_only=True)
 
     
@@ -135,6 +164,7 @@ class MachineHostSystemSerializer(serializers.Serializer):
         machineHostSystem.id_grupo_maquina = validated_data.get('id_grupo_maquina')
         machineHostSystem.id_maquina = validated_data.get('id_maquina')
         machineHostSystem.descr = validated_data.get('descr')
+        machineHostSystem.create_date = validated_data.get('create_date')
         machineHostSystem.last_updttm = validated_data.get('last_updttm')
         machineHostSystem.code = str( hash ( validated_data.get('id_compania') +
                                          validated_data.get('id_sede')+
@@ -155,16 +185,20 @@ class MachineHostSystemSerializer(serializers.Serializer):
                                                id_grupo_maquina = validated_data.get('id_grupo_maquina',instance.id_grupo_maquina),
                                                id_maquina = validated_data.get('id_maquina',instance.id_maquina))
         instance.descr =  validated_data.get('descr')
+        instance.create_date = validated_data.get('create_date')
         instance.last_updttm = validated_data.get('last_updttm')
         instance.save()
         return instance    
 
 class PlantHostSystemSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    type = serializers.CharField(max_length=1)
     id_compania = serializers.CharField(max_length=60)
     id_sede = serializers.CharField(max_length=60)
     id_planta = serializers.CharField(max_length=60)
     descr = serializers.CharField(max_length=200)
-    last_updttm = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S", required=False, read_only=True)
+    create_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", required=False, read_only=True)
+    last_updttm = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", required=False, read_only=True)
 
     def create(self, validated_data):
         """
@@ -175,6 +209,7 @@ class PlantHostSystemSerializer(serializers.Serializer):
         plantHostSystem.id_sede = validated_data.get('id_sede')
         plantHostSystem.id_planta = validated_data.get('id_planta')
         plantHostSystem.descr = validated_data.get('descr')
+        plantHostSystem.create_date = validated_data.get('create_date')
         plantHostSystem.last_updttm = validated_data.get('last_updttm')
         plantHostSystem.code = str( hash ( validated_data.get('id_compania') +
                                        validated_data.get('id_sede') +
@@ -192,6 +227,7 @@ class PlantHostSystemSerializer(serializers.Serializer):
                                                id_planta= validated_data.get('id_planta', instance.id_planta))
         instance.descr =  validated_data.get('descr')
         instance.last_updttm = validated_data.get('last_updttm')
+        instance.create_date = validated_data.get('create_date')
         instance.save()
         return instance
 
@@ -202,19 +238,27 @@ class IdleReasonHostSystemSerializer(serializers.Serializer):
     id_planta = serializers.CharField(max_length=60)
     id_razon_parada = serializers.CharField(max_length=60)
     descr = serializers.CharField(max_length=200)
-    group_cd = serializers.CharField(max_length=60)
-    classification = serializers.CharField(max_length=1)
-    down = serializers.CharField(max_length=1)
+    grupo_razon_parada = serializers.CharField(max_length=60)
+    causa_raiz_parada = serializers.CharField(max_length=60)
+    clasificacion = serializers.CharField(max_length=1)
+    afecta_capacidad = serializers.CharField(max_length=1)
+    
 
     def create(self, validated_data):
         """
         Create and return a new `IdleReasonHostSystem` instance, given the validated data.
         """
+        logger.info('In IdleReasonHostSystem serializer method create')
         idleReasonHostSystem = IdleReasonHostSystem()
         idleReasonHostSystem.id_compania = validated_data.get('id_compania')
         idleReasonHostSystem.id_sede = validated_data.get('id_sede')
         idleReasonHostSystem.id_planta = validated_data.get('id_planta')
         idleReasonHostSystem.id_razon_parada = validated_data.get('id_razon_parada')
+        idleReasonHostSystem.descr = validated_data.get('descr')
+        idleReasonHostSystem.group_cd = validated_data.get('grupo_razon_parada')
+        idleReasonHostSystem.cause = validated_data.get('causa_raiz_parada')
+        idleReasonHostSystem.down = validated_data.get('afecta_capacidad')
+        idleReasonHostSystem.classification = validated_data.get('clasificacion')
 
         idleReasonHostSystem.save()
         return idleReasonHostSystem
@@ -223,12 +267,24 @@ class IdleReasonHostSystemSerializer(serializers.Serializer):
         """
         Update and return an existing `Idle Reason` instance, given the validated data.
         """
+        logger.info('In IdleReasonHostSystem serializer method update')
         instance = IdleReasonHostSystem.objects.get(id_compania=validated_data.get('id_compania',instance.id_compania),
                                                id_sede=validated_data.get('id_sede',instance.id_sede),
                                                id_planta= validated_data.get('id_planta', instance.id_planta),
 					       id_razon_parada = validated_data.get('id_razon_parada', instance.id_razon_parada))
         instance.descr =  validated_data.get('descr')
+        instance.group_cd = validated_data.get('grupo_razon_parada')
+        instance.cause = validated_data.get('causa_raiz_parada')
+        instance.down = validated_data.get('afecta_capacidad')        
+        instance.classification = validated_data.get('clasificacion')
         instance.last_updttm = validated_data.get('last_updttm')
         instance.save()
         return instance
 
+
+class IdleReasonHostSystemOuputSerializer(serializers.ModelSerializer):
+    create_date = serializers.DateTimeField('%Y-%m-%d %H:%M:%S.%f')
+
+    class Meta:
+        model = IdleReasonHostSystem
+        fields = ('id', 'descr', 'group_cd', 'cause', 'classification', 'down', 'create_date') 
