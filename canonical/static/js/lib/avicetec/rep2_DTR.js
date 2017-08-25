@@ -62,17 +62,17 @@ stop_reasons = {
             //data:data_query.stop_reasons,
             success:function(response){
                 $("#chartsArea").append('<div class="row">' +
-                                        '<div id="previous_container" class="col-lg-4">' +
+                                        '<div id="previous_container" class="col-lg-6">' +
                                         '    <header class="card-header">Perdiodo anterior</header>' +
-                                        '    <canvas id="previous_chart" class="canvas-hbc"></canvas>' +
+                                        '    <canvas id="previous_chart"></canvas>' +
                                         '</div>' +
-                                        '<div id="previous_to_date_container" class="col-lg-4">' +
+                                        '<div id="previous_to_date_container" class="col-lg-6">' +
                                         '    <header class="card-header">Anterior a la misma fecha</header>' +
-                                        '    <canvas id="previous_to_date_chart" class="canvas-hbc"></canvas>' +
+                                        '    <canvas id="previous_to_date_chart"></canvas>' +
                                         '</div>' +
-                                        '<div id="current_container" class="col-lg-4">' +
+                                        '<div id="current_container" class="col-lg-6">' +
                                         '    <header class="card-header">Actualmente</header>' +
-                                        '    <canvas id="current_chart" class="canvas-hbc"></canvas>' +
+                                        '    <canvas id="current_chart"></canvas>' +
                                         '</div>');
                 var data_previous_day = [],
                     data_previous_week = [],
@@ -154,8 +154,8 @@ function create_horizontalBarChart(container,labels,obtained_data){
             data: obtained_data[1].values
         },{
             label: obtained_data[2].name,
-            backgroundColor: chartColors[2],
-            borderColor: chartColors[2],
+            backgroundColor: chartColors[3],
+            borderColor: chartColors[3],
             data: obtained_data[2].values
         }]
 
