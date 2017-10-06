@@ -402,3 +402,4 @@ class Employee(models.Model):
     id_compania = models.CharField(max_length=60)
     id_sede = models.CharField(max_length=60)
     id_planta = models.CharField(max_length=60)
+​
