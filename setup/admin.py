@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django import forms
 from django.forms import ModelForm
+from django.db import transaction
 from setup.models import SignalType
 from setup.models import SignalUnit
 from setup.models import Signal
@@ -20,7 +21,9 @@ from setup.models import MeasuredEntityScheduledEvent
 from setup.models import MachineHostSystem
 from setup.models import PlantHostSystem
 
+from django.core.exceptions import ValidationError
 import requests
+import json
 from setup.serializers import SignalUnitSerializer
 from setup.serializers import SignalTypeSerializer
 from setup.serializers import SignalSerializer
@@ -233,13 +236,13 @@ class BehaviorForm(forms.ModelForm):
     class Meta:
         model = MeasuredEntityBehavior
         fields = ['measure_entity', 'name','descr', 'behavior_text']
-
+        
 @receiver(pre_delete, sender=MeasuredEntityBehavior)
 def callback_delete_measure_entity_behavior(sender, instance, **kwargs):
-    url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
-    url = url + defaults.CONTEXT_ROOT + '/'
-    url = url + 'MeasuredEntity' + '/' + str(instance.measure_entity_id) + '/Behavior/' + str(instance.id)
     try:
+        url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+        url = url + defaults.CONTEXT_ROOT + '/'
+        url = url + 'MeasuredEntity' + '/' + str(instance.measure_entity_id) + '/Behavior/' + str(instance.id)
         r = requests.delete(url)
     except requests.exceptions.RequestException as e:
        logger.error(e)
@@ -250,6 +253,18 @@ class MeasuredEntityBehaviorAdmin(admin.ModelAdmin):
     form = BehaviorForm
     list_display = ('measure_entity', 'name', 'descr')
     list_filter = ('measure_entity',)
+
+    def get_actions(self,request):
+        """
+        It is not possible to perfom the delete action for this model.
+        If we let this functionality to operate, then we are not checking
+        that a behavior is being used in a transformation.
+        """
+        actions = super(MeasuredEntityBehaviorAdmin, self).get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        
+        return actions
 
     def save_model(self,request, obj, form, change):
         obj.save()
@@ -373,7 +388,7 @@ def callback_delete_measured_entity_schedule_event(sender, instance, **kwargs):
 class ScheduleEventForm(forms.ModelForm):
     class Meta:
         model = MeasuredEntityScheduledEvent
-        fields = ['measure_entity','scheduled_event_type','descr', 'recurrences' ]
+        fields = ['measure_entity','scheduled_event_type','descr', 'recurrences', 'day_time' ]
 
 class MeasuredEntityScheduledEventAdmin(admin.ModelAdmin):
     model = MeasuredEntityScheduledEvent
@@ -421,10 +436,12 @@ class MonitoringDeviceAdmin(admin.ModelAdmin):
     list_display = ('descr', 'mac_address','serial')
     inlines = [ InputOutputPortInline, ]
 
-    def save_model(self,request, obj, form, change):
-        obj.save()
+    def save_formset(self, request, form, formset, change):
+        with transaction.atomic():
+            super(MonitoringDeviceAdmin, self).save_formset(request, form, formset, change)
+            
+        obj = formset.instance
         serializer = MonitoringDeviceSerializer(obj)
-        print(serializer.data)
         content = JSONRenderer().render(serializer.data)
         url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
         url = url + defaults.CONTEXT_ROOT + '/'
