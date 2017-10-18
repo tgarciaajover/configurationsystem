@@ -12,6 +12,7 @@ from macaddress.fields import MACAddressField
 import logging
 import os
 import logging.handlers
+import json
 
 
 # Get an instance of a logger
@@ -160,15 +161,13 @@ class InputOutputPort(models.Model):
     def clean(self):
         if (self.transformation_text != None): 
            if (len(self.transformation_text) > 0):
-               print(len(self.transformation_text))
-               root = Element('program')
-               root.text = self.transformation_text
-               xml = tostring(root)
+               dic = { 'program' : self.transformation_text, 'measured_entity' : str(self.measured_entity.id) }
+               jsondata = json.dumps(dic)
                url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
                url = url + defaults.CONTEXT_ROOT + '/'
                url = url + 'checker/transformation'
                try:
-                    r = requests.put(url, data = xml)
+                    r = requests.put(url, data = jsondata)
                     if (r.status_code == 400):
                         raise ValidationError("Invalid language request")
                     else: 
@@ -197,15 +196,15 @@ class MeasuredEntityBehavior(models.Model):
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
 
     def clean(self):
+        print('in clean')
         if len(self.behavior_text) > 0:
-            root = Element('program')
-            root.text = self.behavior_text
-            xml = tostring(root)
+            dic = { 'program' : self.behavior_text, 'measured_entity' : str(self.measure_entity.id) }
+            jsondata = json.dumps(dic)
             url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
             url = url + defaults.CONTEXT_ROOT + '/'
             url = url + 'checker/behavior'
             try:
-                r = requests.put(url, data = xml)
+                r = requests.put(url, data = jsondata)
                 if (r.status_code == 400):
                     raise ValidationError("Invalid language request")
                 else: 
@@ -220,6 +219,24 @@ class MeasuredEntityBehavior(models.Model):
             except requests.exceptions.RequestException as e:
                 logger.info(e)
                 raise ValidationError("An error occurs when connecting to the Syntax Validation Server")
+
+    def delete(self, *args, **kwards):
+        """
+        Only deletes the behavior of not used in transformations.
+        """
+        # Verifies that the behavior is not called in any transformation
+        url =  defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
+        url = url + defaults.CONTEXT_ROOT + '/'
+        url = url + 'MeasuredEntity' + '/' + str(self.measure_entity.id)
+        url = url + '/TransformationsUsingBehavior/' + str(self.id)
+        try:
+            r = requests.get(url)
+            if (r.status_code == 200):
+                json = r.json()
+                if len(json) == 0:
+                    super(MeasuredEntityBehavior, self).delete(*args, **kwargs)
+        except requests.exceptions.RequestException as e:
+            logger.info(e)
 
     def __str__(self):
         return self.name  + ' ' + self.descr 
@@ -237,14 +254,13 @@ class MeasuredEntityStateBehavior(models.Model):
 
     def clean(self):
         if len(self.behavior_text) > 0:
-            root = Element('program')
-            root.text = self.behavior_text
-            xml = tostring(root)
+            dic = { 'program' : self.behavior_text, 'measured_entity' : str(self.measure_entity.id) }
+            jsondata = json.dumps(dic)
             url = defaults.JAVA_CONFIGURATION_SERVER + ':' + str(defaults.PORT) + '/'
             url = url + defaults.CONTEXT_ROOT + '/'
             url = url + 'checker/behavior'
             try:
-                r = requests.put(url, data = xml)
+                r = requests.put(url, data = jsondata)
                 if (r.status_code == 400):
                     raise ValidationError("Invalid language request")
                 else: 
@@ -271,6 +287,7 @@ class MeasuredEntityScheduledEvent(models.Model):
     scheduled_event_type = models.CharField(max_length=2, choices=EVENT_TYPE, default=0)
     descr = models.CharField(max_length=160, null=False, blank=False)
     recurrences = RecurrenceField()
+    day_time = models.TimeField('day_time', editable = True)
     create_date = models.DateTimeField('create datetime', auto_now=False, auto_now_add=True)
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
     
@@ -402,4 +419,3 @@ class Employee(models.Model):
     id_compania = models.CharField(max_length=60)
     id_sede = models.CharField(max_length=60)
     id_planta = models.CharField(max_length=60)
-​
