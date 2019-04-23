@@ -19,9 +19,11 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.conf.urls import url, include
 import views
+from material.frontend import urls as frontend_urls
 
 
 urlpatterns = [
+    url(r'^jet/', include('jet.urls', 'jet')),  # Django JET URLS
     url(r'^admin/', admin.site.urls),
     url(r'^', include('canonical.urls')),
 ]
