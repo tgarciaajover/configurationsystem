@@ -82,6 +82,7 @@ CORS_ALLOW_HEADERS = (
 REST_FRAMEWORK = {
    'DEFAULT_AUTHENTICATION_CLASSES': (
        'rest_framework.authentication.TokenAuthentication',
+       'rest_framework.authentication.SessionAuthentication',
    ),
    'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAdminUser'
@@ -200,3 +201,6 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/registro/add/'
 
 MACADDRESS_DEFAULT_DIALECT = 'netaddr.mac_eui48'
+
+# Directorio donde residen los logs de la aplicación
+LOG_PATH = os.path.join(BASE_DIR, "log/")

@@ -16,21 +16,10 @@ from setup.models import MeasuredEntityScheduledEvent
 import logging
 import os
 import logging.handlers
+from utils.advutils import get_logger
 
 
-# Get an instance of a logger
-LOG_FILENAME = 'iotsettings.log'
-
-# Check if log exists and should therefore be rolled
-needRoll = os.path.isfile(LOG_FILENAME)
-
-logger = logging.getLogger('setup.serializers')
-
-fh = logging.handlers.RotatingFileHandler(LOG_FILENAME, backupCount=5)
-fh.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
-logger.addHandler(fh)
+logger = get_logger('iot_settings_serializers')
 
 
 class SignalUnitSerializer(serializers.Serializer):

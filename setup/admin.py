@@ -58,27 +58,11 @@ from setup.models import Employee
 
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+from utils.advutils import get_logger
 
 # Register your models here.
 
-# Get an instance of a logger
-LOG_FILENAME = 'iotsettings.log'
-
-# Check if log exists and should therefore be rolled
-needRoll = os.path.isfile(LOG_FILENAME)
-
-logger = logging.getLogger('admin')
-
-fh = logging.handlers.RotatingFileHandler(LOG_FILENAME, backupCount=5)
-fh.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
-logger.addHandler(fh)
-
-# This is a stale log, so roll it
-if needRoll:
-	# Roll over on application start
-    logger.handlers[0].doRollover()
+logger = get_logger('iot_settings_admin')
 
 class SignalTypeForm(ModelForm):
     class Meta:
