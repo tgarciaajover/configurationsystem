@@ -1,8 +1,17 @@
 from django.conf.urls import url
 from rest_framework.urlpatterns import format_suffix_patterns
 from canonical import views
+from rest_framework import routers
+from rest_framework.authtoken.views import ObtainAuthToken
+from django.conf.urls import *
+from canonical.views import UserViewSet
+
+router = routers.DefaultRouter()
+router.register(r'users', UserViewSet)
 
 urlpatterns = [
+    url('api/auth/', ObtainAuthToken.as_view()),
+    url('api/', include(router.urls)),
     url(r'^compania/$', views.compania_list),
     url(r'^compania/(?P<pk>[0-9]+)/$', views.compania_detail),
     url(r'^sede/$', views.sede_list),
@@ -23,4 +32,4 @@ urlpatterns = [
     url(r'^parada_planeada/(?P<pk>[0-9]+)/$', views.parada_planeada_detail),
 ]
 
-urlpatterns = format_suffix_patterns(urlpatterns)
+#urlpatterns = format_suffix_patterns(urlpatterns)

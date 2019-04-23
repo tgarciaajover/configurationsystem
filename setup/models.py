@@ -413,6 +413,7 @@ class DisplayDevice(models.Model):
     descr = models.CharField(max_length=160, null=False, blank=False)
     ip_address = models.GenericIPAddressField()
     port = models.IntegerField(null=False, blank=False, default=3001, validators=[MaxValueValidator(65535), MinValueValidator(1)])
+    entity = models.ForeignKey(MeasuredEntity, related_name='display_entity', on_delete=models.CASCADE)
     
 class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

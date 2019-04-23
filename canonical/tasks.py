@@ -1,4 +1,3 @@
-from django_q.tasks import async
 from django.http import HttpResponse, JsonResponse
 
 import logging

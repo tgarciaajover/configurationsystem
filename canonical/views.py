@@ -42,7 +42,6 @@ from setup.serializers import MachineHostSystemSerializer
 from setup.serializers import IdleReasonHostSystemSerializer
 from setup.serializers import IdleReasonHostSystemOuputSerializer
 
-from django_q.tasks import async
 from canonical.tasks import delReasonCode
 from canonical.tasks import putReasonCode
 from canonical.tasks import putActivityRegister
@@ -65,6 +64,10 @@ import datetime
 import logging
 import os
 import logging.handlers
+
+from rest_framework import viewsets
+from django.contrib.auth.models import User
+from canonical.serializers import UserSeralizer
 
 
 # Get an instance of a logger
@@ -962,7 +965,7 @@ class CreateRegisterView(LoginRequiredMixin, CreateView):
         self.object = form.save()
         serializer = DisplayDeviceSerializer(self.object)
         content = JSONRenderer().render(serializer.data)
-        async(putActivityRegister, content)
+        #async(putActivityRegister, content)
         return HttpResponseRedirect(self.get_success_url())    
 
     # if a GET (or any other method) we'll create a blank form
@@ -980,3 +983,8 @@ def reports(request,report):
         "2":"downtime_reasons.html"
         }
     return render(request,template_report[report], {})
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserSeralizer
+    permission_classes = (IsAuthenticated,)

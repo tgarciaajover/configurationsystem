@@ -10,6 +10,8 @@ from canonical.models import OrdenProduccionPlaneada
 from canonical.models import ParadaPlaneada
 from canonical.models import ActivityRegister
 
+from django.contrib.auth.models import User
+
 
 class CompaniaSerializer(serializers.Serializer):
     id_compania = serializers.CharField(max_length=60)
@@ -145,3 +147,13 @@ class ActivityRegisterSerializer(serializers.ModelSerializer):
                    'id_grupo_maquina', 'id_maquina', 'ano',
                    'mes', 'tipo_actividad', 'id_razon_parada',
                    'id_produccion', 'create_date', 'last_updttm' )
+
+class UserSeralizer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'password')
+        extra_kwargs = {'password' : {'write_only':True, 'required': True}}
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user

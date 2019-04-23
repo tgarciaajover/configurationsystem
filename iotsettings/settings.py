@@ -26,14 +26,12 @@ SECRET_KEY = 'di=r3ptk^0y6l&4n&g6ksp8ix)&+t4c&^l-60))ok%d*n#^&(2'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.24' , 'localhost', '127.0.0.1','192.168.0.19']
+ALLOWED_HOSTS = ['192.168.0.24' , 'localhost', '127.0.0.1','192.168.0.19', '192.168.0.171']
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'setup.apps.SetupConfig',
-    'canonical.apps.CanonicalConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,22 +39,54 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
     'django_ace',
-    'mod_wsgi.server',
+    'canonical',
+    'setup',
     # other apps
-    'django_q',
-    'recurrence'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOW_METHODS = (
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+)
+
+CORS_ALLOW_HEADERS = (
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+)
+
+REST_FRAMEWORK = {
+   'DEFAULT_AUTHENTICATION_CLASSES': (
+       'rest_framework.authentication.TokenAuthentication',
+   ),
+   'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAdminUser'
+   ),
+}
 
 ROOT_URLCONF = 'iotsettings.urls'
 
@@ -85,19 +115,19 @@ WSGI_APPLICATION = 'iotsettings.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'iotajover',
-        'USER': 'iotajover',
-        'PASSWORD': 'iotajover',
-        'HOST': 'localhost',
-        'PORT': '',
+        'NAME': 'iot_manufactura',
+        'USER': 'postgres',
+        'PASSWORD': 'pYdxBXhwd8XgZ',
+        'HOST': '192.168.0.31',
+        'PORT': '6234',
     },
    'canonical': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'ajover_canonical_model',
-        'USER': 'iotajover',
-        'PASSWORD': 'iotajover',
-        'HOST': 'localhost',
-        'PORT': '',
+        'NAME': 'manufactura_canonical_model',
+        'USER': 'postgres',
+        'PASSWORD': 'pYdxBXhwd8XgZ',
+        'HOST': '192.168.0.31',
+        'PORT': '6234',
     }
 }
 
