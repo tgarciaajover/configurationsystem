@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.forms import ModelForm
-from canonical.models import ActivityRegister, Compania, Planta, Sede, RazonParada, Maquina, GrupoMaquina
+from canonical.models import ActivityRegister, Compania, Planta, Sede, RazonParada, Maquina, GrupoMaquina, GraphType
 from django.contrib.auth.decorators import login_required
 
 # Register your models here.
@@ -32,3 +32,4 @@ admin.site.register(RazonParada)
 admin.site.register(Compania)
 admin.site.register(Maquina)
 admin.site.register(GrupoMaquina)
+admin.site.register(GraphType)
