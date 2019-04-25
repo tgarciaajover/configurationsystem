@@ -1006,3 +1006,43 @@ class GraphTypeList(APIView):
         serializer = GraphTypeSerializer(graph_types, many=True)
         print(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class SedeByCompaniaId(APIView):
+    """
+    Get a Sede by companiaId.
+    """
+    def get(self, request, format=None):
+        sedes = Sede.objects.filter(id_compania= request.GET.get('compania', None))
+        print(request)
+        serializer =  SedeSerializer(sedes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class MaquinaByCompaniaId(APIView):
+    """
+    Get a Maquina by companiaId.
+    """
+    def get(self, request, format=None):
+        maquinas = Maquina.objects.filter(id_compania= request.GET.get('compania', None))
+        print(request)
+        serializer =  MaquinaSerializer(maquinas, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class GruposMaquinaByCompaniaId(APIView):
+    """
+    Get Grupos Maquinas by companiaId.
+    """
+    def get(self, request, format=None):
+        grupos_maquinas = GrupoMaquina.objects.filter(id_compania= request.GET.get('compania', None))
+        print(request)
+        serializer =  GrupoMaquina(grupos_maquinas, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class PlantaByCompaniaId(APIView):
+    """
+    Get Plantas by companiaId.
+    """
+    def get(self, request, format=None):
+        plantas = Planta.objects.filter(id_compania= request.GET.get('compania', None))
+        print(request)
+        serializer =  PlantaSerializer(plantas, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

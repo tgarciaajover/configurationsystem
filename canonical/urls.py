@@ -5,7 +5,7 @@ from rest_framework import routers
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.conf.urls import *
 from canonical.views import UserViewSet
-from canonical.views import GraphTypeList
+from canonical.views import GraphTypeList, SedeByCompaniaId, MaquinaByCompaniaId, GruposMaquinaByCompaniaId, PlantaByCompaniaId
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
@@ -31,7 +31,11 @@ urlpatterns = [
     url(r'^orden_produccion_planeada/(?P<pk>[0-9]+)/$', views.orden_produccion_planeada_detail),
     url(r'^parada_planeada/$', views.parada_planeada_list),
     url(r'^parada_planeada/(?P<pk>[0-9]+)/$', views.parada_planeada_detail),
-    url('graph_types', GraphTypeList.as_view(), name='graph_types')
+    url('graph_types', GraphTypeList.as_view(), name='graph_types'),
+    url('sede_compania', SedeByCompaniaId.as_view(), name='sede_by_compania_id'),
+    url('maquina_compania', MaquinaByCompaniaId.as_view(), name='maquina_by_compania_id'),
+    url('grupo_maquina_compania', GruposMaquinaByCompaniaId.as_view(), name='grupo_maquina_by_compania_id'),
+    url('planta_compania', PlantaByCompaniaId.as_view(), name='planta_by_compania_id'),
 ]
 
 #urlpatterns = format_suffix_patterns(urlpatterns)
