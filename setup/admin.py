@@ -19,7 +19,7 @@ from setup.models import MeasuredEntityStateBehavior
 from setup.models import MeasuredEntityTransitionState
 from setup.models import MeasuredEntityScheduledEvent
 from setup.models import MachineHostSystem
-from setup.models import PlantHostSystem
+from setup.models import PlantHostSystem, IdleReasonHostSystem
 
 from django.core.exceptions import ValidationError
 import requests
@@ -592,3 +592,5 @@ admin.site.register(DisplayDevice, DisplayDeviceAdmin)
 # Re-register UserAdmin
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
+admin.site.register(IdleReasonHostSystem)
+

@@ -69,6 +69,9 @@ from rest_framework import viewsets
 from django.contrib.auth.models import User
 from canonical.serializers import UserSeralizer
 
+from canonical.models import GraphType
+from canonical.serializers import GraphTypeSerializer
+from rest_framework.views import APIView
 
 # Get an instance of a logger
 LOG_FILENAME = 'iotsettings.log'
@@ -239,6 +242,8 @@ def planta_list(request, format=None):
         except Planta.DoesNotExist:
             serializer_p = PlantaSerializer(data=data)
             serializer_phs = PlantHostSystemSerializer(data=data)
+            print(serializer_p)
+            print(serializer_phs)
             if (serializer_p.is_valid() and serializer_phs.is_valid()):
                 serializer_p.save()
                 serializer_phs.save()
@@ -246,6 +251,9 @@ def planta_list(request, format=None):
             else:
                 logger.error(serializer_p.errors)
                 logger.error(serializer_phs.errors)
+                print('ERRORS')
+                print(serializer_p.errors)
+                print(serializer_phs.errors)
                 return JsonResponse(serializer_p.errors, status=400) 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -988,3 +996,13 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSeralizer
     permission_classes = (IsAuthenticated,)
+
+class GraphTypeList(APIView):
+    """
+    List all graph types.
+    """
+    def get(self, request, format=None):
+        graph_types = GraphType.objects.all()
+        serializer = GraphTypeSerializer(graph_types, many=True)
+        print(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)

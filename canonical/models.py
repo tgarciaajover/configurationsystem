@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 
 class Compania(models.Model):
     id_compania = models.CharField(max_length=60)
-    descr =  models.CharField(max_length=200)
+    descr = models.CharField(max_length=200)
     create_date = models.DateTimeField('create datetime',  auto_now=False,  auto_now_add=True)
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
 
@@ -156,4 +156,15 @@ class ActivityRegister(models.Model):
     author = models.IntegerField(null=True, blank=True)    
     create_date =  models.DateTimeField('create datetime',  auto_now=False,  auto_now_add=True)
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
+
+
+class GraphType(models.Model):
+    name = models.CharField(max_length=200, null=False, blank=False)
+    image_path = models.CharField(max_length=300, null=False, blank=False)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'graph_types'
 
