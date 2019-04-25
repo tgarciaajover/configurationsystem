@@ -424,7 +424,7 @@ def razon_parada_detail(request, pk, format=None):
             if (r.status_code == 204):
                 razonparada.delete()
                 idlehs.delete()
-                return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+                return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response(r.text, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except requests.exceptions.RequestException as e:

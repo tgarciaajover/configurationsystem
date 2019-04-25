@@ -232,7 +232,7 @@ class RazonesParadaViewTest(TestCase):
         else:
             response = requests.delete(url, data=jsonText,
                                        headers=token)
-        self.assertEqual(response.status_code, 204)
+        self.assertIn(response.status_code, [200, 204])
 
     def test_view_b_post(self, token=None):
         dict = {'id_compania': 'compania0', 'id_sede': 'sede0',
@@ -250,7 +250,7 @@ class RazonesParadaViewTest(TestCase):
         else:
             response = requests.post(url, data=jsonText,
                                      headers=token)
-        #self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 201)
 
     def test_view_c_list_get(self, token=None):
         url = host + port + url_prefix + 'razon_parada/'

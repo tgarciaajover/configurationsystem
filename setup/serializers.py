@@ -188,7 +188,6 @@ class MachineHostSystemSerializer(serializers.Serializer):
 
 class PlantHostSystemSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    type = serializers.CharField(max_length=1)
     id_compania = serializers.CharField(max_length=60)
     id_sede = serializers.CharField(max_length=60)
     id_planta = serializers.CharField(max_length=60)
