@@ -499,3 +499,41 @@ class AggregateMethod(models.Model):
     create_date = models.DateTimeField('create datetime', auto_now=False,
                                        auto_now_add=True)
     period = models.ForeignKey(Period, on_delete=models.PROTECT)
+
+class GraphType(models.Model):
+    name = models.CharField(max_length=200, null=False, blank=False)
+    image_path = models.CharField(max_length=300, null=False, blank=False)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'graph_types'
+
+
+class Dashboard(models.Model):
+    name = models.CharField(max_length=300, null=False, blank=False)
+    layout = models.CharField(max_length=100, null=False, blank=False)
+    favorite = models.BooleanField(null=False, blank=False, default=False)
+    id_user = models.Model
+    user = models.ForeignKey( User , on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'dashboards'
+
+
+class Chart(models.Model):
+    graph_type = models.OneToOneField( GraphType , on_delete = models.PROTECT)
+    position = models.IntegerField(blank=False, null=False)
+    kpi_name = models.CharField(max_length= 300, blank=False, null=False)
+    api_url = models.CharField(max_length= 300, blank=False, null=False)
+    dashboard = models.ForeignKey( Dashboard , on_delete=models.CASCADE )
+
+    def __str__(self):
+        return str(self.graph_type) + ' ' + str(self.dashboard) + ' ' + self.kpi_name
+
+    class Meta:
+        db_table = 'charts'

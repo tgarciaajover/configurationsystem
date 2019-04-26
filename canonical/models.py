@@ -158,13 +158,3 @@ class ActivityRegister(models.Model):
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
 
 
-class GraphType(models.Model):
-    name = models.CharField(max_length=200, null=False, blank=False)
-    image_path = models.CharField(max_length=300, null=False, blank=False)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        db_table = 'graph_types'
-

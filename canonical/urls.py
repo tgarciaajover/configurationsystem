@@ -5,7 +5,8 @@ from rest_framework import routers
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.conf.urls import *
 from canonical.views import UserViewSet
-from canonical.views import GraphTypeList, SedeByCompaniaId, MaquinaByCompaniaId, GruposMaquinaByCompaniaId, PlantaByCompaniaId
+from canonical.views import SedeByCompaniaId, MaquinaByCompaniaId, GruposMaquinaByCompaniaId, PlantaByCompaniaId, GraphTypeList
+from canonical.views import DashboardsApiView, ChartsApiView
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
@@ -36,6 +37,8 @@ urlpatterns = [
     url('maquina_compania', MaquinaByCompaniaId.as_view(), name='maquina_by_compania_id'),
     url('grupo_maquina_compania', GruposMaquinaByCompaniaId.as_view(), name='grupo_maquina_by_compania_id'),
     url('planta_compania', PlantaByCompaniaId.as_view(), name='planta_by_compania_id'),
+    url('dashboards', DashboardsApiView.as_view(), name='dashboards'),
+    url('charts', ChartsApiView.as_view(), name='charts'),
 ]
 
 #urlpatterns = format_suffix_patterns(urlpatterns)
