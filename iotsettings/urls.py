@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^jet/', include('jet.urls', 'jet')),  # Django JET URLS
     url(r'^admin/', admin.site.urls),
     url(r'^', include('canonical.urls')),
+    url(r'^', include('graph_types.urls')),
 ]
 
 urlpatterns += [

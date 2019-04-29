@@ -9,7 +9,6 @@ from canonical.models import PlanProduccion
 from canonical.models import OrdenProduccionPlaneada
 from canonical.models import ParadaPlaneada
 from canonical.models import ActivityRegister
-from setup.models import GraphType, Dashboard, Chart
 
 from django.contrib.auth.models import User
 
@@ -159,17 +158,12 @@ class UserSeralizer(serializers.HyperlinkedModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
 
-class GraphTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GraphType
-        fields = '__all__'
-
-class DashboardSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Dashboard
-        fields = '__all__'
-
-class ChartSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Chart
-        fields = '__all__'
+# class DashboardSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Dashboard
+#         fields = '__all__'
+#
+# class ChartSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Chart
+#         fields = '__all__'

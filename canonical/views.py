@@ -69,8 +69,6 @@ from rest_framework import viewsets
 from django.contrib.auth.models import User
 from canonical.serializers import UserSeralizer
 
-from setup.models import GraphType, Chart, Dashboard
-from canonical.serializers import GraphTypeSerializer, ChartSerializer, DashboardSerializer
 from rest_framework.views import APIView
 
 # Get an instance of a logger
@@ -997,16 +995,6 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSeralizer
     permission_classes = (IsAuthenticated,)
 
-class GraphTypeList(APIView):
-    """
-    List all graph types.
-    """
-    def get(self, request, format=None):
-        graph_types = GraphType.objects.all()
-        serializer = GraphTypeSerializer(graph_types, many=True)
-        print(serializer.data)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
 class SedeByCompaniaId(APIView):
     """
     Get a Sede by companiaId.
@@ -1048,37 +1036,37 @@ class PlantaByCompaniaId(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class DashboardsApiView(APIView):
-    """
-    Get Plantas by companiaId.
-    """
-    def get(self, request, format=None):
-        dashboards = Dashboard.objects.all()
-        serializer =  DashboardSerializer(dashboards, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request, format=None):
-        body_data = json.loads(request.body)
-        serializer = DashboardSerializer( data = body_data )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class ChartsApiView(APIView):
-    """
-    Get Plantas by companiaId.
-    """
-    def get(self, request, format=None):
-        charts = Chart.objects.all()
-        serializer =  ChartSerializer(charts, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request, format=None):
-        body_data = json.loads(request.body)
-        serializer = ChartSerializer( data = body_data )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# class DashboardsApiView(APIView):
+#     """
+#     Get Plantas by companiaId.
+#     """
+#     def get(self, request, format=None):
+#         dashboards = Dashboard.objects.all()
+#         serializer =  DashboardSerializer(dashboards, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+#
+#     def post(self, request, format=None):
+#         body_data = json.loads(request.body)
+#         serializer = DashboardSerializer( data = body_data )
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+#
+# class ChartsApiView(APIView):
+#     """
+#     Get Plantas by companiaId.
+#     """
+#     def get(self, request, format=None):
+#         charts = Chart.objects.all()
+#         serializer =  ChartSerializer(charts, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+#
+#     def post(self, request, format=None):
+#         body_data = json.loads(request.body)
+#         serializer = ChartSerializer( data = body_data )
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
