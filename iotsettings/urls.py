@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include('canonical.urls')),
     url(r'^', include('graph_types.urls')),
+    url(r'^', include('dashboard.urls')),
 ]
 
 urlpatterns += [

@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'canonical',
     'setup',
     'graph_types',
+    'dashboard',
     # other apps
 ]
 

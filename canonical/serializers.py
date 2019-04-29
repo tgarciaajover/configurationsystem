@@ -157,13 +157,3 @@ class UserSeralizer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
-
-# class DashboardSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Dashboard
-#         fields = '__all__'
-#
-# class ChartSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Chart
-#         fields = '__all__'

@@ -31,13 +31,10 @@ urlpatterns = [
     url(r'^orden_produccion_planeada/(?P<pk>[0-9]+)/$', views.orden_produccion_planeada_detail),
     url(r'^parada_planeada/$', views.parada_planeada_list),
     url(r'^parada_planeada/(?P<pk>[0-9]+)/$', views.parada_planeada_detail),
-    # url('graph_types', GraphTypeList.as_view(), name='graph_types'),
     url('sede_compania', SedeByCompaniaId.as_view(), name='sede_by_compania_id'),
     url('maquina_compania', MaquinaByCompaniaId.as_view(), name='maquina_by_compania_id'),
     url('grupo_maquina_compania', GruposMaquinaByCompaniaId.as_view(), name='grupo_maquina_by_compania_id'),
     url('planta_compania', PlantaByCompaniaId.as_view(), name='planta_by_compania_id'),
-    # url('dashboards', DashboardsApiView.as_view(), name='dashboards'),
-    # url('charts', ChartsApiView.as_view(), name='charts'),
 ]
 
 #urlpatterns = format_suffix_patterns(urlpatterns)
