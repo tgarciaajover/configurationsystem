@@ -10,6 +10,8 @@ from recurrence.fields import RecurrenceField
 from macaddress.fields import MACAddressField
 from utils.advutils import get_logger
 
+from graph_types.models import GraphType
+
 import json
 
 logger = get_logger('iot_settings')

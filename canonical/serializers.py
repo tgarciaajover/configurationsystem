@@ -9,7 +9,6 @@ from canonical.models import PlanProduccion
 from canonical.models import OrdenProduccionPlaneada
 from canonical.models import ParadaPlaneada
 from canonical.models import ActivityRegister
-from canonical.models import GraphType
 
 from django.contrib.auth.models import User
 
@@ -158,8 +157,3 @@ class UserSeralizer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
-
-class GraphTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GraphType
-        fields = '__all__'

@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.forms import ModelForm
 from canonical.models import ActivityRegister, Compania, Planta, Sede, RazonParada, Maquina, GrupoMaquina
 from django.contrib.auth.decorators import login_required
-
 # Register your models here.
 
 class ActivityRegisterForm(ModelForm):
@@ -14,6 +13,7 @@ class ActivityRegisterForm(ModelForm):
         super(ActivityRegisterForm, self).__init__(*args, **kwargs)
 
 class ActivityRegisterAdmin(admin.ModelAdmin):
+    form = ActivityRegisterForm
     form = ActivityRegisterForm
 
     def get_form(self, request, obj=None, **kwargs):
