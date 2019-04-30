@@ -7,6 +7,6 @@ from dashboard.views import ChartsApiView, ChartDetailApiView
 urlpatterns = [
     url('dashboards', DashboardsApiView.as_view(), name='dashboards'),
     url('dashboard_detail/(?P<pk>[\w:|-]+)/', DashboardDetailApiView.as_view()),
-    url('charts/', ChartsApiView.as_view(), name='charts'),
+    url('charts', ChartsApiView.as_view(), name='charts'),
     url('chart_detail/(?P<pk>[\w:|-]+)/', ChartDetailApiView.as_view()),
 ]

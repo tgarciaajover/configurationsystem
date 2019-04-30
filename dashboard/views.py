@@ -20,8 +20,8 @@ class DashboardsApiView(APIView):
     """
     def get(self, request, format=None):
         if request.GET.get('user', None):
-            user = User.objects.get(username=request.GET.get('user', None))
-            dashboards = Dashboard.objects.filter(user= user)
+            user = get_object_or_404(User, username = request.GET.get('user', None))
+            dashboards = Dashboard.objects.filter(user=user)
         else:
             # Se obtienen todos los dashboards
             dashboards = Dashboard.objects.all()
@@ -84,8 +84,12 @@ class ChartsApiView(APIView):
         Retrieve and Create Charts.
     """
     def get(self, request, format=None):
-        # Se obtienen todas las graficas
-        charts = Chart.objects.all()
+        if request.GET.get('dashboard_id', None):
+            dashboard = get_object_or_404(Dashboard, id=request.GET.get('dashboard_id', None))
+            charts = Chart.objects.filter(dashboard=dashboard)
+        else:
+            # Se obtienen todas las graficas
+            charts = Chart.objects.all()
         # Se serializan todas las graficas
         serializer =  ChartSerializer(charts, many=True)
         # Retorna las graficas serializadas y status 200.
