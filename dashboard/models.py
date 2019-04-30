@@ -50,7 +50,7 @@ class Chart(models.Model):
         dashboard
             Referencia al dashboard al cual se encuentra asociado la grafica
     """
-    graph_type = models.OneToOneField( GraphType , on_delete = models.PROTECT)
+    graph_type = models.ForeignKey( GraphType , on_delete=models.CASCADE)
     position = models.IntegerField(blank=False, null=False)
     kpi_name = models.CharField(max_length= 300, blank=False, null=False)
     api_url = models.CharField(max_length= 300, blank=False, null=False)
