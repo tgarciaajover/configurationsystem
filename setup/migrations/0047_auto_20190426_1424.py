@@ -24,7 +24,6 @@ class Migration(migrations.Migration):
                 ('method', models.CharField(max_length=160)),
                 ('attribute', models.CharField(max_length=160)),
                 ('create_date', models.DateTimeField(auto_now_add=True, verbose_name='create datetime')),
-                ('period', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='setup.Period')),
             ],
         ),
         migrations.CreateModel(
@@ -62,10 +61,6 @@ class Migration(migrations.Migration):
             options={
                 'db_table': 'graph_types',
             },
-        ),
-        migrations.RemoveField(
-            model_name='agreggatemethod',
-            name='period',
         ),
         migrations.DeleteModel(
             name='AgreggateMethod',
