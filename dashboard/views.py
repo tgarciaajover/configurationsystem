@@ -7,6 +7,7 @@ import json
 
 from dashboard.models import Dashboard
 from dashboard.models import Chart
+from django.contrib.auth.models import User
 
 from dashboard.serializers import DashboardSerializer
 from dashboard.serializers import ChartSerializer
@@ -15,14 +16,19 @@ from dashboard.serializers import ChartSerializer
 
 class DashboardsApiView(APIView):
     """
-    Retrieve and Post Dashboards.
+    Retrieve and Create Dashboards.
     """
     def get(self, request, format=None):
-        # Se obtienen todos los dashboards
-        dashboards = Dashboard.objects.all()
+        if request.GET.get('user', None):
+            user = User.objects.get(username=request.GET.get('user', None))
+            dashboards = Dashboard.objects.filter(user= user)
+        else:
+            # Se obtienen todos los dashboards
+            dashboards = Dashboard.objects.all()
         # Se serializan los dashboards
         serializer =  DashboardSerializer(dashboards, many=True)
         # Retorna los dashboards serializados y status 200.
+
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, format=None):
@@ -75,7 +81,7 @@ class DashboardDetailApiView(APIView):
 
 class ChartsApiView(APIView):
     """
-        Retrieve and Post Charts.
+        Retrieve and Create Charts.
     """
     def get(self, request, format=None):
         # Se obtienen todas las graficas
