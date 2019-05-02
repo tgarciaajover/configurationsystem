@@ -5,7 +5,7 @@ from rest_framework import routers
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.conf.urls import *
 from canonical.views import UserViewSet
-from canonical.views import SedeByCompaniaId, MaquinaByCompaniaId, GruposMaquinaByCompaniaId, PlantaByCompaniaId
+from canonical.views import SedeByCompaniaId, MaquinaByGrupoId, GruposMaquinaByPlantaId, PlantaBySedeId
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
@@ -32,9 +32,9 @@ urlpatterns = [
     url(r'^parada_planeada/$', views.parada_planeada_list),
     url(r'^parada_planeada/(?P<pk>[0-9]+)/$', views.parada_planeada_detail),
     url('sede_compania', SedeByCompaniaId.as_view(), name='sede_by_compania_id'),
-    url('maquina_compania', MaquinaByCompaniaId.as_view(), name='maquina_by_compania_id'),
-    url('grupo_maquina_compania', GruposMaquinaByCompaniaId.as_view(), name='grupo_maquina_by_compania_id'),
-    url('planta_compania', PlantaByCompaniaId.as_view(), name='planta_by_compania_id'),
+    url('maquina_grupo_maquina', MaquinaByGrupoId.as_view(), name='maquina_by_grupo_id'),
+    url('grupo_maquina_planta', GruposMaquinaByPlantaId.as_view(), name='grupo_maquina_by_planta_id'),
+    url('planta_compania', PlantaBySedeId.as_view(), name='planta_by_sede_id'),
 ]
 
 #urlpatterns = format_suffix_patterns(urlpatterns)

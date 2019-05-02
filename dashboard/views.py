@@ -34,6 +34,10 @@ class DashboardsApiView(APIView):
     def post(self, request, format=None):
         # Se obtiene la informacion que viene en el body
         body_data = json.loads(request.body)
+        # Obtener el Usuario a partir del nombre de usuario
+        user = User.objects.get(username=body_data['user'])
+        # Cambiar el nombre de usuario por el id
+        body_data['user'] = user.id
         # Se serializa la informacion obtenida del body
         serializer = DashboardSerializer( data = body_data )
         if serializer.is_valid():

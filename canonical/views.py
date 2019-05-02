@@ -1005,32 +1005,30 @@ class SedeByCompaniaId(APIView):
         serializer =  SedeSerializer(sedes, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class MaquinaByCompaniaId(APIView):
+class MaquinaByGrupoId(APIView):
     """
     Get a Maquina by companiaId.
     """
     def get(self, request, format=None):
-        maquinas = Maquina.objects.filter(id_compania= request.GET.get('compania', None))
+        maquinas = Maquina.objects.filter(id_grupo_maquina= request.GET.get('grupo', None))
         print(request)
         serializer =  MaquinaSerializer(maquinas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class GruposMaquinaByCompaniaId(APIView):
+class GruposMaquinaByPlantaId(APIView):
     """
     Get Grupos Maquinas by companiaId.
     """
     def get(self, request, format=None):
-        grupos_maquinas = GrupoMaquina.objects.filter(id_compania= request.GET.get('compania', None))
-        print(request)
-        serializer =  GrupoMaquina(grupos_maquinas, many=True)
+        grupos_maquinas = GrupoMaquina.objects.filter(id_planta= request.GET.get('planta', None))
+        serializer =  GrupoMaquinaSerializer(grupos_maquinas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class PlantaByCompaniaId(APIView):
+class PlantaBySedeId(APIView):
     """
     Get Plantas by companiaId.
     """
     def get(self, request, format=None):
-        plantas = Planta.objects.filter(id_compania= request.GET.get('compania', None))
-        print(request)
+        plantas = Planta.objects.filter(id_sede= request.GET.get('sede', None))
         serializer =  PlantaSerializer(plantas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
