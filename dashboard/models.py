@@ -55,6 +55,7 @@ class Chart(models.Model):
     kpi_name = models.CharField(max_length= 300, blank=False, null=False)
     api_url = models.CharField(max_length= 300, blank=False, null=False)
     dashboard = models.ForeignKey( Dashboard , on_delete=models.CASCADE )
+    graph_html_id = models.CharField(max_length=300, blank=False, null=False, default="")
 
     def __str__(self):
         return str(self.graph_type) + ' ' + str(self.dashboard) + ' ' + self.kpi_name
