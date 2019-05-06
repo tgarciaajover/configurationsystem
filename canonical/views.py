@@ -111,11 +111,32 @@ def variables_comunes(request, format=None):
 
                             json_data.append(json_append)
 
-        # req = requests.
+        variables = []
+        initial = True
 
-        print(json_append)
+        for data in json_data:
+            # TODO: Cambiar URL
+            req = requests.get(url='http://192.168.0.171:8111/iotserver/Status', params=data)
+            json_info = req.json()
 
-        return Response(status=status.HTTP_200_OK)
+            if initial == True:
+                for info in json_info:
+                    variables.append(info['key'])
+                    initial = False
+            elif len(variables) > 0:
+                temp = []
+                for info in json_info:
+                    temp.append(info['key'])
+
+                variables = list(set(variables).intersection(temp))
+            else:
+                break
+
+        return_json = {
+            'kpis': variables
+        }
+
+        return Response(return_json, status=status.HTTP_200_OK)
 
 @api_view(['GET', ])
 @permission_classes((IsAuthenticated, ))
