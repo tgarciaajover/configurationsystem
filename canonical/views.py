@@ -65,6 +65,8 @@ import logging
 import os
 import logging.handlers
 
+from django.core import serializers
+
 from rest_framework import viewsets
 from django.contrib.auth.models import User
 from canonical.serializers import UserSeralizer
@@ -90,11 +92,73 @@ logger.addHandler(fh)
 @parser_classes((JSONParser,))
 def arbol(request, format=None):
     if request.method == 'GET':
-        companias = Compania.objects.all().values_list('id_compania', 'descr')
-        print(companias)
+        json_data = {
+            'companias': []
+        }
+
+        companias = Compania.objects.all()
+
         for comp in companias:
-            pass
-        return Response(status=status.HTTP_200_OK)
+            push_compania = {
+                'id_compania': comp.id_compania,
+                'descr': comp.descr,
+                'sedes': []
+            }
+
+            json_data['companias'].append(push_compania)
+
+            index_compania = len(json_data['companias']) - 1
+
+            sedes = Sede.objects.filter(id_compania=comp.id_compania)
+
+            for sede in sedes:
+                push_sede = {
+                    'id_sede': sede.id_sede,
+                    'descr': sede.descr,
+                    'plantas': []
+                }
+
+                json_data['companias'][index_compania]['sedes'].append(push_sede)
+
+                index_sede = len(json_data['companias'][index_compania]['sedes']) - 1
+
+                plantas = Planta.objects.filter(id_sede=sede.id_sede)
+
+                for planta in plantas:
+                    push_planta = {
+                        'id_planta': planta.id_planta,
+                        'descr': planta.descr,
+                        'grupos_maquinas': []
+                    }
+
+                    json_data['companias'][index_compania]['sedes'][index_sede]['plantas'].append(push_planta)
+
+                    index_planta = len(json_data['companias'][index_compania]['sedes'][index_sede]['plantas']) - 1
+
+                    grupos_maquinas = GrupoMaquina.objects.filter(id_planta=planta.id_planta)
+
+                    for grup in grupos_maquinas:
+                        push_grup = {
+                            'id_grupo_maquina': grup.id_grupo_maquina,
+                            'descr': grup.descr,
+                            'maquinas': []
+                        }
+
+                        json_data['companias'][index_compania]['sedes'][index_sede]['plantas'][index_planta]['grupos_maquinas'].append(push_grup)
+
+                        index_grup = len(json_data['companias'][index_compania]['sedes'][index_sede]['plantas'][index_planta]['grupos_maquinas']) - 1
+
+                        maquinas = Maquina.objects.filter(id_grupo_maquina=grup.id_grupo_maquina)
+
+                        for maquina in maquinas:
+                            push_maquina = {
+                                'id_maquina': maquina.id_maquina,
+                                'descr': maquina.descr,
+                            }
+
+                            json_data['companias'][index_compania]['sedes'][index_sede]['plantas'][index_planta]['grupos_maquinas'][index_grup]['maquinas'].append(push_maquina)
+
+        return Response(json_data, status=status.HTTP_200_OK)
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
