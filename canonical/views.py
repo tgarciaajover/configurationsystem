@@ -85,6 +85,16 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
+@api_view(['GET', ])
+@permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
+def arbol(request, format=None):
+    if request.method == 'GET':
+        companias = Compania.objects.all().values_list('id_compania', 'descr')
+        print(companias)
+        for comp in companias:
+            pass
+        return Response(status=status.HTTP_200_OK)
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
@@ -747,7 +757,6 @@ def orden_produccion_planeada_detail(request, pk, format=None):
             logger.error(e)
             return Response(serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
@@ -823,6 +832,7 @@ class ListActivityRegisterView(ListView):
 
     model = ActivityRegister
     template_name = 'ActivityRegister_list.html'
+
 
 def ordenes_from_maquina(request):
     _id_compania =request.GET.get('id_compania')

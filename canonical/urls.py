@@ -35,6 +35,7 @@ urlpatterns = [
     url('maquina_grupo_maquina', MaquinaByGrupoId.as_view(), name='maquina_by_grupo_id'),
     url('grupo_maquina_planta', GruposMaquinaByPlantaId.as_view(), name='grupo_maquina_by_planta_id'),
     url('planta_compania', PlantaBySedeId.as_view(), name='planta_by_sede_id'),
+    url('arbol', views.arbol, name='arbol'),
 ]
 
 #urlpatterns = format_suffix_patterns(urlpatterns)
