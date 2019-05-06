@@ -14,6 +14,7 @@ django-q==1.0.0
 django-recurrence==1.7.0
 django-viewflow==1.5.3
 djangorestframework==3.9.2
+djangorestframework-stubs==0.4.2
 get==2019.3.22
 idna==2.8
 Markdown==3.1
