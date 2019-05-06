@@ -87,9 +87,38 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
-@api_view(['GET', ])
+@api_view(['POST', ])
 @permission_classes((IsAuthenticated, ))
 @parser_classes((JSONParser,))
+def variables_comunes(request, format=None):
+    if request.method == 'POST':
+        request_data = request.data
+
+        json_data = []
+
+        for compania in request_data['companias']:
+            for sede in compania['sedes']:
+                for planta in sede['plantas']:
+                    for grup in planta['grupos_maquinas']:
+                        for maquina in grup['maquinas']:
+                            json_append = {
+                                'company': compania['id_compania'],
+                                'location': sede['id_sede'],
+                                'plant': planta['id_planta'],
+                                'machineGroup': grup['id_grupo_maquina'],
+                                'machineId': maquina['id_maquina']
+                            }
+
+                            json_data.append(json_append)
+
+        # req = requests.
+
+        print(json_append)
+
+        return Response(status=status.HTTP_200_OK)
+
+@api_view(['GET', ])
+@permission_classes((IsAuthenticated, ))
 def arbol(request, format=None):
     if request.method == 'GET':
         json_data = {
@@ -114,6 +143,7 @@ def arbol(request, format=None):
             for sede in sedes:
                 push_sede = {
                     'id_sede': sede.id_sede,
+                    'id_compania': sede.id_compania,
                     'descr': sede.descr,
                     'plantas': []
                 }
@@ -127,6 +157,8 @@ def arbol(request, format=None):
                 for planta in plantas:
                     push_planta = {
                         'id_planta': planta.id_planta,
+                        'id_sede': planta.id_sede,
+                        'id_compania': planta.id_compania,
                         'descr': planta.descr,
                         'grupos_maquinas': []
                     }
@@ -140,6 +172,9 @@ def arbol(request, format=None):
                     for grup in grupos_maquinas:
                         push_grup = {
                             'id_grupo_maquina': grup.id_grupo_maquina,
+                            'id_planta': grup.id_planta,
+                            'id_sede': grup.id_sede,
+                            'id_compania': grup.id_compania,
                             'descr': grup.descr,
                             'maquinas': []
                         }
@@ -153,6 +188,10 @@ def arbol(request, format=None):
                         for maquina in maquinas:
                             push_maquina = {
                                 'id_maquina': maquina.id_maquina,
+                                'id_grupo_maquina': maquina.id_grupo_maquina,
+                                'id_planta': maquina.id_planta,
+                                'id_sede': maquina.id_sede,
+                                'id_compania': maquina.id_compania,
                                 'descr': maquina.descr,
                             }
 
