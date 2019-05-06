@@ -37,6 +37,7 @@ urlpatterns = [
     url('planta_compania', PlantaBySedeId.as_view(), name='planta_by_sede_id'),
     url('arbol', views.arbol, name='arbol'),
     url('variables_comunes', views.variables_comunes, name='variables_comunes'),
+    url('maquinas_variables', views.maquinas_variables, name='maquinas_variables'),
 ]
 
 #urlpatterns = format_suffix_patterns(urlpatterns)

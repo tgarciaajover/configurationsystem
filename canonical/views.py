@@ -90,6 +90,42 @@ logger.addHandler(fh)
 @api_view(['POST', ])
 @permission_classes((IsAuthenticated, ))
 @parser_classes((JSONParser,))
+def maquinas_variables(request, format=None):
+    if request.method == 'POST':
+        request_data = request.data
+
+        json_data = []
+
+        for compania in request_data['companias']:
+            for sede in compania['sedes']:
+                for planta in sede['plantas']:
+                    for grup in planta['grupos_maquinas']:
+                        for maquina in grup['maquinas']:
+                            json_append = {
+                                'company': compania['id_compania'],
+                                'location': sede['id_sede'],
+                                'plant': planta['id_planta'],
+                                'machineGroup': grup['id_grupo_maquina'],
+                                'machineId': maquina['id_maquina'],
+                                'startDttm': request_data['startDttm'],
+                                'endDttm': request_data['endDttm'],
+                                'variable': request_data['variable']
+                            }
+
+                            json_data.append(json_append)
+
+        for data in json_data:
+            # TODO: Cambiar URL
+            req = requests.get(url='http://192.168.0.171:8111/iotserver/Trend', params=data)
+            data['value'] = req.json()
+
+        return Response(json_data, status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST', ])
+@permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
 def variables_comunes(request, format=None):
     if request.method == 'POST':
         request_data = request.data
@@ -137,6 +173,8 @@ def variables_comunes(request, format=None):
         }
 
         return Response(return_json, status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET', ])
 @permission_classes((IsAuthenticated, ))
@@ -219,6 +257,8 @@ def arbol(request, format=None):
                             json_data['companias'][index_compania]['sedes'][index_sede]['plantas'][index_planta]['grupos_maquinas'][index_grup]['maquinas'].append(push_maquina)
 
         return Response(json_data, status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
