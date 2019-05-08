@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import JSONField
 
 from django.contrib.auth.models import User
 from graph_types.models import GraphType
@@ -56,6 +57,7 @@ class Chart(models.Model):
     api_url = models.CharField(max_length= 300, blank=False, null=False)
     dashboard = models.ForeignKey( Dashboard , on_delete=models.CASCADE )
     graph_html_id = models.CharField(max_length=300, blank=False, null=False, default="")
+    tree = JSONField(default={})
 
     def __str__(self):
         return str(self.graph_type) + ' ' + str(self.dashboard) + ' ' + self.kpi_name

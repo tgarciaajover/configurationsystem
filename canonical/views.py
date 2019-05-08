@@ -116,7 +116,7 @@ def maquinas_variables(request, format=None):
 
         for data in json_data:
             # TODO: Cambiar URL
-            req = requests.get(url='http://192.168.0.171:8111/iotserver/Trend', params=data)
+            req = requests.get(url='http://192.168.1.171:8111/iotserver/Trend', params=data)
             data['value'] = req.json()
 
         return Response(json_data, status=status.HTTP_200_OK)
@@ -152,7 +152,7 @@ def variables_comunes(request, format=None):
 
         for data in json_data:
             # TODO: Cambiar URL
-            req = requests.get(url='http://192.168.0.171:8111/iotserver/Status', params=data)
+            req = requests.get(url='http://192.168.1.171:8111/iotserver/Status', params=data)
             json_info = req.json()
 
             if initial == True:

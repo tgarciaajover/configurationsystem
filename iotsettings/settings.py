@@ -125,7 +125,7 @@ DATABASES = {
         'NAME': 'iot_manufactura',
         'USER': 'postgres',
         'PASSWORD': 'pYdxBXhwd8XgZ',
-        'HOST': '192.168.0.31',
+        'HOST': '192.168.1.31',
         'PORT': '6234',
     },
    'canonical': {
@@ -133,7 +133,7 @@ DATABASES = {
         'NAME': 'manufactura_canonical_model',
         'USER': 'postgres',
         'PASSWORD': 'pYdxBXhwd8XgZ',
-        'HOST': '192.168.0.31',
+        'HOST': '192.168.1.31',
         'PORT': '6234',
     }
 }
