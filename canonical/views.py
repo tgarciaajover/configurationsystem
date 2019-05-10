@@ -211,7 +211,7 @@ def arbol(request, format=None):
 
                 index_sede = len(json_data['companias'][index_compania]['sedes']) - 1
 
-                plantas = Planta.objects.filter(id_sede=sede.id_sede)
+                plantas = Planta.objects.filter(id_sede=sede.id_sede, id_compania=comp.id_compania)
 
                 for planta in plantas:
                     push_planta = {
@@ -226,7 +226,7 @@ def arbol(request, format=None):
 
                     index_planta = len(json_data['companias'][index_compania]['sedes'][index_sede]['plantas']) - 1
 
-                    grupos_maquinas = GrupoMaquina.objects.filter(id_planta=planta.id_planta)
+                    grupos_maquinas = GrupoMaquina.objects.filter(id_planta=planta.id_planta, id_sede=sede.id_sede, id_compania=comp.id_compania)
 
                     for grup in grupos_maquinas:
                         push_grup = {
@@ -242,7 +242,7 @@ def arbol(request, format=None):
 
                         index_grup = len(json_data['companias'][index_compania]['sedes'][index_sede]['plantas'][index_planta]['grupos_maquinas']) - 1
 
-                        maquinas = Maquina.objects.filter(id_grupo_maquina=grup.id_grupo_maquina)
+                        maquinas = Maquina.objects.filter(id_grupo_maquina=grup.id_grupo_maquina, id_planta=planta.id_planta, id_sede=sede.id_sede, id_compania=comp.id_compania)
 
                         for maquina in maquinas:
                             push_maquina = {
