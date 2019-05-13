@@ -159,15 +159,13 @@ def variables_comunes(request, format=None):
             if initial == True:
                 for info in json_info:
                     variables.append(info['key'])
-                    initial = False
+                initial = False
             elif len(variables) > 0:
                 temp = []
                 for info in json_info:
                     temp.append(info['key'])
 
                 variables = list(set(variables).intersection(temp))
-            else:
-                break
 
         return_json = {
             'kpis': variables
