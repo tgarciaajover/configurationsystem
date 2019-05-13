@@ -153,7 +153,8 @@ def variables_comunes(request, format=None):
         for data in json_data:
             # TODO: Cambiar URL
             req = requests.get(url='http://192.168.1.171:8111/iotserver/Status', params=data)
-            json_info = req.json()
+            print(json.dumps(json.loads(req.text), indent=4))
+            json_info = json.loads(req.text)
 
             if initial == True:
                 for info in json_info:
