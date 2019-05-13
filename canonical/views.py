@@ -153,19 +153,27 @@ def variables_comunes(request, format=None):
         for data in json_data:
             # TODO: Cambiar URL
             req = requests.get(url='http://192.168.1.171:8111/iotserver/Status', params=data)
-            print(json.dumps(json.loads(req.text), indent=4))
-            json_info = json.loads(req.text)
+            if req.status_code == status.HTTP_200_OK:
+                json_info = json.loads(req.text)
 
-            if initial == True:
-                for info in json_info:
-                    variables.append(info['key'])
-                initial = False
-            elif len(variables) > 0:
-                temp = []
-                for info in json_info:
-                    temp.append(info['key'])
+                if initial == True:
+                    for info in json_info:
+                        variables.append(info['key'])
+                    initial = False
+                elif len(variables) > 0:
+                    temp = []
+                    for info in json_info:
+                        temp.append(info['key'])
 
-                variables = list(set(variables).intersection(temp))
+                    variables = list(set(variables).intersection(temp))
+            elif req.status_code == status.HTTP_406_NOT_ACCEPTABLE:
+                return_json = {
+                    'kpis': []
+                }
+
+                return Response(return_json, status=status.HTTP_200_OK)
+            else:
+                return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return_json = {
             'kpis': variables
