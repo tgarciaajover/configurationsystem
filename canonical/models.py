@@ -80,6 +80,7 @@ class Maquina(models.Model):
                                                 default= 'sin_trabajo')
     create_date = models.DateTimeField('create datetime',  auto_now=False,  auto_now_add=True)
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
+    tiempo_refresco = models.IntegerField(default=5)
 
     def __str__(self):
         return self.id_maquina + ' ' + self.descr

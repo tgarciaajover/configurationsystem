@@ -142,6 +142,7 @@ class MachineHostSystem(MeasuredEntity):
     factor_conversion_emp_ciclo = models.FloatField(default=0)
     descripcion_sin_trabajo = models.CharField(max_length=200,
                                                default= 'sin_trabajo')
+    tiempo_refresco = models.IntegerField(default=5)
 
     @property
     def get_code(self):
