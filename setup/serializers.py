@@ -141,6 +141,7 @@ class MachineHostSystemSerializer(serializers.Serializer):
     descr = serializers.CharField(max_length=200)
     create_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", required=False, read_only=True)
     last_updttm = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", required=False, read_only=True)
+    tiempo_refresco = serializers.IntegerField()
 
     
     def create(self, validated_data):
@@ -154,6 +155,7 @@ class MachineHostSystemSerializer(serializers.Serializer):
         machineHostSystem.id_grupo_maquina = validated_data.get('id_grupo_maquina')
         machineHostSystem.id_maquina = validated_data.get('id_maquina')
         machineHostSystem.descr = validated_data.get('descr')
+        machineHostSystem.tiempo_refresco = validated_data.get('tiempo_refresco')
         if validated_data.get('create_date') != None:
             machineHostSystem.create_date = validated_data.get('create_date')
 
@@ -178,7 +180,7 @@ class MachineHostSystemSerializer(serializers.Serializer):
                                                id_planta= validated_data.get('id_planta', instance.id_planta),
                                                id_grupo_maquina = validated_data.get('id_grupo_maquina',instance.id_grupo_maquina),
                                                id_maquina = validated_data.get('id_maquina',instance.id_maquina))
-        instance.descr =  validated_data.get('descr')
+        instance.descr = validated_data.get('descr')
         if validated_data.get('create_date') != None:
             instance.create_date = validated_data.get('create_date')
         if validated_data.get('last_updttm') != None:

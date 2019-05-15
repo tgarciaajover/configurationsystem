@@ -410,7 +410,8 @@ class MaquinaViewTest(TestCase):
                 'id_maquina': 'maquina0',
                 'descr': 'Planta 0 Sede 0 compania 0 grupo 0 maquina 0',
                 'estado_actual': 'A', 'create_date': '2017-05-22 00:00:00.000',
-                'last_updttm': '2017-05-22 00:00:00.000'}
+                'last_updttm': '2017-05-22 00:00:00.000',
+                'tiempo_refresco': 5}
 
         jsonText = json.dumps(dict)
         url = host + port + url_prefix + 'maquina/'
