@@ -97,7 +97,20 @@ def maquinas_operarios(request, username, format=None):
         maquinas_operarios = MachineOperator.objects.using('canonical').filter(operator__user__username=username)
         serializer = MachineOperatorSerializer(maquinas_operarios, many=True)
         if serializer.is_valid():
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            json_return = serializer.data
+            for maq in json_return:
+                json_request = {
+                    'company': maq['id_compania'],
+                    'location': maq['id_sede'],
+                    'plant': maq['id_planta'],
+                    'machineGroup': maq['id_grupo_maquina'],
+                    'machineId': maq['id_maquina']
+                }
+
+                req = requests.get(url='http://192.168.1.171:8111/iotserver/Status', params=json_request)
+
+                json_return['variables'] = json.loads(req.text)
+            return Response(json_return, status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
