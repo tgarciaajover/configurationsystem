@@ -66,6 +66,25 @@ class DashboardDetailApiView(APIView):
         dashboard = get_object_or_404(Dashboard, id=pk)
         # Serializa un dashboard
         serializer = DashboardSerializer(dashboard, data=request.data)
+        if request.data['favorite']:
+            if not dashboard.favorite:
+                # Revisa si hay 10 o mas favoritos
+                favoritesLength = Dashboard.objects.filter(favorite=True).count()
+                print(favoritesLength)
+                if favoritesLength < 9:
+                    # Agrega este dashboard como favorito
+                    if serializer.is_valid():
+                        # Guarda el dashboard con los cambios realizados
+                        serializer.save()
+                        # Retorna el dashboard serializado y status 200.
+                        return Response(serializer.data, status.HTTP_200_OK)
+                    # Retorna los errores y status 400 en caso de que la informacion serializada no sea valida.
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    # Retorna mensaje diciendo que hay mas de 10 favoritos
+                    msg = {"msg": "There are already 10 favorites"}
+                    return Response(msg, status=status.HTTP_200_OK)
+        # Revisa si el serializar es valido
         if serializer.is_valid():
             # Guarda el dashboard con los cambios realizados
             serializer.save()
@@ -145,3 +164,21 @@ class ChartDetailApiView(APIView):
         chart.delete()
         # Retorna status 204.
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FavoriteDashboards(APIView):
+    """
+        Retrieve the favorite dashboards of a user.
+    """
+    def get(self, request, format=None):
+        if request.GET.get('user', None):
+            user = get_object_or_404(User, username = request.GET.get('user', None))
+            dashboards = Dashboard.objects.filter(user=user,favorite=True)
+        else:
+            # Se devuelve un array vacio
+            dashboards = []
+        # Se serializan los dashboards
+        serializer =  DashboardSerializer(dashboards, many=True)
+        # Retorna los dashboards serializados y status 200.
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
