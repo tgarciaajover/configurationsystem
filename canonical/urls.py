@@ -31,13 +31,12 @@ urlpatterns = [
     url(r'^orden_produccion_planeada/(?P<pk>[0-9]+)/$', views.orden_produccion_planeada_detail),
     url(r'^parada_planeada/$', views.parada_planeada_list),
     url(r'^parada_planeada/(?P<pk>[0-9]+)/$', views.parada_planeada_detail),
-    url('sede_compania', SedeByCompaniaId.as_view(), name='sede_by_compania_id'),
-    url('maquina_grupo_maquina', MaquinaByGrupoId.as_view(), name='maquina_by_grupo_id'),
-    url('grupo_maquina_planta', GruposMaquinaByPlantaId.as_view(), name='grupo_maquina_by_planta_id'),
-    url('planta_compania', PlantaBySedeId.as_view(), name='planta_by_sede_id'),
-    url('arbol', views.arbol, name='arbol'),
-    url('variables_comunes', views.variables_comunes, name='variables_comunes'),
-    url('maquinas_variables', views.maquinas_variables, name='maquinas_variables'),
+    url(r'^sede_compania/$', SedeByCompaniaId.as_view(), name='sede_by_compania_id'),
+    url(r'^maquina_grupo_maquina/$', MaquinaByGrupoId.as_view(), name='maquina_by_grupo_id'),
+    url(r'^grupo_maquina_planta/$', GruposMaquinaByPlantaId.as_view(), name='grupo_maquina_by_planta_id'),
+    url(r'^planta_compania/$', PlantaBySedeId.as_view(), name='planta_by_sede_id'),
+    url(r'^arbolv', views.arbol, name='arbol'),
+    url(r'^variables_comunes/$', views.variables_comunes, name='variables_comunes'),
+    url(r'^maquinas_variables/$', views.maquinas_variables, name='maquinas_variables'),
+    url(r'^maquinas_operario/(?P<username>.+)/$', views.maquinas_operarios, name='maquinas_operarios'),
 ]
-
-#urlpatterns = format_suffix_patterns(urlpatterns)

@@ -19,6 +19,7 @@ from canonical.models import Maquina
 from canonical.models import PlanProduccion
 from canonical.models import OrdenProduccionPlaneada
 from canonical.models import ParadaPlaneada
+from canonical.models import MachineOperator
 
 from canonical.serializers import CompaniaSerializer
 from canonical.serializers import SedeSerializer
@@ -29,6 +30,7 @@ from canonical.serializers import MaquinaSerializer
 from canonical.serializers import PlanProduccionSerializer
 from canonical.serializers import OrdenProduccionPlaneadaSerializer
 from canonical.serializers import ParadaPlaneadaSerializer
+from canonical.serializers import MachineOperatorSerializer
 
 from canonical.models import ActivityRegister
 
@@ -87,6 +89,20 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
+@api_view(['GET', ])
+@permission_classes((IsAuthenticated, ))
+@permission_classes((JSONParser, ))
+def maquinas_operarios(request, username, format=None):
+    if request.method == 'GET':
+        maquinas_operarios = MachineOperator.objects.using('canonical').filter(operator__user__username=username)
+        serializer = MachineOperatorSerializer(maquinas_operarios, many=True)
+        if serializer.is_valid():
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(['POST', ])
 @permission_classes((IsAuthenticated, ))
 @parser_classes((JSONParser,))
@@ -121,7 +137,7 @@ def maquinas_variables(request, format=None):
 
         return Response(json_data, status=status.HTTP_200_OK)
     else:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST', ])
 @permission_classes((IsAuthenticated, ))
@@ -181,7 +197,7 @@ def variables_comunes(request, format=None):
 
         return Response(return_json, status=status.HTTP_200_OK)
     else:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', ])
 @permission_classes((IsAuthenticated, ))
@@ -265,7 +281,7 @@ def arbol(request, format=None):
 
         return Response(json_data, status=status.HTTP_200_OK)
     else:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
