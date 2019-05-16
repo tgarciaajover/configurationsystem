@@ -99,24 +99,27 @@ logger.addHandler(fh)
 def maquinas_operarios(request, operator_id, format=None):
     if request.method == 'GET':
         maquinas_operarios = MachineOperator.objects.using('canonical').filter(operator__user__id=operator_id)
-        serializer = MachineOperatorSerializer(maquinas_operarios, many=True)
-        if serializer.is_valid():
-            json_return = serializer.data
-            for maq in json_return:
-                json_request = {
-                    'company': maq['id_compania'],
-                    'location': maq['id_sede'],
-                    'plant': maq['id_planta'],
-                    'machineGroup': maq['id_grupo_maquina'],
-                    'machineId': maq['id_maquina']
-                }
+        if len(maquinas_operarios) > 0:
+            serializer = MachineOperatorSerializer(maquinas_operarios, many=True)
+            if serializer.is_valid():
+                json_return = serializer.data
+                for maq in json_return:
+                    json_request = {
+                        'company': maq['id_compania'],
+                        'location': maq['id_sede'],
+                        'plant': maq['id_planta'],
+                        'machineGroup': maq['id_grupo_maquina'],
+                        'machineId': maq['id_maquina']
+                    }
 
-                req = requests.get(url='http://192.168.1.171:8111/iotserver/Status', params=json_request)
+                    req = requests.get(url='http://192.168.1.171:8111/iotserver/Status', params=json_request)
 
-                json_return['variables'] = json.loads(req.text)
-            return Response(json_return, status=status.HTTP_200_OK)
+                    json_return['variables'] = json.loads(req.text)
+                return Response(json_return, status=status.HTTP_200_OK)
+            else:
+                return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({},status=status.HTTP_200_OK)
     else:
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
