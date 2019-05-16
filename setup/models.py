@@ -739,7 +739,7 @@ class UrbanDirectionColombia(models.Model):
 
 class MeasuredEntityOperator(models.Model):
     operator = models.ForeignKey(Operator, on_delete=models.CASCADE)
-    maquina = models.ForeignKey(MeasuredEntity, on_delete=models.CASCADE)
+    measured_entity = models.ForeignKey(MeasuredEntity, on_delete=models.CASCADE)
 
 
 class MeasuringEntityStatusInterval(models.Model):

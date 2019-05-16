@@ -309,4 +309,4 @@ class OperatorSerializer(serializers.ModelSerializer):
 class MeasuredEntityOperatorSerializer(serializers.Serializer):
     class Meta:
         model = MeasuredEntityOperator
-        fields = ('operator', 'id_compania', 'id_sede', 'id_planta', 'id_grupo_maquina', 'id_maquina')
+        fields = ('operator', 'measured_entity')
