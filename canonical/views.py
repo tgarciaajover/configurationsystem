@@ -1261,31 +1261,12 @@ class PlantaBySedeId(APIView):
 
 class OperatorListView(APIView):
     """
-       List all operators, or create a new operator.
+       List all operators.
    """
-
     def get(self, request, format=None):
         snippets = Operator.objects.all()
         serializer = OperatorSerializer(snippets, many=True)
         return Response(serializer.data)
-
-    # def post(self, request, format=None):
-    #     userObj = {
-    #            "username": request.data.username,
-    #            "email": request.data.email,
-    #            "password": request.data.password
-    #           }
-    #     userSeralizer = UserSeralizer(data=userObj)
-    #     if userSeralizer.is_valid():
-    #         userSeralizer.save()
-    #         operatorObj = {
-    #             created_by
-    #         }
-    #     serializer = SnippetSerializer(data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OperatorDetailView(APIView):
@@ -1297,7 +1278,7 @@ class OperatorDetailView(APIView):
         # Obtiene el usuario asociado con el Operador
         user = User.objects.get(username= request.GET.get('username', None))
         # Obtiene un operador por el id o devuelve status 404
-        operator = get_object_or_404(OperatorSerializer, user=user.id)
+        operator = get_object_or_404(Operator, user=user)
         # Serializa un operador
         serializer = OperatorSerializer(operator)
         # Retorna el operador serializado y status 200.
