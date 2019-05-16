@@ -13,7 +13,7 @@ from setup.models import MeasuredEntityTransitionState
 from setup.models import IdleReasonHostSystem
 from setup.models import MeasuredEntityScheduledEvent
 from setup.models import Operator
-from setup.models import MachineOperator
+from setup.models import MeasuredEntityOperator
 
 import logging
 import os
@@ -306,7 +306,7 @@ class OperatorSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class MachineOperatorSerializer(serializers.Serializer):
+class MeasuredEntityOperatorSerializer(serializers.Serializer):
     class Meta:
-        model = MachineOperator
+        model = MeasuredEntityOperator
         fields = ('operator', 'id_compania', 'id_sede', 'id_planta', 'id_grupo_maquina', 'id_maquina')

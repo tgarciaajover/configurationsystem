@@ -737,13 +737,9 @@ class UrbanDirectionColombia(models.Model):
         )
 
 
-class MachineOperator(models.Model):
-    operator = models.ForeignKey('Operator', on_delete=models.CASCADE)
-    id_compania = models.CharField(max_length=60)
-    id_sede = models.CharField(max_length=60)
-    id_planta = models.CharField(max_length=60)
-    id_grupo_maquina = models.CharField(max_length=60)
-    id_maquina = models.CharField(max_length=60)
+class MeasuredEntityOperator(models.Model):
+    operator = models.ForeignKey(Operator, on_delete=models.CASCADE)
+    maquina = models.ForeignKey(MeasuredEntity, on_delete=models.CASCADE)
 
 
 class MeasuringEntityStatusInterval(models.Model):
@@ -764,6 +760,7 @@ class MeasuringEntityStatusInterval(models.Model):
 
     class Meta:
         db_table = 'measuringentitystatusinterval'
+
 
 class MeasuredAttributeValue(models.Model):
     id_owner = models.IntegerField()

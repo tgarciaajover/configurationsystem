@@ -36,13 +36,13 @@ from setup.models import PlantHostSystem
 from setup.models import MachineHostSystem
 from setup.models import IdleReasonHostSystem
 from setup.models import Employee
-from setup.models import MachineOperator
+from setup.models import MeasuredEntityOperator
 
 from setup.serializers import PlantHostSystemSerializer
 from setup.serializers import MachineHostSystemSerializer
 from setup.serializers import IdleReasonHostSystemSerializer
 from setup.serializers import IdleReasonHostSystemOuputSerializer
-from setup.serializers import MachineOperatorSerializer
+from setup.serializers import MeasuredEntityOperatorSerializer
 from setup.serializers import OperatorSerializer
 
 from canonical.tasks import delReasonCode
@@ -96,9 +96,13 @@ logger.addHandler(fh)
 @api_view(['GET', ])
 @permission_classes((IsAuthenticated, ))
 @permission_classes((JSONParser, ))
-def maquinas_operarios(request, operator_id, format=None):
+def measured_entities_operator(request, operator_id, format=None):
     if request.method == 'GET':
-        maquinas_operarios = MachineOperator.objects.filter(operator_id=operator_id).values('operator', 'id_compania', 'id_sede', 'id_planta', 'id_grupo_maquina', 'id_maquina')
+        maquinas_operarios = MeasuredEntityOperator.objects.filter(operator_id=operator_id)
+
+        # for maqope in maquinas_operarios:
+
+
         if len(maquinas_operarios) > 0:
             try:
                 json_return = {
