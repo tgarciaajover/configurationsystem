@@ -1,9 +1,11 @@
 from django.db import models
 import datetime
+from django.contrib.auth.models import User
 from simple_history.models import HistoricalRecords
 from django.contrib.auth.models import User
 from django.utils.six import python_2_unicode_compatible
 import common.models as common
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -389,3 +391,10 @@ class UrbanDirectionColombia():
             self.complement or ""
         )
 
+class MachineOperator(models.Model):
+    operator = models.ForeignKey('Operator', on_delete=models.CASCADE)
+    id_compania = models.CharField(max_length=60)
+    id_sede = models.CharField(max_length=60)
+    id_planta = models.CharField(max_length=60)
+    id_grupo_maquina = models.CharField(max_length=60)
+    id_maquina = models.CharField(max_length=60)
