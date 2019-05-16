@@ -1,0 +1,8 @@
+*.pyc
+.idea/
+media/*
+venv/*
+log/*
+static/*
+*.log
+*.log.*
