@@ -62,7 +62,7 @@ from django.http import HttpResponseRedirect
 
 import setup.defaults as defaults
 import requests
-
+import traceback
 import datetime
 
 import logging
@@ -151,14 +151,13 @@ def measured_entities_operator(request, operator_id, format=None):
                             'machineId': me['id_maquina']
                         }
 
-                    print(json_request)
-
                     req = requests.get(url='http://192.168.1.171:8111/iotserver/Status', params=json_request)
 
-                    json_return['measured_entities']['variables'] = json.loads(req.text)
+                    # TODO: si el response code es 500 agregar error
+
+                    me['variables'] = json.loads(req.text)
                 return Response(json_return, status=status.HTTP_200_OK)
             except Exception as e:
-                print(e)
                 return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             return Response({'maquinas': []}, status=status.HTTP_200_OK)
