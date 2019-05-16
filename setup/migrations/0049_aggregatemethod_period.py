@@ -13,10 +13,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='aggregatemethod',
-            name='period',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, to='setup.Period'),
-            preserve_default=False,
-        ),
     ]

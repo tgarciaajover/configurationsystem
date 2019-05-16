@@ -27,57 +27,11 @@ class Migration(migrations.Migration):
                 ('period', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='setup.Period')),
             ],
         ),
-        migrations.CreateModel(
-            name='Chart',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('position', models.IntegerField()),
-                ('kpi_name', models.CharField(max_length=300)),
-                ('api_url', models.CharField(max_length=300)),
-            ],
-            options={
-                'db_table': 'charts',
-            },
-        ),
-        migrations.CreateModel(
-            name='Dashboard',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=300)),
-                ('layout', models.CharField(max_length=100)),
-                ('favorite', models.BooleanField(default=False)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'db_table': 'dashboards',
-            },
-        ),
-        migrations.CreateModel(
-            name='GraphType',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200)),
-                ('image_path', models.CharField(max_length=300)),
-            ],
-            options={
-                'db_table': 'graph_types',
-            },
-        ),
         migrations.RemoveField(
             model_name='agreggatemethod',
             name='period',
         ),
         migrations.DeleteModel(
             name='AgreggateMethod',
-        ),
-        migrations.AddField(
-            model_name='chart',
-            name='dashboard',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='setup.Dashboard'),
-        ),
-        migrations.AddField(
-            model_name='chart',
-            name='graph_type',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.PROTECT, to='setup.GraphType'),
         ),
     ]

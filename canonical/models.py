@@ -1,12 +1,9 @@
 from django.db import models
 import datetime
-from django.contrib.auth.models import User
 from simple_history.models import HistoricalRecords
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django.utils.six import python_2_unicode_compatible
 import common.models as common
-
-User = get_user_model()
 
 # Create your models here.
 

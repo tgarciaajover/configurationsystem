@@ -182,3 +182,4 @@ class FavoriteDashboards(APIView):
         # Retorna los dashboards serializados y status 200.
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+

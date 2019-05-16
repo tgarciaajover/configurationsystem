@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+from setup.models import User
 from history.models import HistoricalRecords
 
 # Corresponds to field names not updated during interface processing
@@ -19,8 +19,8 @@ class AuditedModel(models.Model):
            fecha en que se actualizo por última vez la instancia
     """
 
-    created_by = models.ForeignKey(get_user_model(), related_name="%(app_label)s_%(class)s_created")
-    updated_by = models.ForeignKey(get_user_model(), related_name="%(app_label)s_%(class)s_updated")
+    created_by = models.ForeignKey(User, related_name="%(app_label)s_%(class)s_created")
+    updated_by = models.ForeignKey(User, related_name="%(app_label)s_%(class)s_updated")
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
