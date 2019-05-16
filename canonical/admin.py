@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.forms import ModelForm
-from canonical.models import ActivityRegister, Compania, Planta, Sede, RazonParada, Maquina, GrupoMaquina, Operator
+from canonical.models import ActivityRegister, Compania, Planta, Sede, RazonParada, Maquina, GrupoMaquina
+from setup.models import Operator
 from django.contrib.auth.decorators import login_required
 # Register your models here.
 

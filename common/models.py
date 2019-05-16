@@ -1,5 +1,5 @@
 from django.db import models
-from setup.models import User
+from django.contrib.auth.models import User
 from history.models import HistoricalRecords
 
 # Corresponds to field names not updated during interface processing
