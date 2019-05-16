@@ -131,7 +131,7 @@ def measured_entities_operator(request, operator_id, format=None):
 
             json_return['measured_entities'].append(new_object)
 
-        print(json_return)
+        print(json.dumps(json_return, indent=4))
 
         if len(json_return) > 0:
             try:
@@ -158,9 +158,10 @@ def measured_entities_operator(request, operator_id, format=None):
                     json_return['measured_entities']['variables'] = json.loads(req.text)
                 return Response(json_return, status=status.HTTP_200_OK)
             except Exception as e:
+                print(e)
                 return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
-            return Response({'maquinas': []},status=status.HTTP_200_OK)
+            return Response({'maquinas': []}, status=status.HTTP_200_OK)
     else:
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
