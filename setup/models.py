@@ -536,8 +536,8 @@ class Operator(common.AuditedModel):
     class Meta:
         unique_together = ('identification_type', 'identification', 'user')
 
-    def __unicode__(self):
-        return "{}-{}".format(self.get_identification_type_display(), self.identification)
+    def __str__(self):
+        return "{} {} Identification: {}".format(self.first_name, self.surname, self.identification)
 
 
 class ThirdParty(common.AuditedModel):
