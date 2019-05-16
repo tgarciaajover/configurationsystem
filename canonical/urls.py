@@ -5,7 +5,7 @@ from rest_framework import routers
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.conf.urls import *
 from canonical.views import UserViewSet
-from canonical.views import SedeByCompaniaId, MaquinaByGrupoId, GruposMaquinaByPlantaId, PlantaBySedeId
+from canonical.views import SedeByCompaniaId, MaquinaByGrupoId, GruposMaquinaByPlantaId, PlantaBySedeId, OperatorDetailView
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
@@ -39,4 +39,5 @@ urlpatterns = [
     url(r'^variables_comunes/$', views.variables_comunes, name='variables_comunes'),
     url(r'^maquinas_variables/$', views.maquinas_variables, name='maquinas_variables'),
     url(r'^maquinas_operario/(?P<username>.+)/$', views.maquinas_operarios, name='maquinas_operarios'),
+    url(r'^operator_detail/$', OperatorDetailView.as_view(), name='operator_detail'),
 ]

@@ -1282,10 +1282,11 @@ class OperatorDetailView(APIView):
         Retrieve an Operator.
     """
 
-    def get(self, request, pk, format=None):
-        #
+    def get(self, request, format=None):
+        # Obtiene el usuario asociado con el Operador
+        user = User.objects.get(username= request.GET.get('username', None))
         # Obtiene un operador por el id o devuelve status 404
-        operator = get_object_or_404(OperatorSeralizer.objects.using('canonical'), user=pk)
+        operator = get_object_or_404(OperatorSeralizer, user=user.id)
         # Serializa un operador
         serializer = OperatorSeralizer(operator)
         # Retorna el operador serializado y status 200.
