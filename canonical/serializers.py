@@ -9,6 +9,7 @@ from canonical.models import PlanProduccion
 from canonical.models import OrdenProduccionPlaneada
 from canonical.models import ParadaPlaneada
 from canonical.models import ActivityRegister
+from setup.models import Operator
 
 from django.contrib.auth.models import User
 
@@ -148,7 +149,7 @@ class ActivityRegisterSerializer(serializers.ModelSerializer):
                    'mes', 'tipo_actividad', 'id_razon_parada',
                    'id_produccion', 'create_date', 'last_updttm' )
 
-class UserSeralizer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'password')
@@ -157,3 +158,9 @@ class UserSeralizer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
+
+
+class OperatorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model: Operator
+        fields = '__all__'

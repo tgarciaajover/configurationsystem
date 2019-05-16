@@ -71,7 +71,9 @@ from django.core import serializers
 
 from rest_framework import viewsets
 from django.contrib.auth.models import User
-from canonical.serializers import UserSeralizer
+from canonical.serializers import UserSerializer
+from canonical.serializers import OperatorSerializer
+from setup.models import Operator
 
 from rest_framework.views import APIView
 
@@ -1212,7 +1214,7 @@ def reports(request,report):
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
-    serializer_class = UserSeralizer
+    serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
 
 class SedeByCompaniaId(APIView):
@@ -1261,7 +1263,7 @@ class OperatorListView(APIView):
 
     def get(self, request, format=None):
         snippets = Operator.objects.all()
-        serializer = OperatorSeralizer(snippets, many=True)
+        serializer = OperatorSerializer(snippets, many=True)
         return Response(serializer.data)
 
     # def post(self, request, format=None):
@@ -1292,8 +1294,8 @@ class OperatorDetailView(APIView):
         # Obtiene el usuario asociado con el Operador
         user = User.objects.get(username= request.GET.get('username', None))
         # Obtiene un operador por el id o devuelve status 404
-        operator = get_object_or_404(OperatorSeralizer, user=user.id)
+        operator = get_object_or_404(OperatorSerializer, user=user.id)
         # Serializa un operador
-        serializer = OperatorSeralizer(operator)
+        serializer = OperatorSerializer(operator)
         # Retorna el operador serializado y status 200.
         return Response(serializer.data, status.HTTP_200_OK)
