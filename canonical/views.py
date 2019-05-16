@@ -43,6 +43,7 @@ from setup.serializers import MachineHostSystemSerializer
 from setup.serializers import IdleReasonHostSystemSerializer
 from setup.serializers import IdleReasonHostSystemOuputSerializer
 from setup.serializers import MachineOperatorSerializer
+from setup.serializers import OperatorSerializer
 
 from canonical.tasks import delReasonCode
 from canonical.tasks import putReasonCode
@@ -72,7 +73,6 @@ from django.core import serializers
 from rest_framework import viewsets
 from django.contrib.auth.models import User
 from canonical.serializers import UserSerializer
-from canonical.serializers import OperatorSerializer
 from setup.models import Operator
 
 from rest_framework.views import APIView

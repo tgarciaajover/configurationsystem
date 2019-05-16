@@ -12,6 +12,7 @@ from setup.models import MeasuredEntityStateBehavior
 from setup.models import MeasuredEntityTransitionState
 from setup.models import IdleReasonHostSystem
 from setup.models import MeasuredEntityScheduledEvent
+from setup.models import Operator
 from setup.models import MachineOperator
 
 import logging
@@ -296,7 +297,14 @@ class IdleReasonHostSystemOuputSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IdleReasonHostSystem
-        fields = ('id', 'descr', 'group_cd', 'cause', 'classification', 'down', 'create_date') 
+        fields = ('id', 'descr', 'group_cd', 'cause', 'classification', 'down', 'create_date')
+
+
+class OperatorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Operator
+        fields = '__all__'
+
 
 class MachineOperatorSerializer(serializers.Serializer):
     class Meta:

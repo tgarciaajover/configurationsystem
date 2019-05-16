@@ -159,8 +159,3 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
 
-
-class OperatorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model: Operator
-        fields = '__all__'
