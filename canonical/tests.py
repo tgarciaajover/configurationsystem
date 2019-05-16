@@ -29,16 +29,20 @@ class CompaniaViewTest(TestCase):
         self.assertEqual(response.status_code, 204)
 
     def test_view_b_post(self, token=None):
-        dict = {'id_compania': 'compania0', 'descr': 'compania zero'}
-        jsonText = json.dumps(dict)
-        url = host + port + url_prefix + 'compania/'
-        if not token:
-            response = requests.post(url, data=jsonText,
-                                     auth=('admin', 'admin2018'))
-        else:
-            response = requests.post(url, data=jsonText,
-                                     headers=token)
-        self.assertEqual(response.status_code, 201)
+        for i in range(0, 5):
+            dict = {
+                'id_compania': 'compania' + str(i),
+                'descr': 'Compañía ' + str(i)
+            }
+            jsonText = json.dumps(dict)
+            url = host + port + url_prefix + 'compania/'
+            if not token:
+                response = requests.post(url, data=jsonText,
+                                         auth=('admin', 'admin2018'))
+            else:
+                response = requests.post(url, data=jsonText,
+                                         headers=token)
+            self.assertEqual(response.status_code, 201)
 
     def test_view_c_list_get(self, token=None):
         url = host + port + url_prefix + 'compania/'
@@ -92,17 +96,22 @@ class SedeViewTest(TestCase):
         self.assertEqual(response.status_code, 204)
 
     def test_view_b_post(self, token=None):
-        dict = {'id_compania': 'compania0', 'id_sede': 'sede0',
-                'descr': 'Sede 0 compania zero'}
-        jsonText = json.dumps(dict)
-        url = url = host + port + url_prefix + 'sede/'
-        if not token:
-            response = requests.post(url, data=jsonText,
-                                     auth=('admin', 'admin2018'))
-        else:
-            response = requests.post(url, data=jsonText,
-                                     headers=token)
-        self.assertEqual(response.status_code, 201)
+        for i in range(0, 5):
+            for j in range(0, i + 1):
+                dict = {
+                    'id_compania': 'compania' + str(i),
+                    'id_sede': 'sede' + str(j),
+                    'descr': 'Sede ' + str(j) + ' Compañía ' + str(i)
+                }
+                jsonText = json.dumps(dict)
+                url = url = host + port + url_prefix + 'sede/'
+                if not token:
+                    response = requests.post(url, data=jsonText,
+                                             auth=('admin', 'admin2018'))
+                else:
+                    response = requests.post(url, data=jsonText,
+                                             headers=token)
+                self.assertEqual(response.status_code, 201)
 
     def test_view_c_list_get(self, token=None):
         url = host + port + url_prefix + 'sede/'
@@ -157,24 +166,25 @@ class PlantaViewTest(TestCase):
         self.assertEqual(response.status_code, 204)
 
     def test_view_b_post(self, token=None):
-        dict = {
-        "id_compania": "compania0",
-        "id_sede": "sede0",
-        "id_planta": "planta0",
-        "descr": "Planta 0 Sede 0 compania zero"
-        }
-        jsonText = json.dumps(dict)
-        url = host + port + url_prefix + 'planta/'
-        if not token:
-            response = requests.post(url, data=jsonText,
-                                     auth=('admin', 'admin2018'))
-        else:
-            response = requests.post(url, data=jsonText,
-                                     headers=token)
-            # print(url)
-            # print(jsonText)
-            # print(token)
-        #self.assertEqual(response.status_code, 201)
+        for i in range(0, 5):
+            for j in range(0, i + 1):
+                for k in range(0, i + 1):
+                    dict = {
+                        "id_compania": "compania" + str(i),
+                        "id_sede": "sede" + str(j),
+                        "id_planta": "planta" + str(k),
+                        "descr": "Planta " + str(k) + " Sede " + str(j) + " Compañía " + str(i)
+                    }
+                    jsonText = json.dumps(dict)
+                    url = host + port + url_prefix + 'planta/'
+                    if not token:
+                        response = requests.post(url, data=jsonText,
+                                                 auth=('admin', 'admin2018'))
+                    else:
+                        response = requests.post(url, data=jsonText,
+                                                 headers=token)
+
+                    self.assertEqual(response.status_code, 201)
 
     def test_view_c_list_get(self, token=None):
         url = host + port + url_prefix + 'planta/'
@@ -319,23 +329,29 @@ class GrupoMaquinaViewTest(TestCase):
         self.assertEqual(response.status_code, 204)
 
     def test_view_b_post(self, token=None):
-        dict = {'id_compania': 'compania0',
-                'id_sede': 'sede0',
-                'id_planta': 'planta0',
-                'id_grupo_maquina': 'grupo0',
-                'descr': 'Plánta 0 Sede 0 compania 0 grupo 0',
-                'create_date': '2017-05-22 00:00:00.000',
-                'last_updttm': '2017-05-22 00:00:00.000'}
+        for i in range(0, 5):
+            for j in range(0, i + 1):
+                for k in range(0, i + 1):
+                    for l in range(0, i + 1):
+                        dict = {
+                            "id_compania": "compania" + str(i),
+                            "id_sede": "sede" + str(j),
+                            "id_planta": "planta" + str(k),
+                            'id_grupo_maquina': 'grupo' + str(l),
+                            'descr': 'Grupo ' + str(l) + ' Planta ' + str(k) + ' Sede ' + str(j) + ' Compañía ' + str(i),
+                            'create_date': '2017-05-22 00:00:00.000',
+                            'last_updttm': '2017-05-22 00:00:00.000'
+                        }
 
-        jsonText = json.dumps(dict)
-        url = host + port + url_prefix + 'grupo_maquina/'
-        if not token:
-            response = requests.post(url, data=jsonText,
-                                     auth=('admin', 'admin2018'))
-        else:
-            response = requests.post(url, data=jsonText,
-                                     headers=token)
-        self.assertEqual(response.status_code, 201)
+                        jsonText = json.dumps(dict)
+                        url = host + port + url_prefix + 'grupo_maquina/'
+                        if not token:
+                            response = requests.post(url, data=jsonText,
+                                                     auth=('admin', 'admin2018'))
+                        else:
+                            response = requests.post(url, data=jsonText,
+                                                     headers=token)
+                        self.assertEqual(response.status_code, 201)
 
     def test_view_c_list_get(self, token=None):
         url = host + port + url_prefix + 'grupo_maquina/'
@@ -362,7 +378,8 @@ class GrupoMaquinaViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_view_e_detail_put(self, token=None):
-        dict = {'id_compania': 'compania0', 'id_sede': 'sede0',
+        dict = {'id_compania': 'compania0',
+                'id_sede': 'sede0',
                 'id_planta': 'planta0',
                 'id_grupo_maquina': 'grupo0',
                 'descr': 'Planta 0 Sede 0 compania 0 grupo 0 updated',
@@ -403,25 +420,32 @@ class MaquinaViewTest(TestCase):
         self.assertEqual(response.status_code, 204)
 
     def test_view_b_post(self, token=None):
-        dict = {'id_compania': 'compania0',
-                'id_sede': 'sede0',
-                'id_planta': 'planta0',
-                'id_grupo_maquina': 'grupo0',
-                'id_maquina': 'maquina0',
-                'descr': 'Planta 0 Sede 0 compania 0 grupo 0 maquina 0',
-                'estado_actual': 'A', 'create_date': '2017-05-22 00:00:00.000',
-                'last_updttm': '2017-05-22 00:00:00.000',
-                'tiempo_refresco': 5}
+        for i in range(0, 5):
+            for j in range(0, i + 1):
+                for k in range(0, i + 1):
+                    for l in range(0, i + 1):
+                        for m in range(0, i + 1):
+                            dict = {
+                                "id_compania": "compania" + str(i),
+                                "id_sede": "sede" + str(j),
+                                "id_planta": "planta" + str(k),
+                                'id_grupo_maquina': 'grupo' + str(l),
+                                'id_maquina': 'maquina' + str(m),
+                                'descr': 'Máquina ' + str(m) + ' Grupo ' + str(l) + ' Planta ' + str(k) + ' Sede ' + str(j) + ' Compañía ' + str(i),
+                                'estado_actual': 'A', 'create_date': '2017-05-22 00:00:00.000',
+                                'last_updttm': '2017-05-22 00:00:00.000',
+                                'tiempo_refresco': 5
+                            }
 
-        jsonText = json.dumps(dict)
-        url = host + port + url_prefix + 'maquina/'
-        if not token:
-            response = requests.post(url, data=jsonText,
-                                     auth=('admin', 'admin2018'))
-        else:
-            response = requests.post(url, data=jsonText,
-                                     headers=token)
-        # self.assertEqual(response.status_code, 201)
+                            jsonText = json.dumps(dict)
+                            url = host + port + url_prefix + 'maquina/'
+                            if not token:
+                                response = requests.post(url, data=jsonText,
+                                                         auth=('admin', 'admin2018'))
+                            else:
+                                response = requests.post(url, data=jsonText,
+                                                         headers=token)
+                            self.assertEqual(response.status_code, 201)
 
     def test_view_c_list_get(self, token=None):
         url = host + port + url_prefix + 'maquina/'
@@ -772,25 +796,25 @@ def load_metamodel_data():
         token = response.json()
         headers = {'Authorization': 'Token ' + token['token']}
 
-        # compania = CompaniaViewTest()
+        compania = CompaniaViewTest()
         # compania.test_view_a_detail_delete(headers)
-        # compania.test_view_b_post(headers)
+        compania.test_view_b_post(headers)
 
-        # sede = SedeViewTest()
+        sede = SedeViewTest()
         # sede.test_view_a_detail_delete(headers)
-        # sede.test_view_b_post(headers)
+        sede.test_view_b_post(headers)
 
-        # planta = PlantaViewTest()
+        planta = PlantaViewTest()
         # planta.test_view_a_detail_delete(headers)
-        # planta.test_view_b_post(headers)
+        planta.test_view_b_post(headers)
 
         # razon_parada = RazonesParadaViewTest()
         # razon_parada.test_view_a_detail_delete(headers)
         # razon_parada.test_view_b_post(headers)
 
-        # grupo_maquina = GrupoMaquinaViewTest()
+        grupo_maquina = GrupoMaquinaViewTest()
         # grupo_maquina.test_view_a_detail_delete(headers)
-        # grupo_maquina.test_view_b_post(headers)
+        grupo_maquina.test_view_b_post(headers)
 
         maquina = MaquinaViewTest()
         # maquina.test_view_a_detail_delete(headers)

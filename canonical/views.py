@@ -98,12 +98,14 @@ logger.addHandler(fh)
 @permission_classes((JSONParser, ))
 def maquinas_operarios(request, operator_id, format=None):
     if request.method == 'GET':
-        maquinas_operarios = MachineOperator.objects.using('canonical').filter(operator__user__id=operator_id)
+        maquinas_operarios = MachineOperator.objects.filter(operator_id=operator_id).values('operator', 'id_compania', 'id_sede', 'id_planta', 'id_grupo_maquina', 'id_maquina')
         if len(maquinas_operarios) > 0:
-            serializer = MachineOperatorSerializer(maquinas_operarios, many=True)
-            if serializer.is_valid():
-                json_return = serializer.data
-                for maq in json_return:
+            try:
+                json_return = {
+                    'maquinas': list(maquinas_operarios)
+                }
+
+                for maq in json_return['maquinas']:
                     json_request = {
                         'company': maq['id_compania'],
                         'location': maq['id_sede'],
@@ -112,14 +114,17 @@ def maquinas_operarios(request, operator_id, format=None):
                         'machineId': maq['id_maquina']
                     }
 
+                    print(json_request)
+
                     req = requests.get(url='http://192.168.1.171:8111/iotserver/Status', params=json_request)
 
                     json_return['variables'] = json.loads(req.text)
                 return Response(json_return, status=status.HTTP_200_OK)
-            else:
+            except Exception as e:
+                print(e)
                 return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
-            return Response({},status=status.HTTP_200_OK)
+            return Response({'maquinas': []},status=status.HTTP_200_OK)
     else:
         return Response(status=status.HTTP_400_BAD_REQUEST)
 

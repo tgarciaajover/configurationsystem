@@ -744,3 +744,38 @@ class MachineOperator(models.Model):
     id_planta = models.CharField(max_length=60)
     id_grupo_maquina = models.CharField(max_length=60)
     id_maquina = models.CharField(max_length=60)
+
+
+class MeasuringEntityStatusInterval(models.Model):
+    id_owner = models.IntegerField()
+    owner_type = models.IntegerField()
+    datetime_to = models.DateTimeField()
+    datetime_from = models.DateTimeField()
+    status = models.CharField(max_length=300)
+    related_object = models.IntegerField(null=True, blank=True)
+    related_object_type = models.IntegerField(null=True, blank=True)
+    reason_code = models.CharField(max_length=300, null=True, blank=True)
+    executed_object_canonical = models.CharField(max_length=300, null=True, blank=True)
+    production_rate = models.DecimalField(max_digits=19, decimal_places=10, null=True, blank=True)
+    conversion_1 = models.DecimalField(max_digits=19, decimal_places=10, null=True, blank=True)
+    conversion_2 = models.DecimalField(max_digits=19, decimal_places=10, null=True, blank=True)
+    actual_production_rate = models.DecimalField(max_digits=19, decimal_places=10, null=True, blank=True)
+    qty_defective = models.DecimalField(max_digits=19, decimal_places=10, null=True, blank=True)
+
+    class Meta:
+        db_table = 'measuringentitystatusinterval'
+
+class MeasuredAttributeValue(models.Model):
+    id_owner = models.IntegerField()
+    owner_type = models.IntegerField()
+    attribute_name = models.CharField(max_length=300)
+    value_decimal = models.DecimalField(max_digits=19, decimal_places=10, null=True, blank=True)
+    value_datetime = models.DateTimeField(null=True, blank=True)
+    value_string = models.CharField(max_length=300, null=True, blank=True)
+    value_int = models.IntegerField(null=True, blank=True)
+    value_boolean = models.BooleanField()
+    value_date = models.DateField(null=True, blank=True)
+    value_time = models.TimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'measuredattributevalue'
