@@ -14,7 +14,7 @@ class GraphTypeList(APIView):
     List all graph types.
     """
     def get(self, request, format=None):
-        # Se obtienen todos los tipos de graficas
+        # Se obtienen todos loes tipos de graficas
         graph_types = GraphType.objects.using('canonical').all()
         # Se serializan los tipos de graficas
         serializer = GraphTypeSerializer(graph_types, many=True)

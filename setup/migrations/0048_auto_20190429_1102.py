@@ -12,25 +12,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='chart',
-            name='dashboard',
-        ),
-        migrations.RemoveField(
-            model_name='chart',
-            name='graph_type',
-        ),
-        migrations.RemoveField(
-            model_name='dashboard',
-            name='user',
-        ),
-        migrations.DeleteModel(
-            name='Chart',
-        ),
-        migrations.DeleteModel(
-            name='Dashboard',
-        ),
-        migrations.DeleteModel(
-            name='GraphType',
-        ),
+
     ]

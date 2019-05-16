@@ -75,6 +75,8 @@ from canonical.serializers import UserSeralizer
 
 from rest_framework.views import APIView
 
+from django.shortcuts import get_object_or_404
+
 # Get an instance of a logger
 LOG_FILENAME = 'iotsettings.log'
 
@@ -1250,3 +1252,47 @@ class PlantaBySedeId(APIView):
         plantas = Planta.objects.filter(id_sede= request.GET.get('sede', None))
         serializer =  PlantaSerializer(plantas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class OperatorListView(APIView):
+    """
+       List all operators, or create a new operator.
+   """
+
+    def get(self, request, format=None):
+        snippets = Operator.objects.all()
+        serializer = OperatorSeralizer(snippets, many=True)
+        return Response(serializer.data)
+
+    # def post(self, request, format=None):
+    #     userObj = {
+    #            "username": request.data.username,
+    #            "email": request.data.email,
+    #            "password": request.data.password
+    #           }
+    #     userSeralizer = UserSeralizer(data=userObj)
+    #     if userSeralizer.is_valid():
+    #         userSeralizer.save()
+    #         operatorObj = {
+    #             created_by
+    #         }
+    #     serializer = SnippetSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class OperatorDetailView(APIView):
+    """
+        Retrieve an Operator.
+    """
+
+    def get(self, request, pk, format=None):
+        #
+        # Obtiene un operador por el id o devuelve status 404
+        operator = get_object_or_404(OperatorSeralizer.objects.using('canonical'), user=pk)
+        # Serializa un operador
+        serializer = OperatorSeralizer(operator)
+        # Retorna el operador serializado y status 200.
+        return Response(serializer.data, status.HTTP_200_OK)
