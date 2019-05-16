@@ -1,7 +1,7 @@
 from django.db import models
 import datetime
 from django.contrib.auth.models import User
-
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -80,6 +80,7 @@ class Maquina(models.Model):
                                                 default= 'sin_trabajo')
     create_date = models.DateTimeField('create datetime',  auto_now=False,  auto_now_add=True)
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
+    tiempo_refresco = models.IntegerField(default=5)
 
     def __str__(self):
         return self.id_maquina + ' ' + self.descr
@@ -154,7 +155,5 @@ class ActivityRegister(models.Model):
     id_razon_parada = models.CharField(max_length=60)
     id_produccion = models.CharField(max_length=30)
     author = models.IntegerField(null=True, blank=True)    
-    create_date =  models.DateTimeField('create datetime',  auto_now=False,  auto_now_add=True)
+    create_date = models.DateTimeField('create datetime',  auto_now=False,  auto_now_add=True)
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
-
-

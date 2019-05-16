@@ -36,11 +36,15 @@ from setup.models import PlantHostSystem
 from setup.models import MachineHostSystem
 from setup.models import IdleReasonHostSystem
 from setup.models import Employee
+from setup.models import MeasuredEntityOperator
+from setup.models import MeasuredEntity
 
 from setup.serializers import PlantHostSystemSerializer
 from setup.serializers import MachineHostSystemSerializer
 from setup.serializers import IdleReasonHostSystemSerializer
 from setup.serializers import IdleReasonHostSystemOuputSerializer
+from setup.serializers import MeasuredEntityOperatorSerializer
+from setup.serializers import OperatorSerializer
 
 from canonical.tasks import delReasonCode
 from canonical.tasks import putReasonCode
@@ -65,11 +69,16 @@ import logging
 import os
 import logging.handlers
 
+from django.core import serializers
+
 from rest_framework import viewsets
 from django.contrib.auth.models import User
-from canonical.serializers import UserSeralizer
+from canonical.serializers import UserSerializer
+from setup.models import Operator
 
 from rest_framework.views import APIView
+
+from django.shortcuts import get_object_or_404
 
 # Get an instance of a logger
 LOG_FILENAME = 'iotsettings.log'
@@ -85,6 +94,256 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
+@api_view(['GET', ])
+@permission_classes((IsAuthenticated, ))
+@permission_classes((JSONParser, ))
+def measured_entities_operator(request, operator_id, format=None):
+    if request.method == 'GET':
+        measured_entities_operators = MeasuredEntityOperator.objects.filter(operator_id=operator_id)
+
+        json_return = {
+            'measured_entities': []
+        }
+
+        for measoper in measured_entities_operators:
+            measured_entity = MeasuredEntity.objects.get(pk=measoper.measured_entity_id)
+
+            if measured_entity.type == 'P':
+                plant = PlantHostSystem.objects.get(pk=measured_entity.pk)
+
+                new_object = {
+                    'tipo': 'P',
+                    'id_compania': plant.id_compania,
+                    'id_sede': plant.id_sede,
+                    'id_planta': plant.id_planta
+                }
+            else:
+                machine = MachineHostSystem.objects.get(pk=measured_entity.pk)
+
+                new_object = {
+                    'tipo': 'M',
+                    'id_compania': machine.id_compania,
+                    'id_sede': machine.id_sede,
+                    'id_planta': machine.id_planta,
+                    'id_grupo_maquina': machine.id_grupo_maquina,
+                    'id_maquina': machine.id_maquina
+                }
+
+            json_return['measured_entities'].append(new_object)
+
+        print(json.dumps(json_return, indent=4))
+
+        if len(json_return) > 0:
+            try:
+                for me in json_return['measured_entities']:
+                    if me['tipo'] == 'P':
+                        json_request = {
+                            'company': me['id_compania'],
+                            'location': me['id_sede'],
+                            'plant': me['id_planta'],
+                        }
+                    else:
+                        json_request = {
+                            'company': me['id_compania'],
+                            'location': me['id_sede'],
+                            'plant': me['id_planta'],
+                            'machineGroup': me['id_grupo_maquina'],
+                            'machineId': me['id_maquina']
+                        }
+
+                    print(json_request)
+
+                    req = requests.get(url='http://192.168.1.171:8111/iotserver/Status', params=json_request)
+
+                    json_return['measured_entities']['variables'] = json.loads(req.text)
+                return Response(json_return, status=status.HTTP_200_OK)
+            except Exception as e:
+                print(e)
+                return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response({'maquinas': []}, status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST', ])
+@permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
+def maquinas_variables(request, format=None):
+    if request.method == 'POST':
+        request_data = request.data
+
+        json_data = []
+
+        for compania in request_data['companias']:
+            for sede in compania['sedes']:
+                for planta in sede['plantas']:
+                    for grup in planta['grupos_maquinas']:
+                        for maquina in grup['maquinas']:
+                            json_append = {
+                                'company': compania['id_compania'],
+                                'location': sede['id_sede'],
+                                'plant': planta['id_planta'],
+                                'machineGroup': grup['id_grupo_maquina'],
+                                'machineId': maquina['id_maquina'],
+                                'startDttm': request_data['startDttm'],
+                                'endDttm': request_data['endDttm'],
+                                'variable': request_data['variable']
+                            }
+
+                            json_data.append(json_append)
+
+        for data in json_data:
+            # TODO: Cambiar URL
+            req = requests.get(url='http://192.168.1.171:8111/iotserver/Trend', params=data)
+            data['value'] = req.json()
+
+        return Response(json_data, status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST', ])
+@permission_classes((IsAuthenticated, ))
+@parser_classes((JSONParser,))
+def variables_comunes(request, format=None):
+    if request.method == 'POST':
+        request_data = request.data
+
+        json_data = []
+
+        for compania in request_data['companias']:
+            for sede in compania['sedes']:
+                for planta in sede['plantas']:
+                    for grup in planta['grupos_maquinas']:
+                        for maquina in grup['maquinas']:
+                            json_append = {
+                                'company': compania['id_compania'],
+                                'location': sede['id_sede'],
+                                'plant': planta['id_planta'],
+                                'machineGroup': grup['id_grupo_maquina'],
+                                'machineId': maquina['id_maquina']
+                            }
+
+                            json_data.append(json_append)
+
+        variables = []
+        initial = True
+
+        for data in json_data:
+            # TODO: Cambiar URL
+            req = requests.get(url='http://192.168.1.171:8111/iotserver/Status', params=data)
+            if req.status_code == status.HTTP_200_OK:
+                json_info = json.loads(req.text)
+
+                if initial == True:
+                    for info in json_info:
+                        variables.append(info['key'])
+                    initial = False
+                elif len(variables) > 0:
+                    temp = []
+                    for info in json_info:
+                        temp.append(info['key'])
+
+                    variables = list(set(variables).intersection(temp))
+            elif req.status_code == status.HTTP_406_NOT_ACCEPTABLE:
+                return_json = {
+                    'kpis': []
+                }
+
+                return Response(return_json, status=status.HTTP_200_OK)
+            else:
+                return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return_json = {
+            'kpis': variables
+        }
+
+        return Response(return_json, status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', ])
+@permission_classes((IsAuthenticated, ))
+def arbol(request, format=None):
+    if request.method == 'GET':
+        json_data = {
+            'companias': []
+        }
+
+        companias = Compania.objects.all()
+
+        for comp in companias:
+            push_compania = {
+                'id_compania': comp.id_compania,
+                'descr': comp.descr,
+                'sedes': []
+            }
+
+            json_data['companias'].append(push_compania)
+
+            index_compania = len(json_data['companias']) - 1
+
+            sedes = Sede.objects.filter(id_compania=comp.id_compania)
+
+            for sede in sedes:
+                push_sede = {
+                    'id_sede': sede.id_sede,
+                    'id_compania': sede.id_compania,
+                    'descr': sede.descr,
+                    'plantas': []
+                }
+
+                json_data['companias'][index_compania]['sedes'].append(push_sede)
+
+                index_sede = len(json_data['companias'][index_compania]['sedes']) - 1
+
+                plantas = Planta.objects.filter(id_sede=sede.id_sede, id_compania=comp.id_compania)
+
+                for planta in plantas:
+                    push_planta = {
+                        'id_planta': planta.id_planta,
+                        'id_sede': planta.id_sede,
+                        'id_compania': planta.id_compania,
+                        'descr': planta.descr,
+                        'grupos_maquinas': []
+                    }
+
+                    json_data['companias'][index_compania]['sedes'][index_sede]['plantas'].append(push_planta)
+
+                    index_planta = len(json_data['companias'][index_compania]['sedes'][index_sede]['plantas']) - 1
+
+                    grupos_maquinas = GrupoMaquina.objects.filter(id_planta=planta.id_planta, id_sede=sede.id_sede, id_compania=comp.id_compania)
+
+                    for grup in grupos_maquinas:
+                        push_grup = {
+                            'id_grupo_maquina': grup.id_grupo_maquina,
+                            'id_planta': grup.id_planta,
+                            'id_sede': grup.id_sede,
+                            'id_compania': grup.id_compania,
+                            'descr': grup.descr,
+                            'maquinas': []
+                        }
+
+                        json_data['companias'][index_compania]['sedes'][index_sede]['plantas'][index_planta]['grupos_maquinas'].append(push_grup)
+
+                        index_grup = len(json_data['companias'][index_compania]['sedes'][index_sede]['plantas'][index_planta]['grupos_maquinas']) - 1
+
+                        maquinas = Maquina.objects.filter(id_grupo_maquina=grup.id_grupo_maquina, id_planta=planta.id_planta, id_sede=sede.id_sede, id_compania=comp.id_compania)
+
+                        for maquina in maquinas:
+                            push_maquina = {
+                                'id_maquina': maquina.id_maquina,
+                                'id_grupo_maquina': maquina.id_grupo_maquina,
+                                'id_planta': maquina.id_planta,
+                                'id_sede': maquina.id_sede,
+                                'id_compania': maquina.id_compania,
+                                'descr': maquina.descr,
+                            }
+
+                            json_data['companias'][index_compania]['sedes'][index_sede]['plantas'][index_planta]['grupos_maquinas'][index_grup]['maquinas'].append(push_maquina)
+
+        return Response(json_data, status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
@@ -183,6 +442,7 @@ def sede_list(request, format=None):
                 logger.error(serializer.errors)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
 @parser_classes((JSONParser,))
@@ -217,6 +477,7 @@ def sede_detail(request, pk, format=None):
     elif request.method == 'DELETE':
         sede.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
@@ -253,6 +514,7 @@ def planta_list(request, format=None):
                 print(serializer_p.errors)
                 print(serializer_phs.errors)
                 return JsonResponse(serializer_p.errors, status=400) 
+
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
@@ -297,6 +559,7 @@ def planta_detail(request, pk, format=None):
         planta.delete()
         planths.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
@@ -351,6 +614,7 @@ def razon_parada_list(request, format=None):
                 logger.error(serializer.errors)
                 logger.error(serializer_irhs.errors)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
@@ -429,6 +693,7 @@ def razon_parada_detail(request, pk, format=None):
             logger.error(e)
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
 @parser_classes((JSONParser,))
@@ -458,6 +723,7 @@ def grupo_maquina_list(request, format=None):
             else:
                 logger.error(serializer.errors)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
@@ -494,6 +760,7 @@ def grupo_maquina_detail(request, pk, format=None):
         grupomaquina.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
 @parser_classes((JSONParser,))
@@ -511,10 +778,10 @@ def maquina_list(request, format=None):
         data = JSONParser().parse(request)
         try:
             maquina = Maquina.objects.get(id_compania = data.get('id_compania'),
-                                           id_sede = data.get('id_sede'),
-                                            id_planta = data.get('id_planta'),
-                                             id_grupo_maquina = data.get('id_grupo_maquina'),
-                                              id_maquina = data.get('id_maquina'))
+                                          id_sede = data.get('id_sede'),
+                                          id_planta = data.get('id_planta'),
+                                          id_grupo_maquina = data.get('id_grupo_maquina'),
+                                          id_maquina = data.get('id_maquina'))
             return Response(status=status.HTTP_302_FOUND)
         except Maquina.DoesNotExist:
             serializer_p = MaquinaSerializer(data=data)
@@ -615,12 +882,12 @@ def plan_produccion_detail(request, pk, format=None):
     try:
         data = JSONParser().parse(request)
         planproduccion = PlanProduccion.objects.get(id_compania = data.get('id_compania'),
-                                           id_sede = data.get('id_sede'),
-                                            id_planta = data.get('id_planta'),
-                                             id_grupo_maquina = data.get('id_grupo_maquina'),
-                                              id_maquina = data.get('id_maquina'),
-                                               ano = data.get('ano'),
-                                                mes = data.get('mes'))
+                                                    id_sede = data.get('id_sede'),
+                                                    id_planta = data.get('id_planta'),
+                                                    id_grupo_maquina = data.get('id_grupo_maquina'),
+                                                    id_maquina = data.get('id_maquina'),
+                                                    ano = data.get('ano'),
+                                                    mes = data.get('mes'))
     except PlanProduccion.DoesNotExist:
         if request.method == 'DELETE':
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -747,7 +1014,6 @@ def orden_produccion_planeada_detail(request, pk, format=None):
             logger.error(e)
             return Response(serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
@@ -823,6 +1089,7 @@ class ListActivityRegisterView(ListView):
 
     model = ActivityRegister
     template_name = 'ActivityRegister_list.html'
+
 
 def ordenes_from_maquina(request):
     _id_compania =request.GET.get('id_compania')
@@ -992,7 +1259,7 @@ def reports(request,report):
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
-    serializer_class = UserSeralizer
+    serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
 
 class SedeByCompaniaId(APIView):
@@ -1005,32 +1272,56 @@ class SedeByCompaniaId(APIView):
         serializer =  SedeSerializer(sedes, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class MaquinaByCompaniaId(APIView):
+class MaquinaByGrupoId(APIView):
     """
     Get a Maquina by companiaId.
     """
     def get(self, request, format=None):
-        maquinas = Maquina.objects.filter(id_compania= request.GET.get('compania', None))
+        maquinas = Maquina.objects.filter(id_grupo_maquina= request.GET.get('grupo', None))
         print(request)
         serializer =  MaquinaSerializer(maquinas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class GruposMaquinaByCompaniaId(APIView):
+class GruposMaquinaByPlantaId(APIView):
     """
     Get Grupos Maquinas by companiaId.
     """
     def get(self, request, format=None):
-        grupos_maquinas = GrupoMaquina.objects.filter(id_compania= request.GET.get('compania', None))
-        print(request)
-        serializer =  GrupoMaquina(grupos_maquinas, many=True)
+        grupos_maquinas = GrupoMaquina.objects.filter(id_planta= request.GET.get('planta', None))
+        serializer =  GrupoMaquinaSerializer(grupos_maquinas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class PlantaByCompaniaId(APIView):
+class PlantaBySedeId(APIView):
     """
     Get Plantas by companiaId.
     """
     def get(self, request, format=None):
-        plantas = Planta.objects.filter(id_compania= request.GET.get('compania', None))
-        print(request)
+        plantas = Planta.objects.filter(id_sede= request.GET.get('sede', None))
         serializer =  PlantaSerializer(plantas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class OperatorListView(APIView):
+    """
+       List all operators.
+   """
+    def get(self, request, format=None):
+        snippets = Operator.objects.all()
+        serializer = OperatorSerializer(snippets, many=True)
+        return Response(serializer.data)
+
+
+class OperatorDetailView(APIView):
+    """
+        Retrieve an Operator.
+    """
+
+    def get(self, request, format=None):
+        # Obtiene el usuario asociado con el Operador
+        user = User.objects.get(username= request.GET.get('username', None))
+        # Obtiene un operador por el id o devuelve status 404
+        operator = get_object_or_404(Operator, user=user)
+        # Serializa un operador
+        serializer = OperatorSerializer(operator)
+        # Retorna el operador serializado y status 200.
+        return Response(serializer.data, status.HTTP_200_OK)

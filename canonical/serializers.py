@@ -9,6 +9,7 @@ from canonical.models import PlanProduccion
 from canonical.models import OrdenProduccionPlaneada
 from canonical.models import ParadaPlaneada
 from canonical.models import ActivityRegister
+from setup.models import Operator
 
 from django.contrib.auth.models import User
 
@@ -96,7 +97,7 @@ class MaquinaSerializer(serializers.ModelSerializer):
                    'descr', 'estado_actual', 'tasa_vel_esperada',
                    'tiempo_esperado_config', 'factor_conversion_kg_ciclo',
                    'factor_conversion_mil_ciclo', 'factor_conversion_emp_ciclo',
-                   'descripcion_sin_trabajo', 'create_date', 'last_updttm' )
+                   'descripcion_sin_trabajo', 'create_date', 'last_updttm', 'tiempo_refresco')
 
 class PlanProduccionSerializer(serializers.ModelSerializer):
     last_updttm = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S.%f", input_formats=["%Y-%m-%d %H:%M:%S.%f"], required=False, read_only=True)
@@ -148,7 +149,7 @@ class ActivityRegisterSerializer(serializers.ModelSerializer):
                    'mes', 'tipo_actividad', 'id_razon_parada',
                    'id_produccion', 'create_date', 'last_updttm' )
 
-class UserSeralizer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'password')
@@ -157,3 +158,4 @@ class UserSeralizer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
+

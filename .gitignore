@@ -6,3 +6,4 @@ log/*
 static/*
 *.log
 *.log.*
+/static/

@@ -91,7 +91,7 @@ REST_FRAMEWORK = {
        'rest_framework.authentication.SessionAuthentication',
    ),
    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAdminUser',
+        'rest_framework.permissions.IsAuthenticated',
    ),
 }
 
@@ -116,16 +116,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'iotsettings.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'iot_manufactura',
         'USER': 'postgres',
         'PASSWORD': 'pYdxBXhwd8XgZ',
-        'HOST': '192.168.0.31',
+        'HOST': '192.168.1.31',
         'PORT': '6234',
     },
    'canonical': {
@@ -133,10 +130,13 @@ DATABASES = {
         'NAME': 'manufactura_canonical_model',
         'USER': 'postgres',
         'PASSWORD': 'pYdxBXhwd8XgZ',
-        'HOST': '192.168.0.31',
+        'HOST': '192.168.1.31',
         'PORT': '6234',
     }
 }
+# Database
+# https://docs.djangoproject.com/en/1.10/ref/settings/#databases
+
 
 
 DATABASE_ROUTERS = ['routers.Routers.CanonicalRouter']
