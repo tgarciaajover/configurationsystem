@@ -9,7 +9,6 @@ from canonical.models import PlanProduccion
 from canonical.models import OrdenProduccionPlaneada
 from canonical.models import ParadaPlaneada
 from canonical.models import ActivityRegister
-from canonical.models import MachineOperator
 
 from django.contrib.auth.models import User
 
@@ -159,7 +158,3 @@ class UserSeralizer(serializers.HyperlinkedModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
 
-class MachineOperatorSerializer(serializers.Serializer):
-    class Meta:
-        model = MachineOperator
-        fields = ('operator', 'id_compania', 'id_sede', 'id_planta', 'id_grupo_maquina', 'id_maquina')

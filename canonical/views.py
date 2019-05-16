@@ -19,7 +19,6 @@ from canonical.models import Maquina
 from canonical.models import PlanProduccion
 from canonical.models import OrdenProduccionPlaneada
 from canonical.models import ParadaPlaneada
-from canonical.models import MachineOperator
 
 from canonical.serializers import CompaniaSerializer
 from canonical.serializers import SedeSerializer
@@ -30,7 +29,6 @@ from canonical.serializers import MaquinaSerializer
 from canonical.serializers import PlanProduccionSerializer
 from canonical.serializers import OrdenProduccionPlaneadaSerializer
 from canonical.serializers import ParadaPlaneadaSerializer
-from canonical.serializers import MachineOperatorSerializer
 
 from canonical.models import ActivityRegister
 
@@ -38,11 +36,13 @@ from setup.models import PlantHostSystem
 from setup.models import MachineHostSystem
 from setup.models import IdleReasonHostSystem
 from setup.models import Employee
+from setup.models import MachineOperator
 
 from setup.serializers import PlantHostSystemSerializer
 from setup.serializers import MachineHostSystemSerializer
 from setup.serializers import IdleReasonHostSystemSerializer
 from setup.serializers import IdleReasonHostSystemOuputSerializer
+from setup.serializers import MachineOperatorSerializer
 
 from canonical.tasks import delReasonCode
 from canonical.tasks import putReasonCode
@@ -393,6 +393,7 @@ def sede_list(request, format=None):
                 logger.error(serializer.errors)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
 @parser_classes((JSONParser,))
@@ -427,6 +428,7 @@ def sede_detail(request, pk, format=None):
     elif request.method == 'DELETE':
         sede.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
@@ -463,6 +465,7 @@ def planta_list(request, format=None):
                 print(serializer_p.errors)
                 print(serializer_phs.errors)
                 return JsonResponse(serializer_p.errors, status=400) 
+
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
@@ -507,6 +510,7 @@ def planta_detail(request, pk, format=None):
         planta.delete()
         planths.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
@@ -561,6 +565,7 @@ def razon_parada_list(request, format=None):
                 logger.error(serializer.errors)
                 logger.error(serializer_irhs.errors)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
@@ -639,6 +644,7 @@ def razon_parada_detail(request, pk, format=None):
             logger.error(e)
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
 @parser_classes((JSONParser,))
@@ -668,6 +674,7 @@ def grupo_maquina_list(request, format=None):
             else:
                 logger.error(serializer.errors)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated, ))
@@ -704,6 +711,7 @@ def grupo_maquina_detail(request, pk, format=None):
         grupomaquina.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
 @parser_classes((JSONParser,))
@@ -721,10 +729,10 @@ def maquina_list(request, format=None):
         data = JSONParser().parse(request)
         try:
             maquina = Maquina.objects.get(id_compania = data.get('id_compania'),
-                                           id_sede = data.get('id_sede'),
-                                            id_planta = data.get('id_planta'),
-                                             id_grupo_maquina = data.get('id_grupo_maquina'),
-                                              id_maquina = data.get('id_maquina'))
+                                          id_sede = data.get('id_sede'),
+                                          id_planta = data.get('id_planta'),
+                                          id_grupo_maquina = data.get('id_grupo_maquina'),
+                                          id_maquina = data.get('id_maquina'))
             return Response(status=status.HTTP_302_FOUND)
         except Maquina.DoesNotExist:
             serializer_p = MaquinaSerializer(data=data)
@@ -825,12 +833,12 @@ def plan_produccion_detail(request, pk, format=None):
     try:
         data = JSONParser().parse(request)
         planproduccion = PlanProduccion.objects.get(id_compania = data.get('id_compania'),
-                                           id_sede = data.get('id_sede'),
-                                            id_planta = data.get('id_planta'),
-                                             id_grupo_maquina = data.get('id_grupo_maquina'),
-                                              id_maquina = data.get('id_maquina'),
-                                               ano = data.get('ano'),
-                                                mes = data.get('mes'))
+                                                    id_sede = data.get('id_sede'),
+                                                    id_planta = data.get('id_planta'),
+                                                    id_grupo_maquina = data.get('id_grupo_maquina'),
+                                                    id_maquina = data.get('id_maquina'),
+                                                    ano = data.get('ano'),
+                                                    mes = data.get('mes'))
     except PlanProduccion.DoesNotExist:
         if request.method == 'DELETE':
             return Response(status=status.HTTP_204_NO_CONTENT)
