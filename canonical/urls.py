@@ -38,6 +38,6 @@ urlpatterns = [
     url(r'^arbolv', views.arbol, name='arbol'),
     url(r'^variables_comunes/$', views.variables_comunes, name='variables_comunes'),
     url(r'^maquinas_variables/$', views.maquinas_variables, name='maquinas_variables'),
-    url(r'^maquinas_operario/(?P<username>.+)/$', views.maquinas_operarios, name='maquinas_operarios'),
+    url(r'^maquinas_operario/(?P<operator_id>[0-9]+)/$', views.maquinas_operarios, name='maquinas_operarios'),
     url(r'^operator_detail/$', OperatorDetailView.as_view(), name='operator_detail'),
 ]

@@ -96,9 +96,9 @@ logger.addHandler(fh)
 @api_view(['GET', ])
 @permission_classes((IsAuthenticated, ))
 @permission_classes((JSONParser, ))
-def maquinas_operarios(request, username, format=None):
+def maquinas_operarios(request, operator_id, format=None):
     if request.method == 'GET':
-        maquinas_operarios = MachineOperator.objects.using('canonical').filter(operator__user__username=username)
+        maquinas_operarios = MachineOperator.objects.using('canonical').filter(operator__user__id=operator_id)
         serializer = MachineOperatorSerializer(maquinas_operarios, many=True)
         if serializer.is_valid():
             json_return = serializer.data
