@@ -770,7 +770,7 @@ class MeasuredAttributeValue(models.Model):
     value_datetime = models.DateTimeField(null=True, blank=True)
     value_string = models.CharField(max_length=300, null=True, blank=True)
     value_int = models.IntegerField(null=True, blank=True)
-    value_boolean = models.BooleanField()
+    value_boolean = models.BooleanField(default=False)
     value_date = models.DateField(null=True, blank=True)
     value_time = models.TimeField(null=True, blank=True)
     timestamp = models.DateTimeField()
