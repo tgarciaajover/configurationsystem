@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'django_ace',
     'canonical',
     'setup',
-    'data',
     'graph_types',
     'dashboard',
     # other apps

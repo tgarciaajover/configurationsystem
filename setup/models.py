@@ -773,6 +773,7 @@ class MeasuredAttributeValue(models.Model):
     value_boolean = models.BooleanField()
     value_date = models.DateField(null=True, blank=True)
     value_time = models.TimeField(null=True, blank=True)
+    timestamp = models.DateTimeField()
 
     class Meta:
         db_table = 'measuredattributevalue'
