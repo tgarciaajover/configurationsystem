@@ -94,6 +94,39 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
+@api_view(['POST', ])
+@permission_classes((IsAuthenticated, ))
+@permission_classes((JSONParser, ))
+def state_interval(request, format=None):
+    if request.method == 'POST':
+        try:
+            request_data = request.data
+
+            operator_id = request_data['id']
+            dttm_from = request_data['DttmFrom']
+            dttm_to = request_data['DttmTo']
+
+            request_json = {
+                "DttmFrom": dttm_from,
+                "DttmTo": dttm_to
+            }
+
+            req = requests.get(url='http://192.168.1.171:8111/iotserver/StateInterval/' + str(operator_id), data=json.dumps(request_json))
+
+            if type(json.loads(req.text)) != list and json.loads(req.text)['code'] == 500:
+                return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                json_return = {
+                    "state_interval": req.json()
+                }
+                return Response(json_return, status=status.HTTP_200_OK)
+        except:
+            print(traceback.print_exc())
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(['GET', ])
 @permission_classes((IsAuthenticated, ))
 @permission_classes((JSONParser, ))

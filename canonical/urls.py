@@ -40,4 +40,5 @@ urlpatterns = [
     url(r'^maquinas_variables/$', views.maquinas_variables, name='maquinas_variables'),
     url(r'^measured_entities_operator/(?P<operator_id>[0-9]+)/$', views.measured_entities_operator, name='measured_entities_operator'),
     url(r'^operator_detail/$', OperatorDetailView.as_view(), name='operator_detail'),
+    url(r'^state_interval/$', views.state_interval, name='state_interval'),
 ]

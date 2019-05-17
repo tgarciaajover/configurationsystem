@@ -528,8 +528,8 @@ class Operator(common.AuditedModel):
     identification_type = models.CharField(max_length=2, choices=IDENTIFICATION_TYPE, null=True, blank=True)
     identification = models.CharField(max_length=20, null=True, blank=True)
     user = models.OneToOneField(User, related_name='person')
-
     active_account = models.BooleanField(default=True)
+    days_interval = models.IntegerField()
 
     history = HistoricalRecords()
 
