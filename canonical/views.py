@@ -150,7 +150,8 @@ def measured_entities_operator(request, operator_id, format=None):
                     'id_compania': plant.id_compania,
                     'id_sede': plant.id_sede,
                     'id_planta': plant.id_planta,
-                    'descr': measured_entity.descr
+                    'descr': measured_entity.descr,
+                    'refresh_time': measured_entity.refresh_time
                 }
             else:
                 machine = MachineHostSystem.objects.get(pk=measured_entity.pk)
@@ -163,7 +164,8 @@ def measured_entities_operator(request, operator_id, format=None):
                     'id_planta': machine.id_planta,
                     'id_grupo_maquina': machine.id_grupo_maquina,
                     'id_maquina': machine.id_maquina,
-                    'descr': measured_entity.descr
+                    'descr': measured_entity.descr,
+                    'refresh_time': measured_entity.refresh_time
                 }
 
             json_return['measured_entities'].append(new_object)

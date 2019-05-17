@@ -117,6 +117,7 @@ class MeasuredEntity(models.Model):
     create_date = models.DateTimeField('create datetime', auto_now=False,
                                        auto_now_add=True)
     last_updttm = models.DateTimeField('last datetime', auto_now=True)
+    refresh_time = models.IntegerField()
 
     def __str__(self):
         return self.code + ' ' + self.descr
@@ -144,7 +145,6 @@ class MachineHostSystem(MeasuredEntity):
     factor_conversion_emp_ciclo = models.FloatField(default=0)
     descripcion_sin_trabajo = models.CharField(max_length=200,
                                                default= 'sin_trabajo')
-    tiempo_refresco = models.IntegerField(default=5)
 
     @property
     def get_code(self):
