@@ -113,6 +113,7 @@ def measured_entities_operator(request, operator_id, format=None):
 
                 new_object = {
                     'tipo': 'P',
+                    'id': measured_entity.id,
                     'id_compania': plant.id_compania,
                     'id_sede': plant.id_sede,
                     'id_planta': plant.id_planta,
@@ -123,6 +124,7 @@ def measured_entities_operator(request, operator_id, format=None):
 
                 new_object = {
                     'tipo': 'M',
+                    'id': measured_entity.id,
                     'id_compania': machine.id_compania,
                     'id_sede': machine.id_sede,
                     'id_planta': machine.id_planta,
