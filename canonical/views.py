@@ -131,8 +131,6 @@ def measured_entities_operator(request, operator_id, format=None):
 
             json_return['measured_entities'].append(new_object)
 
-        print(json.dumps(json_return, indent=4))
-
         if len(json_return) > 0:
             try:
                 for me in json_return['measured_entities']:
@@ -153,13 +151,17 @@ def measured_entities_operator(request, operator_id, format=None):
 
                     req = requests.get(url='http://192.168.1.171:8111/iotserver/Status', params=json_request)
 
-                    if json.loads(req.text)['code'] == 500:
+                    print(json.dumps(json.loads(req.text), indent=4))
+                    print(type(json.loads(req.text)))
+
+                    if type(json.loads(req.text)) != list and json.loads(req.text)['code'] == 500:
                         me['variables'] = 'ERROR'
                     else:
                         me['variables'] = json.loads(req.text)
 
                 return Response(json_return, status=status.HTTP_200_OK)
             except Exception as e:
+                print(traceback.print_exc())
                 return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             return Response({'maquinas': []}, status=status.HTTP_200_OK)
