@@ -153,9 +153,11 @@ def measured_entities_operator(request, operator_id, format=None):
 
                     req = requests.get(url='http://192.168.1.171:8111/iotserver/Status', params=json_request)
 
-                    # TODO: si el response code es 500 agregar error
+                    if json.loads(req.text)['code'] == 500:
+                        me['variables'] = 'ERROR'
+                    else:
+                        me['variables'] = json.loads(req.text)
 
-                    me['variables'] = json.loads(req.text)
                 return Response(json_return, status=status.HTTP_200_OK)
             except Exception as e:
                 return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
