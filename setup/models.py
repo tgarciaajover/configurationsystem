@@ -11,12 +11,27 @@ from django.contrib.auth.models import User
 from recurrence.fields import RecurrenceField
 from macaddress.fields import MACAddressField
 from utils.advutils import get_logger
+from model_utils import Choices
+from django.utils.translation import gettext as _
 
 from graph_types.models import GraphType
 
 import json
 
 logger = get_logger('iot_settings')
+
+MODBUS_OBJECT_TYPE = Choices(
+    ('CO', 'Coil', _('Coil')),
+    ('DI', 'Discrete_input', _('Discrete input')),
+    ('IR', 'Input_register', _('Input Register')),
+    ('HR', 'Holding_register', _('Holding Register')),
+)
+
+MODBUS_ACCESS = Choices(
+    ('R', 'Read', _('Read')),
+    ('W', 'Write', _('Write')),
+    ('RW', 'Read_Write', _('Read Write')),
+)
 
 class SignalType(models.Model):
     PROTOCOL_TYPE = (
@@ -102,6 +117,15 @@ class MonitoringDevice(models.Model):
 
     def __str__(self):
         return self.descr
+
+
+class MqttMonitoringDevice(MonitoringDevice):
+    port = models.IntegerField(default=502)
+
+
+class ModBusMonitoringDevice(MonitoringDevice):
+    is_concentrator = models.BooleanField(default=False)
+    port = models.IntegerField(default=502)
 
 
 class MeasuredEntity(models.Model):
@@ -199,6 +223,19 @@ class InputOutputPort(models.Model):
 
     def __str__(self):
         return self.port_label
+
+
+class ModBusInputOutputPort(InputOutputPort):
+    port = models.IntegerField(default=502)
+    unit_id = models.IntegerField(default=1)
+    offset = models.IntegerField(default=0)
+    nbr_read = models.IntegerField(default=1)
+    object_type = models.CharField(max_length=2, choices=MODBUS_OBJECT_TYPE, default='HR')
+    access = models.CharField(max_length=2, choices=MODBUS_ACCESS, default='R')
+
+
+class MqttInputOutputPort(InputOutputPort):
+    topic_name = models.CharField(max_length=200, null=False, blank=False)
 
 
 class MeasuredEntityBehavior(models.Model):

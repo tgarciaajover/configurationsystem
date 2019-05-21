@@ -118,7 +118,7 @@ WSGI_APPLICATION = 'iotsettings.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'iot_manufactura',
+        'NAME': 'iot_manufactura_des',
         'USER': 'postgres',
         'PASSWORD': 'pYdxBXhwd8XgZ',
         'HOST': '192.168.1.31',
@@ -126,7 +126,7 @@ DATABASES = {
     },
    'canonical': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'manufactura_canonical_model',
+        'NAME': 'manufactura_canonical_model_des',
         'USER': 'postgres',
         'PASSWORD': 'pYdxBXhwd8XgZ',
         'HOST': '192.168.1.31',
